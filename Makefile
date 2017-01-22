@@ -2,7 +2,7 @@
 
 .PHONY:
 all: build
-	@cd build && cmake .. 
+	@cd build && cmake ..  && make
 
 build: 
 	@mkdir -p build
