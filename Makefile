@@ -10,19 +10,16 @@ clean:
 	@cd build && make clean
 
 doc:
-	doxygen Doxyfile
+	@doxygen Doxyfile
 
 .ONESHELL:
-push-code:
-	git add -u .
+push: doc
+	git add .
 	git commit 
 	git push
-
-.ONESHELL:
-push: push-code doc
 	cd doc/html
-	git add -u .
+	git add .
 	git commit
 	git push
 
-.PHONY: all clean doc push-code push
+.PHONY: all clean doc push
