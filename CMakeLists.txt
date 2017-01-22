@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(nonparama)
+project(noparama)
 
 if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     message( FATAL_ERROR "Do not use source dir to build stuff. Use make which will call cmake properly.")
@@ -34,7 +34,7 @@ set(SOURCE_FILES src/np_main.cpp)
 # CMAKE_BINARY_DIR is the top of the build-directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_executable(nonparama ${SOURCE_FILES})
+add_executable(noparama ${SOURCE_FILES})
 
 enable_testing()
 

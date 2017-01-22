@@ -7,4 +7,7 @@ all: build
 build: 
 	@mkdir -p build
 
+.PHONY:
+clean:
+	@cd build && make clean
 
