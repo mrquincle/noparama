@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['updateclusterpopulation',['UpdateClusterPopulation',['../classUpdateClusterPopulation.html',1,'']]],
-  ['updateclusters',['UpdateClusters',['../classUpdateClusters.html',1,'']]]
+  ['t_5fsample_5fpdf',['t_sample_pdf',['../classt__sample__pdf.html',1,'']]]
 ];

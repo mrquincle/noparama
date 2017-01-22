@@ -1,7 +1,7 @@
 var indexSectionsWithContent =
 {
-  0: "clnpsu",
-  1: "clpsu",
+  0: "clnpstu",
+  1: "clpstu",
   2: "u",
   3: "n"
 };
