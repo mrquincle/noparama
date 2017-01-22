@@ -21,7 +21,7 @@ class multivariate_normal_distribution {
 		}
 
 		template<typename _UniformRandomNumberGenerator >
-		Eigen::VectorXd operator()(	_UniformRandomNumberGenerator & generator) const
+		Eigen::VectorXd operator()(_UniformRandomNumberGenerator & generator) const
 		{
 			static std::normal_distribution<> dist;
 
