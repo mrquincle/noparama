@@ -6,10 +6,20 @@ all: build
 build: 
 	@mkdir -p build
 
+clean:
+	@cd build && make clean
+
 doc:
 	doxygen Doxyfile
 
-clean:
-	@cd build && make clean
+.ONESHELL:
+push:
+	git add -u .
+	git commit 
+	git push
+	cd doc/html
+	git add -u .
+	git commit
+	git push
 
 .PHONY: all clean doc
