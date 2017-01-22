@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 2.8)
+project(noparama)
+
+if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    message( FATAL_ERROR "Do not use source dir to build stuff. Use make which will call cmake properly.")
+endif()
+
+set (PROJECT_VERSION "1.0")
+set (PACKAGE "${PROJECT_NAME}")
+set (VERSION "${PROJECT_VERSION}")
+set (PACKAGE_BUGREPORT "anne@crownstone.rocks")
+set (PACKAGE_NAME "${PACKAGE}")
+set (PACKAGE_TARNAME "${PACKAGE}")
+set (PACKAGE_VERSION "${VERSION}")
+set (PACKAGE_STRING "${PACKAGE} ${VERSION}")
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules
+    CACHE STRING "CMake module path")
+
+find_package(PkgConfig)
+pkg_search_module(Eigen3 REQUIRED eigen3)
+
+if( NOT Eigen3_INCLUDE_DIRS )
+    message( FATAL_ERROR "Install Eigen3 (we have used pkg-config to find it and can't find the include paths).")
+endif()
+include_directories ( "${Eigen3_INCLUDE_DIRS}" )
+
+set(CMAKE_CXX_FLAGS "-O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+set(SOURCE_FILES src/np_main.cpp)
+
+# CMAKE_BINARY_DIR is the top of the build-directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+add_executable(noparama ${SOURCE_FILES})
+
+enable_testing()
+
+add_subdirectory (test)
+
+
