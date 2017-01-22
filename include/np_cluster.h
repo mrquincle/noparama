@@ -27,6 +27,9 @@ class Cluster {
 
 		// Get sufficient statistics
 		SufficientStatistics & getSufficientStatistics();
+		
+		// Set sufficient statistics
+		void setSufficientStatistics(SufficientStatistics & statistics);
 
 		// Add a data item
 		size_t add(t_datum & item);
@@ -36,4 +39,7 @@ class Cluster {
 
 		// Number of data items
 		int count();
+
+		// Get data
+		t_data & data();
 };

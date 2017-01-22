@@ -6,30 +6,51 @@
  * Initiate update cluster class and set likelihood and posterior predictive.
  */
 UpdateClusters::UpdateClusters(
-		Likelihood & likelihood,
-		PosteriorPredictive & pred
+			Likelihood & likelihood,
+			PosteriorPredictive & pred
 		): 
 			_likelihood(likelihood),
-			_predictive_posterior(pred) {
+			_predictive_posterior(pred) 
+{
 }
 
-/** 
- * Given a single observation update all cluster parameters 
- * @param clusters					Cluster parameters
- * @param nonparametrics 			Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
- * @param number_mh_steps			Number of MH-steps
- */
 UpdateClusters::update(
-		t_cluster_population & clusters, 
-		t_data & observation
-		t_nonparametrics & nonparametrics, 
-		t_base_distribution & base_distribution, 
-		t_prior & prior,
-		int number_mh_steps
-		) {
+			t_cluster_population & clusters, 
+			t_nonparametrics & nonparametrics, 
+			t_prior & prior,
+			int number_mh_steps
+		) 
+{
+	double likelihood;
+	double proposed_likelihood;
 
-	for (int t = 0; t < number_mh_steps; ++t)
+	// This update procedure exists out of a number of MH steps
+	for (int t = 0; t < number_mh_steps; ++t) {
+
 		for (auto cluster: clusters) {
+			// current likelihood	
+			likelihood = _likelihood(prior, cluster.data(), cluster.SufficientStatistics());
+			
+			// proposed likelihood
+			SufficientStatistics & proposed_sufficient_statistics = sample_pdf(nonparametrics.base_distribution);
+			proposed_likelihood = _likelihood(prior, cluster.data(), proposed_sufficient_statistics);
+			
+			if (!likelihood) {
+				// likelihood can be zero at start, in that case accept any proposal
+				cluster.setSufficientStatistics(proposed_sufficient_statistics);
+				continue;
+			} 
+
+			double alpha = proposed_likelihood / likelihood;
+	
+			double reject = _distribution(_generator);
+
+			if (reject < alpha) {
+				// accept new cluster parameters
+				cluster.setSufficientStatistics(proposed_sufficient_statistics);
+			} else {
+				// reject, keep cluster as is
+			}
 
 		}
 	}

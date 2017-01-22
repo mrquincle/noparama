@@ -1,13 +1,15 @@
 #!/bin/make -f
 
-.PHONY:
 all: build
 	@cd build && cmake ..  && make
 
 build: 
 	@mkdir -p build
 
-.PHONY:
+doc:
+	doxygen Doxyfile
+
 clean:
 	@cd build && make clean
 
+.PHONY: all clean doc

@@ -8,19 +8,16 @@ UpdateClusterPopulation::UpdateClusterPopulation(
 		PosteriorPredictive & pred
 		): 
 			_likelihood(likelihood),
-			_predictive_posterior(pred) {
+			_predictive_posterior(pred),
+			_distribution(0.0, 1.0)
+{
 }
 
-/**
- * Update the cluster population. The observation has to be deleted beforehand.
- */
 void UpdateClusterPopulation::update(
 		t_cluster_population & clusters, 
-		t_data & observation
+		t_data & observation,
 		t_nonparametrics & nonparametrics, 
-		t_base_distribution & base_distribution, 
-		t_sample_pdf & sample_pdf,
-		t_prior & prior,
+		t_sample_pdf & sample_pdf
 		) {
 
 	// Create temporary data structure for K clusters
@@ -32,18 +29,16 @@ void UpdateClusterPopulation::update(
 	int i = 0;
 	for (auto cluster: clusters; ++i) {
 		
-		weighted_likelihood[i] = _likelihood(prior, observation, cluster.getSufficientStatistics()) *
+		weighted_likelihood[i] = _likelihood(_prior, observation, cluster.getSufficientStatistics()) *
 			cluster.count();
 	}
 
-	weighted_predictive_posterior = _predictive_posterior(observation, base_distribution) * alpha;
+	weighted_predictive_posterior = _predictive_posterior(observation, nonparametrics.base_distribution) * 
+		nonparametrics.alpha;
 
 	// Calculate parameters for new cluster
-	SufficientStatistics & sufficient_statistics = sample_pdf(base_distribution);
+	SufficientStatistics & sufficient_statistics = sample_pdf(nonparametrics.base_distribution);
 	Cluster new_cluster(sufficient_statistics);
-
-	std::default_random_engine generator;
-	std::uniform_real_distribution<double> distribution(0.0,1.0);
 
 	double sum_likelihoods = sum(likelihoods);
 	
@@ -53,7 +48,7 @@ void UpdateClusterPopulation::update(
 
 	double prob_new_sample = weighted_predictive_posterior / normalization_constant;
 
-	double reject = distribution(generator);
+	double reject = _distribution(_generator);
 
 	if (reject < prob_new_sample) {
 		// note, acceptance of new cluster does not depend on its likelihood

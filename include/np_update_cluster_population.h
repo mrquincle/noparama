@@ -6,8 +6,35 @@ typedef std:set<t_cluster> t_cluster_population;
  * only adjusts the parameters assigned to a cluster and will leave the number of clusters invariant. 
  */
 class UpdateClusterPopulation {
-	public:
-		UpdateClusterPopulation();
+	private:
+		std::default_random_engine _generator;
+	
+		std::uniform_real_distribution<double> _distribution;
 
-		void update(t_cluster_population & clusters);
+	public:
+		/*!
+		 * Construct update method for cluster population.
+		 * @param[in] likelihood					Likelihood function to be used in update()
+		 * @param[in] pred							Posterior predictive to be used in update()
+		 * @param[in] prior							Prior to be used in update()
+		 */
+		UpdateClusterPopulation(
+				Likelihood & likelihood,
+				PosteriorPredictive & pred,
+				Prior & prior
+				);
+
+		/*!
+		 * Update the cluster population. The observation has to be deleted beforehand.
+		 * @param[inout] clusters					Cluster parameters
+		 * @param[in] observation					Observation to be considered for existing and new cluster
+		 * @param[in] nonparametrics 				Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
+		 * @param[in] sample_pdf					Number of MH-steps
+		 */
+		void update(
+				t_cluster_population & clusters, 
+				t_data & observation,
+				t_nonparametrics & nonparametrics, 
+				t_sample_pdf & sample_pdf
+				);
 };
