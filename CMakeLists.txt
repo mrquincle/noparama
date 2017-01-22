@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(nonparama)
 
+if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    message( FATAL_ERROR "Do not use source dir to build stuff. Use make which will call cmake properly.")
+endif()
+
 set (PROJECT_VERSION "1.0")
 set (PACKAGE "${PROJECT_NAME}")
 set (VERSION "${PROJECT_VERSION}")
