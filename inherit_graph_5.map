@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classUpdateClusterPopulation.html" title="UpdateClusterPopulation" alt="" coords="5,5,172,32"/>
+<area shape="rect" id="node1" href="$classSufficientStatistics.html" title="SufficientStatistics" alt="" coords="5,46,137,73"/>
+<area shape="rect" id="node2" href="$classSufficientStatistics__MultivariateNormal.html" title="SufficientStatistics\l_MultivariateNormal" alt="" coords="185,5,324,47"/>
+<area shape="rect" id="node3" href="$classSufficientStatistics__NormalInvGamma.html" title="SufficientStatistics\l_NormalInvGamma" alt="" coords="187,71,322,112"/>
 </map>

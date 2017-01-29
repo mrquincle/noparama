@@ -81,7 +81,54 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">Noparama </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This software is about mathematics, in particular nonparametric Bayesian models. </p>
+<div class="textblock"><p>This software is about mathematics, in particular nonparametric Bayesian models.</p>
+<h1>Structure</h1>
+<p>The elements in this software package or often vectors and matrices, hence Eigen is used.</p>
+<h2>Density functions</h2>
+<p>Density functions are represented by their sufficient statistics. A normal probability distribution is represented by mean and covariance matrix.</p>
+<h2>Data</h2>
+<p>The data is clustered in sets. In <a class="el" href="classMCMC.html">MCMC</a> we often loop through all data items, first removing a data item from the cluster it is currently assigned to, then assigning it to an existing or new cluster.</p>
+<p>The clusters themselves are also updated where we iterate over all clusters and update a cluster given all data items assigned to it.</p>
+<p>A hashmap for the data items allows us to uniquely identify each data item. A cluster refers to its data items through a vector of keys. Removing a data item from a cluster is by removing a key from this vector.</p>
+<p>A cluster can also refer to its data items through a pointer to the data item including its identifier. Search is still easy by the use of keys. Removal is by deleting a pointer from a vector or set.</p>
+<p>To remove a data item from a cluster, we will have to iterate through all clusters, or also store the membership information per data item. To also store a reference to a cluster per data item is cumbersome and leads to double updates.</p>
+<p>Requirements:</p><ul>
+<li>update membership information in O(1) and in one atomic operation</li>
+<li>iterate over data items in cluster X in O(D), with D number of data items that are a member of cluster X</li>
+<li>iterate over all data points in O(N), with N number of data items</li>
+</ul>
+<p>This data structure is a matrix with columns with only a single 1. </p><pre class="fragment">    D0  D1  D2  D3  ... DN
+C0  1   0   0   0
+C1  0   1   1   0
+C2  0   0   0   0
+.                   
+.
+CK
+</pre><p>A data item that is not assigned is represented by a zero column-vector, a cluster without data points by a zero row-vector. C0, C1, etc. refers to an object with cluster parameters. D0, D1, etc. refer to an object with data values.</p>
+<p>Hence, we need a matrix plus vectors to store references to the mentioned objects.</p>
+<p>Then a function like matrix::assign(cluster, data) to be fast must be with indices into those vectors. If this is not the case we need to search through those vectors.</p>
+<p>The indices can be stored in an encapsulating object, e.g. as a <code>std::pair&lt;index, object&gt;</code>, but that might not be necessary. It is also preferably to return data without capsulating structures.</p>
+<p>If we want to return a container with data items, we might also store the data items directly. </p><pre class="fragment">C0  D0  0   0   0
+C1  0   D1  D2  0
+C2  0   0   0   0
+.                   
+.
+CK
+</pre><p>This however, would still require us to create a set out of something like [0 D1 D2 0] .</p>
+<p>Hence, what we can do is to maintain two data structures. A matrix structure: </p><pre class="fragment">    D0  D1  D2  D3  ... DN
+C0  1   0   0   0
+C1  0   1   1   0
+C2  0   0   0   0
+.                   
+.
+CK
+</pre><p>Plus a set structure: </p><pre class="fragment">C0  D0
+C1  D1  D2
+C2
+.
+.
+CK
+</pre><p>Here we do not have the property anymore that the update is atomic! Setting something to 1 or 0 in the assignment matrix, needs also an update in the set structure. </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

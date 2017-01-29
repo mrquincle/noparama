@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['cluster',['Cluster',['../classCluster.html',1,'']]]
+  ['cluster_5ft',['cluster_t',['../classcluster__t.html',1,'']]]
 ];

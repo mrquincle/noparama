@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['posteriorpredictive',['PosteriorPredictive',['../classPosteriorPredictive.html',1,'']]]
+  ['mcmc',['MCMC',['../classMCMC.html',1,'']]],
+  ['membertrix',['membertrix',['../classmembertrix.html',1,'']]]
 ];

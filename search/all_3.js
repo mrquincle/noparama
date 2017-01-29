@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['posteriorpredictive',['PosteriorPredictive',['../classPosteriorPredictive.html',1,'']]]
+  ['noparama',['Noparama',['../index.html',1,'']]]
 ];

@@ -99,8 +99,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a3782acd991239a11d7586cf2d228da1e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUpdateClusterPopulation.html#a3782acd991239a11d7586cf2d228da1e">UpdateClusterPopulation</a> (<a class="el" href="classLikelihood.html">Likelihood</a> &amp;likelihood, <a class="el" href="classPosteriorPredictive.html">PosteriorPredictive</a> &amp;pred, Prior &amp;prior)</td></tr>
 <tr class="separator:a3782acd991239a11d7586cf2d228da1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3753f002b3cc205fff70eca6bc4d774"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUpdateClusterPopulation.html#ac3753f002b3cc205fff70eca6bc4d774">update</a> (t_cluster_population &amp;clusters, t_data &amp;observation, t_nonparametrics &amp;nonparametrics, <a class="el" href="classt__sample__pdf.html">t_sample_pdf</a> &amp;sample_pdf)</td></tr>
-<tr class="separator:ac3753f002b3cc205fff70eca6bc4d774"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a469ac365c9af3ed9c5b7de1fef635218"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUpdateClusterPopulation.html#a469ac365c9af3ed9c5b7de1fef635218">update</a> (<a class="el" href="classmembertrix.html">membertrix</a> &amp;cluster_matrix, data_id_t data_id, nonparametrics_t &amp;nonparametrics, sample_pdf_t &amp;sample_pdf)</td></tr>
+<tr class="separator:a469ac365c9af3ed9c5b7de1fef635218"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This class <a class="el" href="classUpdateClusterPopulation.html">UpdateClusterPopulation</a> deletes, adds, and adjusts clusters. This in contrast with UpdateCluster which only adjusts the parameters assigned to a cluster and will leave the number of clusters invariant. </p>
@@ -136,9 +136,9 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Construct update method for cluster population. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">likelihood</td><td><a class="el" href="classLikelihood.html">Likelihood</a> function to be used in <a class="el" href="classUpdateClusterPopulation.html#ac3753f002b3cc205fff70eca6bc4d774">update()</a> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pred</td><td>Posterior predictive to be used in <a class="el" href="classUpdateClusterPopulation.html#ac3753f002b3cc205fff70eca6bc4d774">update()</a> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">prior</td><td>Prior to be used in <a class="el" href="classUpdateClusterPopulation.html#ac3753f002b3cc205fff70eca6bc4d774">update()</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">likelihood</td><td><a class="el" href="classLikelihood.html">Likelihood</a> function to be used in <a class="el" href="classUpdateClusterPopulation.html#a469ac365c9af3ed9c5b7de1fef635218">update()</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pred</td><td>Posterior predictive to be used in <a class="el" href="classUpdateClusterPopulation.html#a469ac365c9af3ed9c5b7de1fef635218">update()</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">prior</td><td>Prior to be used in <a class="el" href="classUpdateClusterPopulation.html#a469ac365c9af3ed9c5b7de1fef635218">update()</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -146,32 +146,32 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="ac3753f002b3cc205fff70eca6bc4d774"></a>
+<a class="anchor" id="a469ac365c9af3ed9c5b7de1fef635218"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void UpdateClusterPopulation::update </td>
           <td>(</td>
-          <td class="paramtype">t_cluster_population &amp;&#160;</td>
-          <td class="paramname"><em>clusters</em>, </td>
+          <td class="paramtype"><a class="el" href="classmembertrix.html">membertrix</a> &amp;&#160;</td>
+          <td class="paramname"><em>cluster_matrix</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">t_data &amp;&#160;</td>
-          <td class="paramname"><em>observation</em>, </td>
+          <td class="paramtype">data_id_t&#160;</td>
+          <td class="paramname"><em>data_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">t_nonparametrics &amp;&#160;</td>
+          <td class="paramtype">nonparametrics_t &amp;&#160;</td>
           <td class="paramname"><em>nonparametrics</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classt__sample__pdf.html">t_sample_pdf</a> &amp;&#160;</td>
+          <td class="paramtype">sample_pdf_t &amp;&#160;</td>
           <td class="paramname"><em>sample_pdf</em>&#160;</td>
         </tr>
         <tr>
@@ -183,8 +183,8 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Update the cluster population. The observation has to be deleted beforehand. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">clusters</td><td><a class="el" href="classCluster.html">Cluster</a> parameters </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">observation</td><td>Observation to be considered for existing and new cluster </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">cluster_matrix</td><td>Cluster-observation membership matrix </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data_id</td><td>Observation to be considered for existing and new cluster </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nonparametrics</td><td>Sufficient statistics of the nonparametric prior (e.g. Dirichlet) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">sample_pdf</td><td>Number of MH-steps </td></tr>
   </table>

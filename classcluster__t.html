@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>noparama: include/np_likelihood.h Source File</title>
+<title>noparama: cluster_t Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -41,8 +41,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
-      <li class="current"><a href="files.html"><span>Files</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -63,7 +63,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="inherits.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -80,19 +83,37 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li>  </ul>
-</div>
 </div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="classcluster__t-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">np_likelihood.h</div>  </div>
+<div class="title">cluster_t Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div><div class="line"><a name="l00002"></a><span class="lineno"><a class="line" href="classLikelihood.html">    2</a></span>&#160;<span class="keyword">class </span><a class="code" href="classLikelihood.html">Likelihood</a> {</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;    <span class="keyword">private</span>:</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;        <a class="code" href="classSufficientStatistics.html">SufficientStatistics</a> _sufficient_statistics;</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;    <span class="keyword">public</span>:</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;        <span class="comment">// Constructor</span></div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;        <a class="code" href="classLikelihood.html">Likelihood</a>(<a class="code" href="classSufficientStatistics.html">SufficientStatistics</a> &amp; sufficient_statistics);</div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;        <span class="comment">// Get likelihood given data</span></div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;        <span class="keywordtype">double</span> <span class="keyword">get</span>(t_data &amp; observation);</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div><div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;        <span class="comment">// Get likelihood given set of data</span></div><div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;        std::vector&lt;double&gt; <span class="keyword">get</span>(t_cluster &amp; cluster);</div><div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;};</div><div class="ttc" id="classSufficientStatistics_html"><div class="ttname"><a href="classSufficientStatistics.html">SufficientStatistics</a></div><div class="ttdef"><b>Definition:</b> np_sufficient_statistics.h:4</div></div>
-<div class="ttc" id="classLikelihood_html"><div class="ttname"><a href="classLikelihood.html">Likelihood</a></div><div class="ttdef"><b>Definition:</b> np_likelihood.h:2</div></div>
-</div><!-- fragment --></div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="np__cluster_8h_source.html">np_cluster.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a9fd8e7a2ff44a5c06a6329448b58aae2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9fd8e7a2ff44a5c06a6329448b58aae2"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>cluster_t</b> (<a class="el" href="classSufficientStatistics.html">SufficientStatistics</a> &amp;statistics)</td></tr>
+<tr class="separator:a9fd8e7a2ff44a5c06a6329448b58aae2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc73722d29fe797a1d31982407c0df06"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adc73722d29fe797a1d31982407c0df06"></a>
+<a class="el" href="classSufficientStatistics.html">SufficientStatistics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getSufficientStatistics</b> ()</td></tr>
+<tr class="separator:adc73722d29fe797a1d31982407c0df06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cab0c423ab8fca70fab2b3410da22f9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2cab0c423ab8fca70fab2b3410da22f9"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setSufficientStatistics</b> (<a class="el" href="classSufficientStatistics.html">SufficientStatistics</a> &amp;statistics)</td></tr>
+<tr class="separator:a2cab0c423ab8fca70fab2b3410da22f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A cluster is represented by a <a class="el" href="classcluster__t.html">cluster_t</a> structure and contains parameters in the form of sufficient statistics.</p>
+<p>There are no dependencies between clusters assumed (hence no references to other clusters or hierarchy). </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
+<li>include/<a class="el" href="np__cluster_8h_source.html">np_cluster.h</a></li>
+</ul>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">
