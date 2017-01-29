@@ -1,5 +1,7 @@
 
 #include <Eigen/dense>
+#include <np_data.h>
+#include <np_cluster.h>
 
 enum error_t { error_none, error_already_assigned, error_assignment_remaining, error_assignment_absent };
 	
@@ -10,13 +12,6 @@ enum error_t { error_none, error_already_assigned, error_assignment_remaining, e
  */
 typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> binary_matrix_t;
 
-typedef std::vector<cluster_t> clusters_t;
-
-//! A dataset
-typedef std::set<data_t> dataset_t;
-
-//! A dataset per cluster
-typedef std::vector< dataset_t > clusters_dataset_t;
 
 /*!
  * The membertrix data structure is a binary matrix optimimized for storing membership information.
@@ -48,20 +43,20 @@ class membertrix {
 
 		membertrix();
 
-		id_cluster_t addCluster(cluster_t & cluster);
+		cluster_id_t addCluster(cluster_t & cluster);
 
-		id_data_t addData(data_t & data);
+		data_id_t addData(data_t & data);
 
-		error_t assign(id_cluster_t & cluster, id_data_t & data);
+		error_t assign(cluster_id_t & cluster, data_id_t & data);
 		
-		error_t retract(id_cluster_t & id_cluster, id_data_t & id_data);
+		error_t retract(cluster_id_t & id_cluster, data_id_t & id_data);
 
-		error_t retract(id_data_t & id_data);
+		error_t retract(data_id_t & id_data);
 
-		id_cluster_t getCluster(id_data_t & id_data);
+		cluster_id_t getCluster(data_id_t & id_data);
 
 		clusters_t & getClusters();
 
-		dataset_t & getData(id_cluster_t & id_cluster);
+		dataset_t & getData(cluster_id_t & id_cluster);
 };
 

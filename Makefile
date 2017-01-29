@@ -22,4 +22,10 @@ push: doc
 	git commit
 	git push
 
-.PHONY: all clean doc push
+doc-online:
+	xdg-open https://mrquincle.github.com/noparama
+
+doc-offline:
+	xdg-open doc/html/index.html
+
+.PHONY: all clean doc push doc-online
