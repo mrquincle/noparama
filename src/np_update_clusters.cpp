@@ -14,7 +14,7 @@ UpdateClusters::UpdateClusters(
 {
 }
 
-UpdateClusters::update(
+void UpdateClusters::update(
 			t_cluster_population & clusters, 
 			t_nonparametrics & nonparametrics, 
 			t_prior & prior,

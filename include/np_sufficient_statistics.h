@@ -1,5 +1,6 @@
-
-
+/*!
+ * SufficientStatistics describes a probability distribution.
+ */
 class SufficientStatistics {
 
 }

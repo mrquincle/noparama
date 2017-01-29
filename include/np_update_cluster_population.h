@@ -1,5 +1,3 @@
-typedef MatrixXd t_cluster;
-typedef std:set<t_cluster> t_cluster_population;
 
 /**
  * This class UpdateClusterPopulation deletes, adds, and adjusts clusters. This in contrast with UpdateCluster which 
@@ -22,19 +20,19 @@ class UpdateClusterPopulation {
 				Likelihood & likelihood,
 				PosteriorPredictive & pred,
 				Prior & prior
-				);
+			);
 
 		/*!
 		 * Update the cluster population. The observation has to be deleted beforehand.
-		 * @param[inout] clusters					Cluster parameters
-		 * @param[in] observation					Observation to be considered for existing and new cluster
+		 * @param[inout] cluster_matrix				Cluster-observation membership matrix
+		 * @param[in] data_id						Observation to be considered for existing and new cluster
 		 * @param[in] nonparametrics 				Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
 		 * @param[in] sample_pdf					Number of MH-steps
 		 */
 		void update(
-				t_cluster_population & clusters, 
-				t_data & observation,
-				t_nonparametrics & nonparametrics, 
-				t_sample_pdf & sample_pdf
-				);
+				membertrix & cluster_matrix,
+				data_id_t data_id,
+				nonparametrics_t & nonparametrics, 
+				sample_pdf_t & sample_pdf
+			);
 };

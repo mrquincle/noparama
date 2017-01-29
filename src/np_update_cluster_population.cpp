@@ -14,10 +14,10 @@ UpdateClusterPopulation::UpdateClusterPopulation(
 }
 
 void UpdateClusterPopulation::update(
-		t_cluster_population & clusters, 
-		t_data & observation,
-		t_nonparametrics & nonparametrics, 
-		t_sample_pdf & sample_pdf
+		membertrix & cluster_matrix,
+		data_id_t data_id,
+		nonparametrics_t & nonparametrics, 
+		sample_pdf_t & sample_pdf
 		) {
 
 	// Create temporary data structure for K clusters
@@ -25,9 +25,11 @@ void UpdateClusterPopulation::update(
 
 	std::vector<double> weighted_likelihood(K);
 
+	data_t & observation = cluster_matrix.getData(data_id);
+
 	// Check all statistics given observation
 	int i = 0;
-	for (auto cluster: clusters; ++i) {
+	for (auto cluster: cluster_matrix.getClusters(); ++i) {
 		
 		weighted_likelihood[i] = _likelihood(_prior, observation, cluster.getSufficientStatistics()) *
 			cluster.count();
@@ -38,7 +40,8 @@ void UpdateClusterPopulation::update(
 
 	// Calculate parameters for new cluster
 	SufficientStatistics & sufficient_statistics = sample_pdf(nonparametrics.base_distribution);
-	Cluster new_cluster(sufficient_statistics);
+	
+	cluster_t * new_cluster = new cluster_t(sufficient_statistics);
 
 	double sum_likelihoods = sum(likelihoods);
 	
@@ -52,7 +55,8 @@ void UpdateClusterPopulation::update(
 
 	if (reject < prob_new_sample) {
 		// note, acceptance of new cluster does not depend on its likelihood
-		clusters.push_back(new_cluster);
+		cluster_matrix.addCluster(new_cluster);
+		cluster_matrix.assign(index, data_id);
 	} else {
 		// pick existing cluster with weights 
 		double pick = (reject - prob_new_sample);
@@ -62,6 +66,6 @@ void UpdateClusterPopulation::update(
 		auto lower = std::lower_bound(cumsum_likelihood.begin(), cumsum_likelihood.end(), pick);
 		size_t index = std::distance(cumsum_likelihood.begin(), lower);
 
-		clusters[i].add(observation);
+		cluster_matrix.reassign(index, data_id);
 	}
 }
