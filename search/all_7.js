@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['update',['update',['../classUpdateClusterPopulation.html#a469ac365c9af3ed9c5b7de1fef635218',1,'UpdateClusterPopulation::update()'],['../classUpdateClusters.html#a79e7cee8e1fb7331d97b279b84c08354',1,'UpdateClusters::update()']]],
-  ['updateclusterpopulation',['UpdateClusterPopulation',['../classUpdateClusterPopulation.html',1,'UpdateClusterPopulation'],['../classUpdateClusterPopulation.html#a3782acd991239a11d7586cf2d228da1e',1,'UpdateClusterPopulation::UpdateClusterPopulation()']]],
-  ['updateclusters',['UpdateClusters',['../classUpdateClusters.html',1,'UpdateClusters'],['../classUpdateClusters.html#abe110c4e02009cfd2b1a4e41ab330c21',1,'UpdateClusters::UpdateClusters()']]]
+  ['lambda',['Lambda',['../classSufficientStatistics__NormalInvGamma.html#a70cf550d200fcce4002f17d1fd37bfdc',1,'SufficientStatistics_NormalInvGamma::Lambda()'],['../np__sufficient__statistics_8h.html#a3db359547eed8cfd48ca821d95f577af',1,'lambda():&#160;np_sufficient_statistics.h']]],
+  ['likelihood',['Likelihood',['../classLikelihood.html',1,'Likelihood'],['../classLikelihood.html#a9190d4b7cd4e55bf915c8c3243789a3d',1,'Likelihood::Likelihood()']]]
 ];

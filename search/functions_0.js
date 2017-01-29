@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['update',['update',['../classUpdateClusterPopulation.html#a469ac365c9af3ed9c5b7de1fef635218',1,'UpdateClusterPopulation::update()'],['../classUpdateClusters.html#a79e7cee8e1fb7331d97b279b84c08354',1,'UpdateClusters::update()']]],
-  ['updateclusterpopulation',['UpdateClusterPopulation',['../classUpdateClusterPopulation.html#a3782acd991239a11d7586cf2d228da1e',1,'UpdateClusterPopulation']]],
-  ['updateclusters',['UpdateClusters',['../classUpdateClusters.html#abe110c4e02009cfd2b1a4e41ab330c21',1,'UpdateClusters']]]
+  ['addcluster',['addCluster',['../classmembertrix.html#a4edaf2c306dc2f83732b4554881938cf',1,'membertrix']]],
+  ['adddata',['addData',['../classmembertrix.html#a746abb4be1daa4b5953ba1ca6a68241e',1,'membertrix']]],
+  ['assign',['assign',['../classmembertrix.html#a6d8b4f09db6eaaa3504823f53aab2ecc',1,'membertrix']]]
 ];
