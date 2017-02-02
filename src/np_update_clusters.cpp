@@ -1,23 +1,25 @@
 #include <np_update_clusters.h>
-#include <np_likelihood.h>
-#include <np_posterior_predictive.h>
+
+#include <np_sample_pdf.h>
 
 /**
  * Initiate update cluster class and set likelihood and posterior predictive.
  */
 UpdateClusters::UpdateClusters(
-			Likelihood & likelihood,
-			PosteriorPredictive & pred
+			distribution_t & likelihood,
+			distribution_t & nonparametrics
 		): 
 			_likelihood(likelihood),
-			_predictive_posterior(pred) 
 {
 }
 
+Suffies & UpdateClusters::propose() {
+	// proposed parameters (can also be Brownian walk)
+	return sample_pdf(_nonparametrics.base_distribution);
+}
+
 void UpdateClusters::update(
-			t_cluster_population & clusters, 
-			t_nonparametrics & nonparametrics, 
-			t_prior & prior,
+			clusters_t & clusters, 
 			int number_mh_steps
 		) 
 {
@@ -28,16 +30,18 @@ void UpdateClusters::update(
 	for (int t = 0; t < number_mh_steps; ++t) {
 
 		for (auto cluster: clusters) {
-			// current likelihood	
-			likelihood = _likelihood(prior, cluster.data(), cluster.SufficientStatistics());
+			// current likelihood for this cluster, compare with new sample
+			// reuse _likelihood object
+			_likelihood.init(cluster.Suffies());
+			likelihood = _likelihood.get(cluster.data());
 			
-			// proposed likelihood
-			SufficientStatistics & proposed_sufficient_statistics = sample_pdf(nonparametrics.base_distribution);
-			proposed_likelihood = _likelihood(prior, cluster.data(), proposed_sufficient_statistics);
+			Suffies & proposed_suffies = propose();
+			_likelihood.init(proposed_suffies);
+			proposed_likelihood = _likelihood.get(cluster.data());
 			
 			if (!likelihood) {
 				// likelihood can be zero at start, in that case accept any proposal
-				cluster.setSufficientStatistics(proposed_sufficient_statistics);
+				cluster.setSuffies(proposed_suffies);
 				continue;
 			} 
 
@@ -47,7 +51,7 @@ void UpdateClusters::update(
 
 			if (reject < alpha) {
 				// accept new cluster parameters
-				cluster.setSufficientStatistics(proposed_sufficient_statistics);
+				cluster.setSuffies(proposed_suffies);
 			} else {
 				// reject, keep cluster as is
 			}

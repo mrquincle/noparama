@@ -1,5 +1,12 @@
-#include <np_data.h>
+#pragma once
+
 #include <vector>
+
+#include <np_data.h>
+#include <np_suffies.h>
+
+// Forward references
+class cluster_t;
 
 //! Index to a cluster
 typedef int cluster_id_t;
@@ -17,21 +24,21 @@ typedef std::vector< dataset_t > clusters_dataset_t;
 class cluster_t {
 	private: 
 		//! The parameters are sufficient statistics of the related probability density function
-		SufficientStatistics _statistics;
+		Suffies _statistics;
 
 		// The data is a set of individual data items
 		//t_data _data;
 
 	public:
-		cluster_t(SufficientStatistics & statistics);
+		cluster_t(Suffies & statistics);
 		
 		~cluster_t();
 
 		//! Get sufficient statistics
-		SufficientStatistics & getSufficientStatistics();
+		Suffies & getSuffies();
 		
 		//! Set sufficient statistics
-		void setSufficientStatistics(SufficientStatistics & statistics);
+		void setSuffies(Suffies & statistics);
 
 		// Add a data item
 		//size_t add(t_datum & item);

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <set>
 
@@ -7,9 +9,10 @@
 typedef std::vector<double> data_t;
 
 /*!
- * A dataset is a set of data items. 
+ * A dataset is a container of data items. It is not an actual set, but a vector, so the order can be used in 
+ * iterators.
  */
-typedef std::set<data_t*> dataset_t; 
+typedef std::vector<data_t*> dataset_t; 
 
 /*!
  * The data items can be uniquely identified by an integer assuming the data set is not too big.

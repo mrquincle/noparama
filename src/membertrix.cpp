@@ -10,10 +10,10 @@ cluster_id_t membertrix::addCluster(cluster_t & cluster) {
 	// use current number of columns as cluster index
 	int cluster_index = mat.columns();
 
-	assert(cluster_index == _column_labels.size());
+	assert(cluster_index == _cluster_objects.size());
 
 	// add to column labels
-	_column_labels.push_back(cluster);
+	_cluster_objects.push_back(cluster);
 
 	// add to matrix
 	_membership_matrix.conservativeResize(cluster_index + 1, NoChange);
@@ -26,7 +26,7 @@ data_id_t membertrix::addData(data_t & data) {
 	int data_index = mat.rows();
 
 	// add to row labels
-	_row_labels.push_back(data);
+	_data_objects.push_back(data);
 
 	// add to matrix
 	_membership_matrix.conservativeResize(NoChange, data_index + 1);
@@ -42,8 +42,8 @@ error_t membertrix::assign(cluster_id_t & cluster_id, data_id_t & data_id) {
 	// write value in matrix
 	_membership_matrix(cluster_id, data_id) = true;
 
-	// add data to cluster set
-	_cluster_sets(cluster_id).push_back(_row_labels[data_id]);
+	// add data to cluster to prepare for quick access through getData(cluster)
+	_clusters_dataset(cluster_id).push_back(_data_objects[data_id]);
 
 	return error_none;
 }
@@ -56,11 +56,8 @@ error_t membertrix::retract(cluster_id_t & cluster_id, data_id_t & data_id) {
 	// remove value from matrix
 	_membership_matrix(cluster_id, data_id) = false;
 
-	// remove value from cluster set
-//	std::set<data_t>::iterator it;
-//	it = _cluster_sets(cluster_id).find(_row_labels[data_id]);
-//	_cluster_sets(cluster_id).erase(it);
-	_cluster_sets(cluster_id).erase(_row_labels[data_id]);
+	// remove data from cluster to update getData(cluster)
+	_clusters_dataset(cluster_id).erase(_data_objects[data_id]);
 
 	if (_membership_matrix.row(data_id).any()) {
 		return error_assignment_remaining;
@@ -86,10 +83,10 @@ cluster_id_t membertrix::getCluster(data_id_t & data_id) {
 }
 
 clusters_t & membertrix::getClusters() {
-	return _column_labels;
+	return _cluster_objects;
 }
 
 dataset_t & membertrix::getData(cluster_id_t & cluster_id) {
-	return _cluster_sets(cluster_id);
+	return _clusters_dataset(cluster_id);
 }
 

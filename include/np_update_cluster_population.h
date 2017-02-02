@@ -1,3 +1,8 @@
+#pragma once
+
+#include <random>
+
+#include <statistics/distribution.h>
 
 /**
  * This class UpdateClusterPopulation deletes, adds, and adjusts clusters. This in contrast with UpdateCluster which 
@@ -13,26 +18,22 @@ class UpdateClusterPopulation {
 		/*!
 		 * Construct update method for cluster population.
 		 * @param[in] likelihood					Likelihood function to be used in update()
-		 * @param[in] pred							Posterior predictive to be used in update()
+		 * @param[in] nonparametrics 				Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
 		 * @param[in] prior							Prior to be used in update()
 		 */
 		UpdateClusterPopulation(
-				Likelihood & likelihood,
-				PosteriorPredictive & pred,
-				Prior & prior
+				distribution_t & likelihood,
+				distribution_t & nonparametrics, 
+				distribution_t & prior
 			);
 
 		/*!
 		 * Update the cluster population. The observation has to be deleted beforehand.
 		 * @param[inout] cluster_matrix				Cluster-observation membership matrix
 		 * @param[in] data_id						Observation to be considered for existing and new cluster
-		 * @param[in] nonparametrics 				Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
-		 * @param[in] sample_pdf					Number of MH-steps
 		 */
 		void update(
 				membertrix & cluster_matrix,
-				data_id_t data_id,
-				nonparametrics_t & nonparametrics, 
-				sample_pdf_t & sample_pdf
+				data_id_t data_id
 			);
 };

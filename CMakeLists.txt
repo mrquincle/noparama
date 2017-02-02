@@ -25,16 +25,23 @@ if( NOT Eigen3_INCLUDE_DIRS )
 endif()
 include_directories ( "${Eigen3_INCLUDE_DIRS}" )
 
+#find_package( Boost REQUIRED COMPONENTS random )
+#include_directories( ${Boost_INCLUDE_DIRS} )
+
 set(CMAKE_CXX_FLAGS "-O2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-set(SOURCE_FILES src/np_main.cpp)
+include_directories ( "include" )
+
+set(SOURCE_FILES src/np_main.cpp src/np_mcmc.cpp src/np_update_clusters.cpp src/np_update_cluster_population.cpp)
 
 # CMAKE_BINARY_DIR is the top of the build-directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_executable(noparama ${SOURCE_FILES})
+
+#target_link_libraries( noparama ${Boost_RANDOM_LIBRARY} )
 
 enable_testing()
 

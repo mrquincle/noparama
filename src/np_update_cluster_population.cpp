@@ -4,7 +4,7 @@
 #include <np_sample_pdf.h>
 
 UpdateClusterPopulation::UpdateClusterPopulation(
-		Likelihood & likelihood,
+		likelihood_t & likelihood,
 		PosteriorPredictive & pred
 		): 
 			_likelihood(likelihood),
@@ -31,7 +31,7 @@ void UpdateClusterPopulation::update(
 	int i = 0;
 	for (auto cluster: cluster_matrix.getClusters(); ++i) {
 		
-		weighted_likelihood[i] = _likelihood(_prior, observation, cluster.getSufficientStatistics()) *
+		weighted_likelihood[i] = _likelihood(_prior, observation, cluster.getSuffies()) *
 			cluster.count();
 	}
 
@@ -39,9 +39,9 @@ void UpdateClusterPopulation::update(
 		nonparametrics.alpha;
 
 	// Calculate parameters for new cluster
-	SufficientStatistics & sufficient_statistics = sample_pdf(nonparametrics.base_distribution);
+	Suffies & suffies = sample_pdf(nonparametrics.base_distribution);
 	
-	cluster_t * new_cluster = new cluster_t(sufficient_statistics);
+	cluster_t * new_cluster = new cluster_t(suffies);
 
 	double sum_likelihoods = sum(likelihoods);
 	
