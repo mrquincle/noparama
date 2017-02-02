@@ -4,6 +4,8 @@
 
 #include <statistics/distribution.h>
 
+#include <membertrix>
+
 /**
  * This class UpdateClusterPopulation deletes, adds, and adjusts clusters. This in contrast with UpdateCluster which 
  * only adjusts the parameters assigned to a cluster and will leave the number of clusters invariant. 
@@ -13,6 +15,12 @@ class UpdateClusterPopulation {
 		std::default_random_engine _generator;
 	
 		std::uniform_real_distribution<double> _distribution;
+
+		distribution_t _likelihood;
+		
+		distribution_t _nonparametrics;
+		
+		distribution_t _prior;
 
 	public:
 		/*!

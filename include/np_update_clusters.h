@@ -6,6 +6,8 @@
 
 #include <statistics/distribution.h>
 
+#include <membertrix>
+
 #include <np_cluster.h>
 
 /**
@@ -16,6 +18,10 @@ class UpdateClusters {
 	private:
 		std::default_random_engine _generator;
 	
+		distribution_t &  _likelihood;
+		
+		distribution_t &  _nonparametrics;
+		
 		std::uniform_real_distribution<double> _distribution;
 
 	protected:
@@ -56,7 +62,7 @@ class UpdateClusters {
 		 * @param[in] number_mh_steps				Number of Metropolis Hastings steps
 		 */
 		void update(
-				clusters_t & clusters, 
+				membertrix & cluster_matrix,
 				int number_mh_steps
 			);
 };

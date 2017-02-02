@@ -1,7 +1,5 @@
 #include <np_update_clusters.h>
 
-#include <np_sample_pdf.h>
-
 /**
  * Initiate update cluster class and set likelihood and posterior predictive.
  */
@@ -10,16 +8,19 @@ UpdateClusters::UpdateClusters(
 			distribution_t & nonparametrics
 		): 
 			_likelihood(likelihood),
+			_nonparametrics(nonparametrics),
+			_distribution(0.0, 1.0)
 {
 }
 
 Suffies & UpdateClusters::propose() {
 	// proposed parameters (can also be Brownian walk)
-	return sample_pdf(_nonparametrics.base_distribution);
+	return  _nonparametrics.sample(_generator);
+//	return sample_pdf(_nonparametrics.base_distribution);
 }
 
 void UpdateClusters::update(
-			clusters_t & clusters, 
+			membertrix & cluster_matrix,
 			int number_mh_steps
 		) 
 {
@@ -29,19 +30,20 @@ void UpdateClusters::update(
 	// This update procedure exists out of a number of MH steps
 	for (int t = 0; t < number_mh_steps; ++t) {
 
-		for (auto cluster: clusters) {
+		auto clusters = cluster_matrix.getClusters();
+		for (int k = 0; k < (int)clusters.size(); ++k) {
 			// current likelihood for this cluster, compare with new sample
 			// reuse _likelihood object
-			_likelihood.init(cluster.Suffies());
-			likelihood = _likelihood.get(cluster.data());
+			_likelihood.init(clusters[k].getSuffies());
+			likelihood = _likelihood.probability(cluster_matrix.getData(k));
 			
 			Suffies & proposed_suffies = propose();
 			_likelihood.init(proposed_suffies);
-			proposed_likelihood = _likelihood.get(cluster.data());
+			proposed_likelihood = _likelihood.probability(cluster_matrix.getData(k));
 			
 			if (!likelihood) {
 				// likelihood can be zero at start, in that case accept any proposal
-				cluster.setSuffies(proposed_suffies);
+				clusters[k].setSuffies(proposed_suffies);
 				continue;
 			} 
 
@@ -51,7 +53,7 @@ void UpdateClusters::update(
 
 			if (reject < alpha) {
 				// accept new cluster parameters
-				cluster.setSuffies(proposed_suffies);
+				clusters[k].setSuffies(proposed_suffies);
 			} else {
 				// reject, keep cluster as is
 			}

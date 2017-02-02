@@ -26,10 +26,16 @@ int main() {
 		dataset.push_back(&data);
 	}
 
+	// The likelihood function is a multivariate normal distribution (parameters need not be set)
 	Suffies_MultivariateNormal suffies_mvn;
 	multivariate_normal_distribution likelihood(suffies_mvn);
 
+	// The hierarchical prior has an alpha of 1 and the base distribution is handed separately through the prior
 	Suffies_Dirichlet suffies_dirichlet;
+	suffies_dirichlet.alpha = 1;
+
+	// TODO: check how we can add the niw to hyper distribution, probably not via suffies but via distribution itself
+
 	dirichlet_distribution hyper(suffies_dirichlet);
 
 	// To update cluster parameters we need prior (hyper parameters) and likelihood, the membership matrix is left 
@@ -37,6 +43,11 @@ int main() {
 	UpdateClusters update_clusters( (distribution_t&)likelihood, (distribution_t&)hyper);
 
 	Suffies_NormalInvWishart suffies_niw;
+	suffies_niw.mu << 6, 6;
+	suffies_niw.kappa = 1/500;
+	suffies_niw.nu = 4;
+	suffies_niw.Lambda << 0.01, 0, 0, 0.01;
+
 	normal_inverse_wishart_distribution prior(suffies_niw);
 
 	// To update the cluster population we need	to sample new clusters using hyper parameters and adjust existing ones

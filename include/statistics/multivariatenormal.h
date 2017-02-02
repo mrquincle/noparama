@@ -103,7 +103,7 @@ class multivariate_normal_distribution: public distribution_t {
 		 * @param[in] generator		a uniform random number generator
 		 * @return					probability (value between 0 and 1)
 		 */
-		double operator()(Eigen::VectorXd & value) const
+		double probability(Eigen::VectorXd & value) const
 		{
 			size_t D = value.size();
 

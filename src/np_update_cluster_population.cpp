@@ -1,23 +1,22 @@
 #include <np_update_cluster_population.h>
-#include <np_likelihood.h>
-#include <np_posterior_predictive.h>
-#include <np_sample_pdf.h>
 
 UpdateClusterPopulation::UpdateClusterPopulation(
-		likelihood_t & likelihood,
-		PosteriorPredictive & pred
+			likelihood_t & likelihood,
+			distribution_t & nonparametrics, 
+			distribution_t & prior
+//		PosteriorPredictive & pred
 		): 
 			_likelihood(likelihood),
-			_predictive_posterior(pred),
+			_nonparametrics(nonparametrics),
+			_prior(prior),
+//			_predictive_posterior(pred),
 			_distribution(0.0, 1.0)
 {
 }
 
 void UpdateClusterPopulation::update(
-		membertrix & cluster_matrix,
-		data_id_t data_id,
-		nonparametrics_t & nonparametrics, 
-		sample_pdf_t & sample_pdf
+			membertrix & cluster_matrix,
+			data_id_t data_id
 		) {
 
 	// Create temporary data structure for K clusters
@@ -35,11 +34,11 @@ void UpdateClusterPopulation::update(
 			cluster.count();
 	}
 
-	weighted_predictive_posterior = _predictive_posterior(observation, nonparametrics.base_distribution) * 
-		nonparametrics.alpha;
+	weighted_predictive_posterior = _predictive_posterior(observation, _nonparametrics.base_distribution) * 
+		_nonparametrics.alpha;
 
 	// Calculate parameters for new cluster
-	Suffies & suffies = sample_pdf(nonparametrics.base_distribution);
+	Suffies & suffies = sample_pdf(_nonparametrics.base_distribution);
 	
 	cluster_t * new_cluster = new cluster_t(suffies);
 

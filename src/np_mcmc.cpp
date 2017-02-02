@@ -1,15 +1,15 @@
 #include <assert.h>
 
+#include <Eigen/Dense>
+
 #include <np_mcmc.h>
 #include <np_update_clusters.h>
 #include <np_update_cluster_population.h>
 
-#include <Eigen/Dense>
-
-using Eigen;
+//using Eigen;
 
 MCMC::MCMC(UpdateClusters & update_clusters, UpdateClusterPopulation & update_cluster_population):
-	_update_clusters(update_cluster), _update_cluster_population(update_cluster_population)
+	_update_clusters(update_clusters), _update_cluster_population(update_cluster_population)
 {
 
 }
@@ -22,9 +22,11 @@ void MCMC::run(dataset_t & dataset) {
 	int K = 30;
 
 	int N = _dataset.size();
-	
+
+	int number_mh_steps = 40;
+
 	for (int i = 0; i < N; ++i) {
-		data_id_t j = _membertrix.addData(_dataset[i]);
+		data_id_t j = _membertrix.addData(*_dataset[i]);
 		assert (i == j);
 	}
 
@@ -33,7 +35,8 @@ void MCMC::run(dataset_t & dataset) {
 		// sample sufficient statistics from nonparametrics
 		//Suffies & suffies = sample_pdf(nonparametrics.base_distribution);
 
-		Suffies & suffies = _nonparametrics.base_distribution(_generator);
+		Suffies & suffies = _nonparametrics.sample(_generator);
+//		Suffies & suffies = _nonparametrics.base_distribution(_generator);
 
 		cluster_t *cluster = new cluster_t(suffies);
 		_membertrix.addCluster(*cluster);
@@ -48,14 +51,16 @@ void MCMC::run(dataset_t & dataset) {
 			_membertrix.retract(i);
 
 			// update cluster assignments, delete and create clusters
-			update_cluster_population.update(membertrix.getClusters(), observations[i], nonparametrics, sample_pdf);
+			_update_cluster_population.update(_membertrix, i);
+			
+			//_update_cluster_population.update(_membertrix.getClusters(), _dataset[i]);
 
 			// 
 
 		}
 
 		// update cluster parameters
-		update_clusters.update(clusters, nonparametrics, prior, number_mh_steps);
+		_update_clusters.update(_membertrix, number_mh_steps);
 
 	}
 
