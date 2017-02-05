@@ -4,6 +4,9 @@
 #include <np_data.h>
 #include <np_cluster.h>
 
+//! A dataset per cluster
+typedef std::vector< dataset_t* > clusters_dataset_t;
+
 enum np_error_t { error_none, error_already_assigned, error_assignment_remaining, error_assignment_absent };
 	
 /*!
@@ -49,8 +52,8 @@ class membertrix {
 		 *
 		 * The returned index should be kept as a reference for use in the functions assign() and retract().
 		 *
-		 * @param[in] cluster_t			A cluster object
-		 * @return						An index to the given cluster object
+		 * @param[in] cluster_t        A cluster object
+		 * @return                     An index to the given cluster object
 		 */
 		cluster_id_t addCluster(cluster_t & cluster);
 
@@ -60,27 +63,42 @@ class membertrix {
 		 *
 		 * The returned index should be kept as a reference for use in the functions assign() and retract().
 		 *
-		 * @param[in] data_t			A data object
-		 * @return						An index to the given data object
+		 * @param[in] data_t           A data object
+		 * @return                     An index to the given data object
 		 */
 		data_id_t addData(data_t & data);
 
-		np_error_t assign(cluster_id_t & cluster_id, data_id_t & data_id);
+		/*!
+		 * Return data point with given index.
+		 *
+		 * @param[in] data_id          An index to a particular data point
+		 * @return                     A data point that has been set previously through addData
+		 */
+		data_t & getDatum(data_id_t data_id);
+
+		np_error_t assign(cluster_id_t cluster_id, data_id_t data_id);
 		
-		np_error_t retract(cluster_id_t & cluster_id, data_id_t & data_id);
+		np_error_t retract(cluster_id_t cluster_id, data_id_t data_id);
 
-		np_error_t retract(data_id_t & data_id);
+		np_error_t retract(data_id_t data_id);
 
-		cluster_id_t getCluster(data_id_t & data_id);
+		cluster_id_t getCluster(data_id_t data_id);
 
 		clusters_t & getClusters();
 
 		/*!
 		 * Return all data points that are assigned to a particular cluster.
 		 *
-		 * @param[in] cluster_id		An index to a particular cluster
-		 * @return						A dataset (vector) of data points that have been assigned through assign()
+		 * @param[in] cluster_id       An index to a particular cluster
+		 * @return                     A dataset (vector) of data points that have been assigned through assign()
 		 */
-		dataset_t & getData(cluster_id_t & cluster_id);
+		dataset_t & getData(cluster_id_t cluster_id);
+
+		/*!
+		 * Return count of data points within the given cluster.
+		 * @param[in] cluster_id       An index to a particular cluster
+		 * @return                     Number of data points (should be the same as getData(cluster_id).size()).
+		 */
+		size_t count(cluster_id_t cluster_id);
 };
 

@@ -1,4 +1,4 @@
-#include <statistics/multivariatenormal_rnd.h>
+#include <statistics/multivariatenormal.h>
 #include <iostream>
 #include <fstream>
 #include <random>

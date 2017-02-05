@@ -2,53 +2,42 @@
 
 #include <vector>
 
-#include <np_data.h>
 #include <np_suffies.h>
 
-// Forward references
+// Forward reference to cluster_t
 class cluster_t;
 
 //! Index to a cluster
 typedef int cluster_id_t;
 
-typedef std::vector<cluster_t> clusters_t;
-
-//! A dataset per cluster
-typedef std::vector< dataset_t > clusters_dataset_t;
+//! Ordered set of clusters
+typedef std::vector<cluster_t*> clusters_t;
 
 /*!
  * A cluster is represented by a cluster_t structure and contains parameters in the form of sufficient statistics.
  *
  * There are no dependencies between clusters assumed (hence no references to other clusters or hierarchy).
+ *
+ * The data is not stored in the cluster itself, but in the membertrix object.
  */
 class cluster_t {
 	private: 
 		//! The parameters are sufficient statistics of the related probability density function
-		Suffies _statistics;
-
-		// The data is a set of individual data items
-		//t_data _data;
+		Suffies _suffies;
 
 	public:
-		cluster_t(Suffies & statistics);
+		cluster_t(Suffies & suffies): _suffies(suffies) {
+		}
 		
-		~cluster_t();
+		~cluster_t() {};
 
 		//! Get sufficient statistics
-		Suffies & getSuffies();
+		Suffies & getSuffies() {
+			return _suffies;
+		}	
 		
 		//! Set sufficient statistics
-		void setSuffies(Suffies & statistics);
-
-		// Add a data item
-		//size_t add(t_datum & item);
-		
-		// Remove a data item
-		//void erase(size_t position);
-
-		// Number of data items
-		//int count();
-
-		// Get data
-		//t_data & data();
+		void setSuffies(Suffies & suffies) {
+			_suffies = suffies;
+		}
 };

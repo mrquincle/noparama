@@ -1,20 +1,20 @@
-#include <np_update_cluster_population.h>
+#include <np_neal_algorithm2.h>
 
-UpdateClusterPopulation::UpdateClusterPopulation(
-			likelihood_t & likelihood,
+NealAlgorithm2::NealAlgorithm2(
+			distribution_t & likelihood,
 			distribution_t & nonparametrics, 
-			distribution_t & prior
-//		PosteriorPredictive & pred
+			distribution_t & prior,
+			PosteriorPredictive & pred
 		): 
 			_likelihood(likelihood),
 			_nonparametrics(nonparametrics),
 			_prior(prior),
-//			_predictive_posterior(pred),
+			_predictive_posterior(pred),
 			_distribution(0.0, 1.0)
 {
 }
 
-void UpdateClusterPopulation::update(
+void NealAlgorithm2::update(
 			membertrix & cluster_matrix,
 			data_id_t data_id
 		) {

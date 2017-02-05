@@ -37,7 +37,7 @@ class multivariate_normal_distribution: public distribution_t {
 		/**
 		 * Constructor for a multivariate normal distribution. The mean is assumed to be a zero-vector with 1xD values.
 		 *
-		 * @param[in] covar		matrix DxD with doubles (make sure it is a covariance matrix!)
+		 * @param[in] covar            matrix DxD with doubles (make sure it is a covariance matrix!)
 		 */
 		multivariate_normal_distribution(Eigen::MatrixXd const& covar)
 			: multivariate_normal_distribution(Eigen::VectorXd::Zero(covar.rows()), covar) 
@@ -47,8 +47,8 @@ class multivariate_normal_distribution: public distribution_t {
 		/**
 		 * Constructor for a multivariate normal distribution.
 		 *
-		 * @param[in] mean		vector 1xD with doubles
-		 * @param[in] covar		matrix DxD with doubles (make sure it is a covariance matrix!)
+		 * @param[in] mean             vector 1xD with doubles
+		 * @param[in] covar            matrix DxD with doubles (make sure it is a covariance matrix!)
 		 */
 		multivariate_normal_distribution(Eigen::VectorXd const& mean, Eigen::MatrixXd const& covar)
 			: distribution_t(), _mean(mean), _covar(covar)
@@ -60,7 +60,7 @@ class multivariate_normal_distribution: public distribution_t {
 		/**
 		 * Constructor for a multivariate normal distribution.
 		 *
-		 * @param[in] suffies		mean and covariance matrix in one structure
+		 * @param[in] suffies          mean and covariance matrix in one structure
 		 */
 		multivariate_normal_distribution(Suffies_MultivariateNormal & suffies)
 			: multivariate_normal_distribution(suffies.mu, suffies.sigma)
@@ -70,8 +70,8 @@ class multivariate_normal_distribution: public distribution_t {
 		/**
 		 * Sample a random value according to the multivariate normal distribution by calling the () operator.
 		 *
-		 * @param[in] generator		a uniform random number generator
-		 * @return					a vector 1xD with doubles, representing a single sample from the distribution
+		 * @param[in] generator        a uniform random number generator
+		 * @return                     a vector 1xD with doubles, representing a single sample from the distribution
 		 */
 		template<typename _UniformRandomNumberGenerator >
 		Eigen::VectorXd operator()(_UniformRandomNumberGenerator & generator) const
@@ -100,8 +100,8 @@ class multivariate_normal_distribution: public distribution_t {
 		 *
 		 *   p(x|mu,S)
 		 *
-		 * @param[in] generator		a uniform random number generator
-		 * @return					probability (value between 0 and 1)
+		 * @param[in] generator        a uniform random number generator
+		 * @return                     probability (value between 0 and 1)
 		 */
 		double probability(Eigen::VectorXd & value) const
 		{
@@ -122,8 +122,8 @@ class multivariate_normal_distribution: public distribution_t {
 		 *
 		 *   L(mu,S|x0,x1,...,xN)
 		 *
-		 * @param[in] values		a vector of supposedly normally distribution multivariate variables
-		 * @return					likelihood (unnormalized probability).
+		 * @param[in] values           a vector of supposedly normally distribution multivariate variables
+		 * @return                     likelihood (unnormalized probability).
 		 */
 /*		double operator()(std::vector< Eigen::VectorXd&> & values) const
 		{

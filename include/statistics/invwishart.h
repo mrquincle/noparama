@@ -20,7 +20,8 @@ class inverse_wishart_distribution: public distribution_t {
 		Suffies_ZeroCentered_MultivariateNormal _suffies_result;
 	public:
 		inverse_wishart_distribution(Suffies_InvWishart & suffies_iw): 
-			_suffies_iw(suffies_iw)
+			_suffies_iw(suffies_iw),
+			_suffies_result(suffies_iw.D)
 		{
 			int D = _suffies_iw.Lambda.cols();
 

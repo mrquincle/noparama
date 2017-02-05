@@ -10,7 +10,8 @@
  * reasons (printing e.g.).
  */
 class Suffies {
-
+	public:
+		int D;
 };
 
 class Suffies_NormalInvWishart: public Suffies {
@@ -18,14 +19,20 @@ class Suffies_NormalInvWishart: public Suffies {
 		Eigen::VectorXd mu;
 		double kappa;
 		double nu;
-		Eigen::Matrix2d Lambda;
+		Eigen::MatrixXd Lambda;
+		
+		Suffies_NormalInvWishart(int D): mu(D), Lambda(D,D) {
+		}
 };
 
 class Suffies_InvWishart: public Suffies {
 	public:
 		double nu;
 		double lambda;
-		Eigen::Matrix2d Lambda;
+		Eigen::MatrixXd Lambda;
+		
+		Suffies_InvWishart(int D): Lambda(D,D) {
+		}
 };
 
 class Suffies_NormalInvGamma: public Suffies {
@@ -33,7 +40,10 @@ class Suffies_NormalInvGamma: public Suffies {
 		Eigen::VectorXd mu;
 		double a;
 		double b;
-		Eigen::Matrix2d Lambda;
+		Eigen::MatrixXd Lambda;
+		
+		Suffies_NormalInvGamma(int D): mu(D), Lambda(D,D) {
+		}
 };
 
 class Suffies_Normal: public Suffies {
@@ -48,6 +58,9 @@ class Suffies_Normal: public Suffies {
 class Suffies_Unity_MultivariateNormal: public Suffies {
 	public:
 		Eigen::VectorXd mu;
+
+		Suffies_Unity_MultivariateNormal(int D): mu(D) {
+		}
 };
 
 /*!
@@ -56,16 +69,22 @@ class Suffies_Unity_MultivariateNormal: public Suffies {
 class Suffies_ZeroCentered_MultivariateNormal: public Suffies {
 	public:
 		Eigen::MatrixXd sigma;
+		
+		Suffies_ZeroCentered_MultivariateNormal(int D): sigma(D, D) {
+		}
 };
 
 class Suffies_MultivariateNormal: public Suffies {
 	public:
 		Eigen::VectorXd mu;
 		Eigen::MatrixXd sigma;
+		
+		Suffies_MultivariateNormal(int D): mu(D), sigma(D,D) {
+		}
 };
 
 class Suffies_Dirichlet: public Suffies {
 	public:
 		double alpha;
-		Suffies base_suffies;
+//		Suffies base_suffies;
 };

@@ -34,7 +34,7 @@ void UpdateClusters::update(
 		for (int k = 0; k < (int)clusters.size(); ++k) {
 			// current likelihood for this cluster, compare with new sample
 			// reuse _likelihood object
-			_likelihood.init(clusters[k].getSuffies());
+			_likelihood.init(clusters[k]->getSuffies());
 			likelihood = _likelihood.probability(cluster_matrix.getData(k));
 			
 			Suffies & proposed_suffies = propose();
@@ -43,7 +43,7 @@ void UpdateClusters::update(
 			
 			if (!likelihood) {
 				// likelihood can be zero at start, in that case accept any proposal
-				clusters[k].setSuffies(proposed_suffies);
+				clusters[k]->setSuffies(proposed_suffies);
 				continue;
 			} 
 
@@ -53,7 +53,7 @@ void UpdateClusters::update(
 
 			if (reject < alpha) {
 				// accept new cluster parameters
-				clusters[k].setSuffies(proposed_suffies);
+				clusters[k]->setSuffies(proposed_suffies);
 			} else {
 				// reject, keep cluster as is
 			}

@@ -34,7 +34,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 include_directories ( "include" )
 
-set(SOURCE_FILES src/np_main.cpp src/np_mcmc.cpp src/np_update_clusters.cpp src/np_update_cluster_population.cpp)
+set(SOURCE_FILES src/np_main.cpp src/np_mcmc.cpp src/membertrix.cpp src/np_update_clusters.cpp src/np_neal_algorithm8.cpp)
 
 # CMAKE_BINARY_DIR is the top of the build-directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

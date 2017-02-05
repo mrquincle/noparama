@@ -22,7 +22,10 @@ class normal_inverse_wishart_distribution: public distribution_t {
 		Suffies_MultivariateNormal _suffies_result; 
 	public:
 		normal_inverse_wishart_distribution(Suffies_NormalInvWishart & suffies_niw): 
-			_suffies_normalinvwishart(suffies_niw)
+			_suffies_normalinvwishart(suffies_niw), 
+			_suffies_mvn(suffies_niw.D), 
+			_suffies_iw(suffies_niw.D),
+			_suffies_result(suffies_niw.D)
 		{
 			_suffies_iw.nu = suffies_niw.nu;
 			_suffies_iw.Lambda = suffies_niw.Lambda;
