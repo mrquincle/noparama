@@ -12,20 +12,27 @@
 
 class MCMC {
 	private:
-
+		//! Membertrix object itself
 		membertrix _membertrix;
 
-		dataset_t _dataset;
+		//! Reference to UpdateCluster object
+		UpdateClusters & _update_clusters;
 
-		distribution_t _nonparametrics;
+		//! Reference to UpdateClusterPopulation object
+		UpdateClusterPopulation & _update_cluster_population;
 
-		UpdateClusters _update_clusters;
-
-		UpdateClusterPopulation _update_cluster_population;
-
-		std::default_random_engine _generator;
+		//! Todo: set generator
+		std::default_random_engine & _generator;
+	
+		//! Reference to nonparametrics distribution_t object
+		distribution_t & _nonparametrics;
 	public:
-		MCMC(UpdateClusters & update_clusters, UpdateClusterPopulation & update_cluster_population);
+		MCMC(
+				UpdateClusters & update_clusters, 
+				UpdateClusterPopulation & update_cluster_population,
+				std::default_random_engine & generator,
+				distribution_t & nonparametrics
+			);
 
 		void run(dataset_t & dataset);
 };

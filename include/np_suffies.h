@@ -1,6 +1,30 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <map>
+
+enum distribution_type_t { 
+	// normals
+	Normal, Unity_Normal,
+	// multivariate normals
+	MultivariateNormal, Unity_MultivariateNormal, ZeroCentered_MultivariateNormal, 
+	// inverse wisharts and alike, useful as priors for normals
+	NormalInvWishart, InvWishart, NormalInvGamma, 
+	// hierarchical priors
+	Dirichlet
+};
+
+static std::map< distribution_type_t, const char * > distribution_type_str = {
+	{Normal,                           "normal"},
+	{Unity_Normal,                     "unity normal"},
+	{MultivariateNormal,               "multivariate normal"},
+	{Unity_MultivariateNormal,         "unity multivariate normal"},
+	{ZeroCentered_MultivariateNormal,  "zero-centered multivariate normal"},
+	{NormalInvWishart,                 "normal inverse-Wishart"},
+	{InvWishart,                       "inverse-Wishart"},
+	{NormalInvGamma,                   "normal inverse-Gamma"},
+	{Dirichlet,                        "Dirichlet"}
+};
 
 /*!
  * Suffies describes a probability distribution. On the moment it does not contain any information on itself.
@@ -12,6 +36,15 @@
 class Suffies {
 	public:
 		int D;
+
+		virtual ~Suffies() {
+		};
+
+		virtual void print(std::ostream& os) const {
+			os << D << " (probably a copy by value rather than copy by reference somewhere?)";
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const Suffies& s);  
 };
 
 class Suffies_NormalInvWishart: public Suffies {
@@ -22,16 +55,24 @@ class Suffies_NormalInvWishart: public Suffies {
 		Eigen::MatrixXd Lambda;
 		
 		Suffies_NormalInvWishart(int D): mu(D), Lambda(D,D) {
+			Suffies::D = D;
+		}
+		
+		void print(std::ostream& os) const {
+			os << nu << " | " << kappa << " | " << nu << " | " << Lambda;
 		}
 };
 
 class Suffies_InvWishart: public Suffies {
 	public:
 		double nu;
-		double lambda;
 		Eigen::MatrixXd Lambda;
 		
 		Suffies_InvWishart(int D): Lambda(D,D) {
+		}
+		
+		void print(std::ostream& os) const {
+			os << nu << " | " << Lambda;
 		}
 };
 
@@ -44,12 +85,29 @@ class Suffies_NormalInvGamma: public Suffies {
 		
 		Suffies_NormalInvGamma(int D): mu(D), Lambda(D,D) {
 		}
+		
+		void print(std::ostream& os) const {
+			os << mu << " | " << a << " | " << b << " | " << Lambda;
+		}
 };
 
 class Suffies_Normal: public Suffies {
 	public:
 		double mu;
 		double sigma;
+		
+		void print(std::ostream& os) const {
+			os << mu << " | " << sigma;
+		}
+};
+
+class Suffies_Unity_Normal: public Suffies {
+	public:
+		double mu;
+
+		void print(std::ostream& os) const {
+			os << mu;
+		}
 };
 
 /*!
@@ -60,6 +118,10 @@ class Suffies_Unity_MultivariateNormal: public Suffies {
 		Eigen::VectorXd mu;
 
 		Suffies_Unity_MultivariateNormal(int D): mu(D) {
+		}
+		
+		void print(std::ostream& os) const {
+			os << mu;
 		}
 };
 
@@ -72,7 +134,13 @@ class Suffies_ZeroCentered_MultivariateNormal: public Suffies {
 		
 		Suffies_ZeroCentered_MultivariateNormal(int D): sigma(D, D) {
 		}
+		
+		void print(std::ostream& os) const {
+			os << sigma;
+		}
 };
+
+static Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, " ", "; ", "", "", "", "");
 
 class Suffies_MultivariateNormal: public Suffies {
 	public:
@@ -81,10 +149,20 @@ class Suffies_MultivariateNormal: public Suffies {
 		
 		Suffies_MultivariateNormal(int D): mu(D), sigma(D,D) {
 		}
+
+		void print(std::ostream& os) const {
+
+			os << "[mu | sigma]: [" << mu.transpose() << " | " << sigma.format(CommaInitFmt) << "]";
+		}
 };
 
 class Suffies_Dirichlet: public Suffies {
 	public:
 		double alpha;
 //		Suffies base_suffies;
+		
+		void print(std::ostream& os) const {
+			os << alpha;
+		}
+		
 };

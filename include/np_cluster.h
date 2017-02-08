@@ -10,9 +10,6 @@ class cluster_t;
 //! Index to a cluster
 typedef int cluster_id_t;
 
-//! Ordered set of clusters
-typedef std::vector<cluster_t*> clusters_t;
-
 /*!
  * A cluster is represented by a cluster_t structure and contains parameters in the form of sufficient statistics.
  *
@@ -23,7 +20,8 @@ typedef std::vector<cluster_t*> clusters_t;
 class cluster_t {
 	private: 
 		//! The parameters are sufficient statistics of the related probability density function
-		Suffies _suffies;
+		//! They are stored by reference, or else the construction will be a copy by value operation.
+		Suffies & _suffies;
 
 	public:
 		cluster_t(Suffies & suffies): _suffies(suffies) {

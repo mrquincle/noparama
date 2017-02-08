@@ -14,10 +14,13 @@
  */
 class NealAlgorithm8: public UpdateClusterPopulation {
 	private:
-		distribution_t _likelihood;
-		
-		distribution_t _nonparametrics;
+		std::default_random_engine _generator;
 
+		distribution_t & _likelihood;
+	
+		// Store by reference, or else the constructor makes a copy, loosing all information on the derived class.
+		distribution_t & _nonparametrics;
+		
 		double _alpha;
 	public:
 		/*!
@@ -27,6 +30,7 @@ class NealAlgorithm8: public UpdateClusterPopulation {
 		 * @param[in] nonparametrics             Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
 		 */
 		NealAlgorithm8(
+			random_engine_t & generator,
 			distribution_t & likelihood,
 			distribution_t & nonparametrics
 		);

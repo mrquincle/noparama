@@ -4,11 +4,24 @@
 #include <np_data.h>
 #include <np_cluster.h>
 
+#include <map>
+#include <unordered_map>
+
+//! Hashmap for the cluster indices and cluster objects
+typedef std::unordered_map<cluster_id_t, cluster_t*> clusters_t;
+
 //! A dataset per cluster
 typedef std::vector< dataset_t* > clusters_dataset_t;
 
 enum np_error_t { error_none, error_already_assigned, error_assignment_remaining, error_assignment_absent };
-	
+
+static std::map< np_error_t, const char * > np_error_str = {
+	{error_none,                       "none"},
+	{error_already_assigned,           "already assigned"},
+	{error_assignment_remaining,       "assignment remaining"},
+	{error_assignment_absent,          "assignment absent"}
+};
+
 /*!
  * The binary matrix is currently defined as a dense matrix. This needs actually some profiling to know if a sparse 
  * matrix is faster. Namely, the content of the matrix is sparse with one non-false value per row. However, for now
@@ -21,10 +34,12 @@ typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> binary_matrix_t;
  * The membership is asymmetric. A data item can be assigned to only one cluster. In contrary, a cluster can have
  * multiple data points as members.
  *
+ * The data points and clusters are stored in separate vectors.
+ *
  * The structure is stored with clusters as columns, and data items as rows. Reasons:
  *   + Eigen by default uses column-major storage [1]
- *   + The getData() function retrieves multiple data items
- *   + The getCluster() function can return on first item found
+ *   + The getData() function retrieves multiple data items (columns)
+ *   + The getCluster() function can return on first item found (rows)
  *
  * References:
  *   [1] https://eigen.tuxfamily.org/dox/group__TopicStorageOrders.html
@@ -55,7 +70,7 @@ class membertrix {
 		 * @param[in] cluster_t        A cluster object
 		 * @return                     An index to the given cluster object
 		 */
-		cluster_id_t addCluster(cluster_t & cluster);
+		cluster_id_t addCluster(cluster_t *cluster);
 
 		/*!
 		 * Add a data point to the membership matrix. The data are not physically stored, only a reference is kept. If
@@ -74,7 +89,7 @@ class membertrix {
 		 * @param[in] data_id          An index to a particular data point
 		 * @return                     A data point that has been set previously through addData
 		 */
-		data_t & getDatum(data_id_t data_id);
+		data_t * getDatum(data_id_t data_id);
 
 		np_error_t assign(cluster_id_t cluster_id, data_id_t data_id);
 		
@@ -100,5 +115,9 @@ class membertrix {
 		 * @return                     Number of data points (should be the same as getData(cluster_id).size()).
 		 */
 		size_t count(cluster_id_t cluster_id);
+		
+		bool empty(cluster_id_t cluster_id);
+
+		int cleanup();
 };
 

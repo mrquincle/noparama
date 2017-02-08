@@ -4,6 +4,8 @@
 
 #include <membertrix>
 
+#include <iostream>
+
 /**
  * This class UpdateClusterPopulation deletes, adds, and adjusts clusters. This in contrast with UpdateCluster which 
  * only adjusts the parameters assigned to a cluster and will leave the number of clusters invariant. 
@@ -28,5 +30,6 @@ class UpdateClusterPopulation {
 				membertrix & cluster_matrix,
 				data_id_t data_id
 			) {
+			std::cout << "General update" << std::endl;
 		}
 };

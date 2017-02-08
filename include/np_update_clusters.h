@@ -26,7 +26,7 @@ class UpdateClusters {
 
 	protected:
 
-		Suffies & propose();
+		Suffies *propose();
 
 	public:
 		/*!
@@ -47,6 +47,7 @@ class UpdateClusters {
 		 * @param[in] nonparametrics 				Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
 		 */
 		UpdateClusters(
+				random_engine_t & generator,
 				distribution_t & likelihood,
 				distribution_t & nonparametrics
 			);

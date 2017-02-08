@@ -15,29 +15,32 @@ class inverse_wishart_distribution: public distribution_t {
 		
 		// Helper pdf
 		Suffies_Normal _suffies_normal;
-		
+		int _D;
+
 		// Result
-		Suffies_ZeroCentered_MultivariateNormal _suffies_result;
+		Suffies_ZeroCentered_MultivariateNormal *_suffies_result;
 	public:
 		inverse_wishart_distribution(Suffies_InvWishart & suffies_iw): 
-			_suffies_iw(suffies_iw),
-			_suffies_result(suffies_iw.D)
+			_suffies_iw(suffies_iw)
 		{
-			int D = _suffies_iw.Lambda.cols();
+			_distribution_type = InvWishart;
 
-			_suffies_normal.mu = D;
+			_D = _suffies_iw.Lambda.cols();
+
+			_suffies_normal.mu = _D;
 			_suffies_normal.sigma = _suffies_iw.nu;
 		}
 
-		template<typename _UniformRandomNumberGenerator >
-		Suffies_ZeroCentered_MultivariateNormal & operator()(_UniformRandomNumberGenerator & generator) const
+		Suffies_ZeroCentered_MultivariateNormal *operator()(random_engine_t & generator) 
 		{
+			_suffies_result = new Suffies_ZeroCentered_MultivariateNormal(_D);
+
 			normal_distribution normal_dist(_suffies_normal);
 
 			Eigen::MatrixXd L( _suffies_iw.Lambda.llt().matrixL() );
-			auto x = L.transpose() * normal_dist(generator);
+			auto x = L.transpose() * normal_dist(generator)->mu;
 			
-			_suffies_result.sigma = x * x.transpose();
+			_suffies_result->sigma = x * x.transpose();
 			
 			return _suffies_result;
 		}

@@ -1,7 +1,9 @@
-#include <statistics/multivariatenormal.h>
 #include <iostream>
 #include <fstream>
 #include <random>
+
+#include <statistics/multivariatenormal.h>
+#include <np_suffies.h>
 
 using namespace std;
 using namespace Eigen;
@@ -14,13 +16,19 @@ int main() {
 	Matrix2d covar;
 	covar << 1,0,0.2,1;
 			
-	multivariate_normal_distribution distribution(mean, covar);
+	Suffies_MultivariateNormal suffies(mean.size());
+	suffies.mu = mean;
+	suffies.sigma = covar;
+
+	multivariate_normal_distribution distribution(suffies);
 
 	const int nRolls = 10000;
 	ofstream ofile;
 	ofile.open("test_multivariate_normal_distribution.data");
 	for (int i = 0; i < nRolls; ++i) {
-		ofile << distribution(generator).transpose() << endl;
+		auto res = distribution(generator);
+		ofile << res->mu.transpose() << endl;
 	}
 	ofile.close();
+	std::cout << "Wrote data to test_multivariate_normal_distribution.data" << std::endl;
 }
