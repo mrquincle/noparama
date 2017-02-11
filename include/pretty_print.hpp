@@ -13,7 +13,10 @@
     )
 
 #define fout \
-    std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]: " << "\033[0m" 
+    if (_verbosity < 3) std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m \033[1;34m" << __func__ << "(): \033[0m" 
+
+#define foutvar(var) \
+    if (_verbosity < var) std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m \033[1;34m" << __func__ << "(): \033[0m" 
 
 // This works similar to ostream_iterator, but doesn't print a delimiter after the final item
 template<typename T, typename TChar = char, typename TCharTraits = std::char_traits<TChar> >

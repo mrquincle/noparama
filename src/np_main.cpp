@@ -15,6 +15,8 @@
 using namespace std;
 
 int main() {
+	char _verbosity = 3;
+	
 	fout << "Welcome to noparama" << endl;
 
 	std::default_random_engine generator(std::random_device{}()); 
@@ -29,12 +31,12 @@ int main() {
 	fout << "Read dataset" << endl;
 	std::ifstream datafilehandle(datafilename);
 	double a, b;
-	int cut = 50, i = 0;
+//	int cut = 50, i = 0;
 	while (datafilehandle >> a >> b) {
 		data_t *data = new data_t(2);
 		*data = { a, b };
 		dataset.push_back(data);
-		if (++i == cut) break;
+//		if (++i == cut) break;
 	}
 
 	int I = 4;

@@ -18,6 +18,8 @@ NealAlgorithm8::NealAlgorithm8(
 			_nonparametrics(nonparametrics)
 {
 	_alpha = ((dirichlet_distribution&)nonparametrics).getSuffies().alpha;
+
+	_verbosity = 4;
 }
 
 void NealAlgorithm8::update(
@@ -56,15 +58,16 @@ void NealAlgorithm8::update(
 		auto const &key = cluster_pair.first;
 		auto const &cluster = cluster_pair.second;
 		
-		fout << "Obtained suffies from cluster " << k << ": " << cluster->getSuffies() << endl;
+		fout << "Obtained suffies from cluster " << key << ": " << cluster->getSuffies() << endl;
 
-//	for (int k = 0; k < (int)K; ++k) {
 		_likelihood.init(cluster->getSuffies());
 		weighted_likelihood[++k] = _likelihood.probability(observation) * cluster_matrix.count(key);
-		fout << "Cluster " << setw(2) << key << \
-			"[#" << cluster_matrix.count(key) << "]: " << \
-			_likelihood.probability(observation) << '\t' << \
-			cluster->getSuffies() << endl;
+		/*
+		fout << "Cluster ";
+		cluster_matrix.print(key, std::cout);
+		cout << '\t' << _likelihood.probability(observation) << endl;
+		*/
+		
 	}
 	for (int m = 0; m < M; ++m) {
 		_likelihood.init(new_clusters[m]->getSuffies());

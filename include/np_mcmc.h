@@ -26,6 +26,10 @@ class MCMC {
 	
 		//! Reference to nonparametrics distribution_t object
 		distribution_t & _nonparametrics;
+		
+		// verbosity
+		char _verbosity;
+
 	public:
 		MCMC(
 				UpdateClusters & update_clusters, 

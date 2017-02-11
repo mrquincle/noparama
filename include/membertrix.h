@@ -11,7 +11,7 @@
 typedef std::unordered_map<cluster_id_t, cluster_t*> clusters_t;
 
 //! A dataset per cluster
-typedef std::vector< dataset_t* > clusters_dataset_t;
+typedef std::unordered_map<cluster_id_t, dataset_t*> clusters_dataset_t;
 
 enum np_error_t { error_none, error_already_assigned, error_assignment_remaining, error_assignment_absent };
 
@@ -57,6 +57,13 @@ class membertrix {
 
 		// store data items per cluster
 		clusters_dataset_t _clusters_dataset;
+
+		// verbosity
+		char _verbosity;
+
+	protected:
+		
+		bool exists(cluster_id_t cluster_id);
 	public:
 
 		membertrix();
@@ -101,13 +108,19 @@ class membertrix {
 
 		clusters_t & getClusters();
 
+		void print(cluster_id_t cluster_id, std::ostream &os);
+		
+		void print(std::ostream& os) const;
+
+		friend std::ostream& operator<<(std::ostream& os, const membertrix& m);  
+
 		/*!
 		 * Return all data points that are assigned to a particular cluster.
 		 *
 		 * @param[in] cluster_id       An index to a particular cluster
 		 * @return                     A dataset (vector) of data points that have been assigned through assign()
 		 */
-		dataset_t & getData(cluster_id_t cluster_id);
+		dataset_t* getData(cluster_id_t cluster_id);
 
 		/*!
 		 * Return count of data points within the given cluster.

@@ -22,6 +22,10 @@ class NealAlgorithm8: public UpdateClusterPopulation {
 		distribution_t & _nonparametrics;
 		
 		double _alpha;
+		
+		// verbosity
+		char _verbosity;
+
 	public:
 		/*!
 		 * Construct update method for cluster population.

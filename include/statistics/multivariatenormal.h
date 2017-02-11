@@ -133,9 +133,14 @@ class multivariate_normal_distribution: public distribution_t {
 //			fout << diff.transpose() << std::endl;
 			auto inverse = _covar.inverse();
 			auto exponent = -0.5 * diff.transpose() * inverse * diff;
-			auto det = _covar.determinant();
-			auto constant = std::pow( 2*M_PI * det, -0.5*D ) ; // check how to get det out of llt
-			return constant * std::exp(exponent);		
+//			std::cout << "Exponent: " << exponent << std::endl;
+			double det = _covar.determinant();
+//			std::cout << "Determinant: " << det << std::endl;
+			//auto constant = std::pow( 2*M_PI * det, -0.5*D ) ; 
+			auto constant = std::sqrt( std::pow( 2*M_PI, D ) * det); // check how to get det out of llt
+//			std::cout << "Constant: " << constant << std::endl;
+
+			return std::exp(exponent) / constant;
 		}
 		
 		double probability(dataset_t & dataset) const

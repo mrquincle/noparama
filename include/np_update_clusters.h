@@ -24,6 +24,8 @@ class UpdateClusters {
 		
 		std::uniform_real_distribution<double> _distribution;
 
+		// verbosity
+		char _verbosity;
 	protected:
 
 		Suffies *propose();

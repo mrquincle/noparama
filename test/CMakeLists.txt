@@ -1,13 +1,22 @@
 include_directories ( "../include" )
 
-set(SOURCE_FILES test_multivariate_normal_distribution.cpp)
+set(TEST test_multivariate_normal_distribution)
+set(SOURCE_FILES ${TEST}.cpp)
+add_executable(${TEST} ${SOURCE_FILES})
+add_test(NAME ${TEST} COMMAND ${TEST})
 
-add_executable(test_multivariate_normal_distribution ${SOURCE_FILES})
+set(TEST test_weighted_vector)
+set(SOURCE_FILES ${TEST}.cpp)
+add_executable(${TEST} ${SOURCE_FILES})
+add_test(NAME ${TEST} COMMAND ${TEST})
 
-add_test(NAME test_multivariate_normal_distribution COMMAND test_multivariate_normal_distribution)
+set(TEST test_mvn_likelihood)
+set(SOURCE_FILES ${TEST}.cpp)
+add_executable(${TEST} ${SOURCE_FILES})
+add_test(NAME ${TEST} COMMAND ${TEST})
 
-set(SOURCE_FILES test_weighted_vector.cpp)
-
-add_executable(test_weighted_vector ${SOURCE_FILES})
-
-add_test(NAME test_weighted_vector COMMAND test_weighted_vector)
+set(TEST test_membertrix)
+set(TEST_SOURCE_FILES ../src/membertrix.cpp ../src/np_suffies.cpp)
+set(SOURCE_FILES ${TEST}.cpp ${TEST_SOURCE_FILES})
+add_executable(${TEST} ${SOURCE_FILES})
+add_test(NAME ${TEST} COMMAND ${TEST})

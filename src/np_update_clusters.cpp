@@ -17,6 +17,7 @@ UpdateClusters::UpdateClusters(
 			_nonparametrics(nonparametrics),
 			_distribution(0.0, 1.0)
 {
+	_verbosity = 4;
 }
 
 Suffies * UpdateClusters::propose() {
@@ -24,6 +25,10 @@ Suffies * UpdateClusters::propose() {
 	return  _nonparametrics(_generator);
 }
 
+/**
+ * Update cluster parameters. This function should leave the clusters invariant. The membership matrix should not
+ * be different 
+ */
 void UpdateClusters::update(
 			membertrix & cluster_matrix,
 			int number_mh_steps
@@ -37,22 +42,25 @@ void UpdateClusters::update(
 
 		fout << "step " << t << endl;
 
-		auto clusters = cluster_matrix.getClusters();
-		//for (int k = 0; k < (int)clusters.size(); ++k) {
+		// here getClusters got corrupted...
+		auto & clusters = cluster_matrix.getClusters();
 		for (auto cluster_pair: clusters) {
 			auto const &key = cluster_pair.first;
+			
+			fout << "Update cluster " << key << " parameters" << endl;
+
 			auto const &cluster = cluster_pair.second;
 
 			if (cluster_matrix.empty(key)) continue;
-			// current likelihood for this cluster, compare with new sample
-			// reuse _likelihood object
+			// current likelihood for this cluster, compare with new sample and reuse the _likelihood object
 			_likelihood.init(cluster->getSuffies());
-			likelihood = _likelihood.probability(cluster_matrix.getData(key));
+			dataset_t *dataset = cluster_matrix.getData(key);
+			likelihood = _likelihood.probability(*dataset);
 			fout << "likelihood cluster " << key << " is " << likelihood << endl;
 			
 			Suffies *proposed_suffies = propose();
 			_likelihood.init(*proposed_suffies);
-			proposed_likelihood = _likelihood.probability(cluster_matrix.getData(key));
+			proposed_likelihood = _likelihood.probability(*dataset);
 			
 			if (!likelihood) {
 				// likelihood can be zero at start, in that case accept any proposal

@@ -25,11 +25,11 @@ MCMC::MCMC(
 	_generator(generator),
 	_nonparametrics(nonparametrics)
 {
-
+	_verbosity = 4;
 }
 
 void MCMC::run(dataset_t & dataset) {
-	int T = 200;
+	int T = 20;
 	int K = 30;
 
 	int N = dataset.size();
@@ -72,16 +72,18 @@ void MCMC::run(dataset_t & dataset) {
 	}	
 
 	// clean up clusters that have been created, but didn't get data assigned
-	int cleaned = _membertrix.cleanup();
-	fout << "Removed " << cleaned << " empty clusters" << endl;
+	int removed = _membertrix.cleanup();
+	fout << "Removed " << removed << " empty clusters" << endl;
+	removed = _membertrix.cleanup();
+	fout << "Removed " << removed << " empty clusters" << endl;
 
 	// update clusters
 	for (int t = 0; t < T; ++t) {
 			
-		fout << "Metropolis Hastings update " << t << endl;
+		foutvar(5) << "Metropolis Hastings update " << t << endl;
 		
 		// iterator over all observations (observations get shifted around, but should not be counted twice)
-		for (int i = 0; i < 2; ++i) {
+		for (int i = 0; i < N; ++i) {
 			fout << "Retract observation " << i << " from membertrix" << endl;
 			
 			// remove observation under consideration from cluster
@@ -89,15 +91,19 @@ void MCMC::run(dataset_t & dataset) {
 			
 			// update cluster assignments, delete and create clusters
 			_update_cluster_population.update(_membertrix, i);
-
 		}
 			
 		fout << "Update cluster " << endl;
 
 		// update cluster parameters
 		_update_clusters.update(_membertrix, number_mh_steps);
-
 	}
 
-
+	clusters_t &clusters = _membertrix.getClusters();
+	for (auto cluster_pair: clusters) {
+		auto const &key = cluster_pair.first;
+		foutvar(5) << "Cluster ";
+		_membertrix.print(key, std::cout);
+		std::cout << endl;
+	}
 }

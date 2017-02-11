@@ -16,6 +16,9 @@ class UpdateClusterPopulation {
 	
 		std::uniform_real_distribution<double> _distribution;
 
+		// verbosity
+		char _verbosity;
+
 	public:
 		UpdateClusterPopulation():
 			_distribution(0.0, 1.0) {
