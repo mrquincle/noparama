@@ -17,7 +17,7 @@ int main() {
 	int _verbosity = 1;
 	
 	// number of samples to generate
-	int N = 10000;
+	int N = 100;
 
 	default_random_engine generator;
 	

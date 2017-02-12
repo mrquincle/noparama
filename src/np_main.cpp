@@ -14,19 +14,24 @@
 
 using namespace std;
 
-int main() {
-	char _verbosity = 3;
+int main(int argc, char *argv[]) {
+	char _verbosity = 2;
 	
 	fout << "Welcome to noparama" << endl;
 
-	std::default_random_engine generator(std::random_device{}()); 
+	default_random_engine generator(random_device{}()); 
 
 	// Load data
 	string datafilename;
-	datafilename = "/home/anne/workspace/thesis/dpm/inference/data/many-modal/pattern100_sigma0_1.plain.txt";
+	if (argc > 1) {
+		datafilename = string(argv[1]);
+	}
+	else {
+		datafilename = "/home/anne/workspace/thesis/dpm/inference/data/many-modal/pattern100_sigma0_1.plain.txt";
+	}
+	fout << "Load file: " << datafilename << endl;
 
 	dataset_t dataset;
-
 	// The data file should have "a b" on lines, separated by spaces (without quotes, each value of the type double).
 	fout << "Read dataset" << endl;
 	std::ifstream datafilehandle(datafilename);
@@ -38,6 +43,7 @@ int main() {
 	}
 
 	int I = 4;
+	fout << "Display first " << I << " items of the dataset" << endl;
 	for (int i = 0; i < I; ++i) {
 		fout << "Data: " << *dataset[i] << endl;
 	}

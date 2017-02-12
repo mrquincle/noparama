@@ -96,6 +96,10 @@ np_error_t membertrix::assign(cluster_id_t cluster_id, data_id_t data_id) {
 	return error_none;
 }
 
+bool membertrix::assigned(data_id_t data_id) {
+	return (_membership_matrix.row(data_id).any());
+}
+
 bool membertrix::exists(cluster_id_t cluster_id) {
 	auto it = _clusters_dataset.find(cluster_id);
 	return (it != _clusters_dataset.end());
@@ -127,7 +131,7 @@ np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id) {
 
 	// if retract is using the iterator over getClusters, this will cause havoc
 	if (empty(cluster_id)) {
-		fout << "Delete cluster: " << cluster_id << endl;
+		fout << "Delete cluster: " << cluster_id << " with " << count(cluster_id) << " items" << endl;
 		_cluster_objects.erase(cluster_id);
 	}
 #endif
@@ -208,6 +212,16 @@ bool membertrix::empty(cluster_id_t cluster_id) {
 
 size_t membertrix::count(cluster_id_t cluster_id) {
 	return _clusters_dataset[cluster_id]->size();
+}
+
+size_t membertrix::count() {
+	size_t result = 0;
+	clusters_t &clusters = getClusters();
+	for (auto cluster_pair: clusters) {
+		auto const &key = cluster_pair.first;
+		result += count(key);
+	}
+	return result;
 }
 
 int membertrix::cleanup() {

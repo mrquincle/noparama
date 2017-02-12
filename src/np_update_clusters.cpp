@@ -51,7 +51,12 @@ void UpdateClusters::update(
 
 			auto const &cluster = cluster_pair.second;
 
-			if (cluster_matrix.empty(key)) continue;
+			if (cluster_matrix.empty(key)) {
+				// shouldn't happen normally
+				foutvar(7) << "This cluster (" << key << ") does not exist!" << endl;
+				continue;
+			}
+
 			// current likelihood for this cluster, compare with new sample and reuse the _likelihood object
 			_likelihood.init(cluster->getSuffies());
 			dataset_t *dataset = cluster_matrix.getData(key);

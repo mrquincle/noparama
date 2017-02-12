@@ -104,6 +104,8 @@ class membertrix {
 
 		np_error_t retract(data_id_t data_id);
 
+		bool assigned(data_id_t data_id);
+
 		cluster_id_t getCluster(data_id_t data_id);
 
 		clusters_t & getClusters();
@@ -128,6 +130,8 @@ class membertrix {
 		 * @return                     Number of data points (should be the same as getData(cluster_id).size()).
 		 */
 		size_t count(cluster_id_t cluster_id);
+
+		size_t count();
 		
 		bool empty(cluster_id_t cluster_id);
 

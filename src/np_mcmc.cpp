@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <sstream>
+#include <fstream>
 
 #include <Eigen/Dense>
 
@@ -16,7 +18,7 @@
 using namespace std;
 
 MCMC::MCMC(
-		std::default_random_engine & generator,
+		default_random_engine & generator,
 		InitClusters & init_clusters, 
 		UpdateClusters & update_clusters, 
 		UpdateClusterPopulation & update_cluster_population
@@ -30,7 +32,7 @@ MCMC::MCMC(
 }
 
 void MCMC::run(dataset_t & dataset) {
-	int T = 20;
+	int T = 10000;
 	int K = 30;
 
 	int N = dataset.size();
@@ -47,25 +49,11 @@ void MCMC::run(dataset_t & dataset) {
 
 	_init_clusters.init(_membertrix, K);
 
-
-	/*
-	// initialize clusters
-	fout << "Add clusters to membership matrix" << endl;
-	for (int k = 0; k < K; ++k) {
-		// sample sufficient statistics from nonparametrics
-		Suffies *suffies = _nonparametrics(_generator);
-
-		cluster_t *cluster = new cluster_t(*suffies);
-		int kTest = _membertrix.addCluster(cluster);
-
-		assert (kTest == k);
-	}*/
-
-	std::vector<double> weights(K);
+	vector<double> weights(K);
 	for (int k = 0; k < K; ++k) {
 		weights[k] = 1/(double)K;
 	}
-	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
+	discrete_distribution<int> distribution(weights.begin(), weights.end());
 
 	// randomly assign data to clusters
 	for (int i = 0; i < N; ++i) {
@@ -74,27 +62,30 @@ void MCMC::run(dataset_t & dataset) {
 		np_error_t err = _membertrix.assign(k, i);
 		if (err) fout << "Error: " << np_error_str[err] << endl;
 	}	
+	foutvar(7) << "We have in total " << _membertrix.count() << " assigned data items" << endl;
 
 	// clean up clusters that have been created, but didn't get data assigned
 	int removed = _membertrix.cleanup();
 	fout << "Removed " << removed << " empty clusters" << endl;
 	removed = _membertrix.cleanup();
 	fout << "Removed " << removed << " empty clusters" << endl;
+	foutvar(7) << "We have in total " << _membertrix.count() << " assigned data items" << endl;
 
 	// update clusters
 	for (int t = 0; t < T; ++t) {
 			
 		foutvar(5) << "Metropolis Hastings update " << t << endl;
-		
+			
 		// iterator over all observations (observations get shifted around, but should not be counted twice)
 		for (int i = 0; i < N; ++i) {
 			fout << "Retract observation " << i << " from membertrix" << endl;
-			
+	
 			// remove observation under consideration from cluster
 			_membertrix.retract(i);
-			
+		
 			// update cluster assignments, delete and create clusters
 			_update_cluster_population.update(_membertrix, i);
+		
 		}
 			
 		fout << "Update cluster " << endl;
@@ -103,11 +94,65 @@ void MCMC::run(dataset_t & dataset) {
 		_update_clusters.update(_membertrix, number_mh_steps);
 	}
 
+	_verbosity = 1;
+	// write everything out
+	int k = 0;
 	clusters_t &clusters = _membertrix.getClusters();
 	for (auto cluster_pair: clusters) {
 		auto const &key = cluster_pair.first;
-		foutvar(5) << "Cluster ";
-		_membertrix.print(key, std::cout);
-		std::cout << endl;
+		fout << "Cluster ";
+		_membertrix.print(key, cout);
+		cout << endl;
+
+		dataset_t *dataset = _membertrix.getData(key);
+		for (auto data: *dataset) {
+			fout << *data << endl;
+		}
+
+		stringstream sstream;
+		sstream.str("");
+		sstream << "output" << k << ".txt";
+		string fname = sstream.str();
+		fout << "Print to " << fname << endl;
+		ofstream ofile;
+		ofile.open(fname);
+		for (auto data: *dataset) {
+			ofile << (*data)[0] << " " << (*data)[1] << endl;
+		}
+
+		ofile.close();
+		fout << "Done printing to " << fname << endl;
+
+		k++;
 	}
+
+	stringstream sstream;
+	sstream.str("");
+	sstream << "output" << ".txt";
+	string fname = sstream.str();
+
+	ofstream ofile;
+	ofile.open(fname);
+
+
+	Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, " ", "; ", "", "", "[", "];");
+
+	k = 1;
+	for (auto cluster_pair: clusters) {
+		auto const &key = cluster_pair.first;
+		auto const &cluster = cluster_pair.second;
+		fout << "Cluster ";
+		_membertrix.print(key, cout);
+		cout << endl;
+		
+		Suffies_MultivariateNormal &suffies = (Suffies_MultivariateNormal&)cluster->getSuffies();
+		
+		ofile << "mu(:," << k << ") = [" << suffies.mu[0] << " " << suffies.mu[1] << "];" << endl;
+		ofile << "sigma(:,:," << k << ") = " << suffies.sigma.format(CommaInitFmt) << endl;
+		k++;
+	}
+
+	ofile.close();
+	
+	_verbosity = 4;
 }

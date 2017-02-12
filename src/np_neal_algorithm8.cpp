@@ -30,10 +30,13 @@ void NealAlgorithm8::update(
 	fout << "Update step " << ++step << " in algorithm 8" << endl;
 
 	// existing clusters
+	// if data item removed one of the clusters, this is still in there with a particular weight
 	auto clusters = cluster_matrix.getClusters();
 
 	// Create temporary data structure for K clusters
 	size_t K = clusters.size();
+	std::vector<int> cluster_ids(K);
+
 	fout << "Calculate likelihood for K=" << K << " existing clusters" << endl;
 
 	fout << "Calculate parameters for M new clusters" << endl;
@@ -53,20 +56,24 @@ void NealAlgorithm8::update(
 
 	// Get (weighted) likelihoods for each existing and new cluster given the above observation
 	std::vector<double> weighted_likelihood(K+M);
+
 	int k = 0;
 	for (auto cluster_pair: clusters) {
 		auto const &key = cluster_pair.first;
 		auto const &cluster = cluster_pair.second;
-		
+	
+		cluster_ids[k] = key;
+
 		fout << "Obtained suffies from cluster " << key << ": " << cluster->getSuffies() << endl;
 
 		_likelihood.init(cluster->getSuffies());
-		weighted_likelihood[++k] = _likelihood.probability(observation) * cluster_matrix.count(key);
+		weighted_likelihood[k] = _likelihood.probability(observation) * cluster_matrix.count(key);
 		/*
 		fout << "Cluster ";
 		cluster_matrix.print(key, std::cout);
 		cout << '\t' << _likelihood.probability(observation) << endl;
 		*/
+		k++;
 		
 	}
 	for (int m = 0; m < M; ++m) {
@@ -96,7 +103,7 @@ void NealAlgorithm8::update(
 
 	assert (index < cumsum_likelihood.size());
 	fout << "Pick value just below pick: " << index << endl;
-
+	
 	if (index >= K) {
 		// pick new cluster
 		fout << "New cluster: " << index-K << endl;
@@ -106,14 +113,23 @@ void NealAlgorithm8::update(
 		fout << "Assign data to cluster with id " << cluster_index << endl;
 		cluster_matrix.assign(cluster_index, data_id);
 	} else {
-		// pick existing cluster with given index
+		// pick existing cluster with given cluster_id
 		fout << "Existing cluster" << endl;
-		cluster_matrix.assign(index, data_id);
-	}
+		
+		cluster_id_t cluster_id = cluster_ids[index];
 
+		fout << "Assign data to cluster with id " << cluster_id << endl;
+		assert (cluster_matrix.count(cluster_id) != 0);
+		
+		cluster_matrix.assign(cluster_id, data_id);
+	}
+	
 	// deallocate new clusters that have not been used
 	fout << "Deallocate temporary clusters" << endl;
 	for (int m = 0; m < M; ++m) {
 		delete new_clusters[m];
 	}
+
+	// check
+	assert(cluster_matrix.assigned(data_id));
 }
