@@ -1,10 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
-# if blah blah
+plot=${1:? "$0 test plot"}
 
 cd ../build/bin
 
-mv test_multivariate_normal_distribution.data ~/tmp
+case $plot in 
+  test_multivariate_normal_distribution|test_dirichlet)
+    mv $plot.data ~/tmp
+    ./$plot
+    gnuplot ../../plot/$plot.plot
+  ;;
+esac
 
-./test_multivariate_normal_distribution
-gnuplot ../../plot/test_multivariate_normal_distribution.plot
