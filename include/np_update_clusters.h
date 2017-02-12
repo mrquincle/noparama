@@ -17,11 +17,11 @@
 class UpdateClusters {
 	private:
 		std::default_random_engine _generator;
-	
+
 		distribution_t &  _likelihood;
-		
+
 		distribution_t &  _nonparametrics;
-		
+
 		std::uniform_real_distribution<double> _distribution;
 
 		// verbosity
@@ -52,7 +52,7 @@ class UpdateClusters {
 				random_engine_t & generator,
 				distribution_t & likelihood,
 				distribution_t & nonparametrics
-			);
+				);
 
 		/*!
 		 * Update all cluster parameters. The number of clusters will not change.
@@ -67,6 +67,6 @@ class UpdateClusters {
 		void update(
 				membertrix & cluster_matrix,
 				int number_mh_steps
-			);
+				);
 };
 

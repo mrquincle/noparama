@@ -31,12 +31,10 @@ int main() {
 	fout << "Read dataset" << endl;
 	std::ifstream datafilehandle(datafilename);
 	double a, b;
-//	int cut = 50, i = 0;
 	while (datafilehandle >> a >> b) {
 		data_t *data = new data_t(2);
 		*data = { a, b };
 		dataset.push_back(data);
-//		if (++i == cut) break;
 	}
 
 	int I = 4;
@@ -51,7 +49,6 @@ int main() {
 	suffies_mvn.sigma << 1, 0, 0, 1;
 	fout << "Multivariate normal distribution" << endl;
 	multivariate_normal_distribution likelihood(suffies_mvn);
-//	likelihood.set(&generator);
 
 	// The hierarchical prior has an alpha of 1 and the base distribution is handed separately through the prior
 	fout << "Dirichlet distribution" << endl;
@@ -66,15 +63,16 @@ int main() {
 	suffies_niw.Lambda << 0.01, 0, 0, 0.01;
 
 	normal_inverse_wishart_distribution prior(suffies_niw);
-//	prior.set(&generator);
 
 	dirichlet_distribution hyper(suffies_dirichlet, prior);
-//	hyper.set(&generator);
+	
+	fout << "Set up InitClusters object" << endl;
+	InitClusters init_clusters(generator, hyper);
 
 	// To update cluster parameters we need prior (hyper parameters) and likelihood, the membership matrix is left 
 	// invariant
 	fout << "Set up UpdateClusters object" << endl;
-	UpdateClusters update_clusters(generator, (distribution_t&)likelihood, (distribution_t&)hyper);
+	UpdateClusters update_clusters(generator, likelihood, hyper);
 
 	// To update the cluster population we need	to sample new clusters using hyper parameters and adjust existing ones
 	// using prior and likelihood
@@ -83,7 +81,7 @@ int main() {
 
 	// create MCMC object
 	fout << "Set up MCMC" << endl;
-	MCMC & mcmc = *new MCMC(update_clusters, update_cluster_population, generator, hyper);
+	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population);
 
 	fout << "Run MCMC" << endl;
 	mcmc.run(dataset);

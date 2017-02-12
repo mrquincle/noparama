@@ -7,13 +7,20 @@
 
 #include <np_data.h>
 
+#include <np_init_clusters.h>
 #include <np_update_clusters.h>
 #include <np_update_cluster_population.h>
 
 class MCMC {
 	private:
+		//! Todo: set generator
+		std::default_random_engine & _generator;
+	
 		//! Membertrix object itself
 		membertrix _membertrix;
+		
+		//! Reference to InitCluster object
+		InitClusters & _init_clusters;
 
 		//! Reference to UpdateCluster object
 		UpdateClusters & _update_clusters;
@@ -21,21 +28,15 @@ class MCMC {
 		//! Reference to UpdateClusterPopulation object
 		UpdateClusterPopulation & _update_cluster_population;
 
-		//! Todo: set generator
-		std::default_random_engine & _generator;
-	
-		//! Reference to nonparametrics distribution_t object
-		distribution_t & _nonparametrics;
-		
 		// verbosity
 		char _verbosity;
 
 	public:
 		MCMC(
-				UpdateClusters & update_clusters, 
-				UpdateClusterPopulation & update_cluster_population,
 				std::default_random_engine & generator,
-				distribution_t & nonparametrics
+				InitClusters & init_clusters, 
+				UpdateClusters & update_clusters, 
+				UpdateClusterPopulation & update_cluster_population
 			);
 
 		void run(dataset_t & dataset);

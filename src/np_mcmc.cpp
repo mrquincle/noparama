@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 
 #include <np_mcmc.h>
+#include <np_init_clusters.h>
 #include <np_update_clusters.h>
 #include <np_update_cluster_population.h>
 
@@ -15,15 +16,15 @@
 using namespace std;
 
 MCMC::MCMC(
-		UpdateClusters & update_clusters, 
-		UpdateClusterPopulation & update_cluster_population,
 		std::default_random_engine & generator,
-		distribution_t & nonparametrics
+		InitClusters & init_clusters, 
+		UpdateClusters & update_clusters, 
+		UpdateClusterPopulation & update_cluster_population
 	):
-	_update_clusters(update_clusters), 
-	_update_cluster_population(update_cluster_population),
 	_generator(generator),
-	_nonparametrics(nonparametrics)
+	_init_clusters(init_clusters), 
+	_update_clusters(update_clusters), 
+	_update_cluster_population(update_cluster_population)
 {
 	_verbosity = 4;
 }
@@ -44,18 +45,21 @@ void MCMC::run(dataset_t & dataset) {
 		assert (i == j);
 	}
 
+	_init_clusters.init(_membertrix, K);
+
+
+	/*
 	// initialize clusters
 	fout << "Add clusters to membership matrix" << endl;
 	for (int k = 0; k < K; ++k) {
 		// sample sufficient statistics from nonparametrics
-		//Suffies & suffies = _nonparametrics.sample(_generator);
 		Suffies *suffies = _nonparametrics(_generator);
 
 		cluster_t *cluster = new cluster_t(*suffies);
 		int kTest = _membertrix.addCluster(cluster);
 
 		assert (kTest == k);
-	}
+	}*/
 
 	std::vector<double> weights(K);
 	for (int k = 0; k < K; ++k) {
