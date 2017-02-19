@@ -1,14 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 
 # All this is not fast enough to prevent cmake to create CMakeCache.txt and CMakeFiles/
-
+# We really do not want people by accident overwriting the Makefile.
+# So, we store the CMakeLists.txt file in a separate cmake/ directory.
 if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-    file( REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/CMakeCache.txt})
     message( FATAL_ERROR "Do not use source dir to build stuff. Use make which will call cmake properly.")
 endif()
-
-#set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-#set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 project(noparama)
 

@@ -1,12 +1,15 @@
 #!/bin/make -f
 
 all: build
+	@cp conf/CMakeLists.txt .
 	@cd build && cmake ..  && make
+	@rm ../CMakeLists.txt
 
+# Existence of build/ path 
 build: 
 	@mkdir -p build
 
-clean:
+clean: build
 	@cd build && make clean
 
 doc:
