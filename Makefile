@@ -2,7 +2,12 @@
 
 all: build
 	@cp conf/CMakeLists.txt .
-	@cd build && cmake ..  && make
+	@cd build && cmake .. && make
+	@rm ../CMakeLists.txt
+
+verbose: build
+	@cp conf/CMakeLists.txt .
+	@cd build && cmake .. && VERBOSE=1 make
 	@rm ../CMakeLists.txt
 
 # Existence of build/ path 

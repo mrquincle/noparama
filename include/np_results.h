@@ -1,7 +1,9 @@
 #include <string>
-#include <membertrix>
+#include <unordered_map>
 
-typedef std::vector<int> ground_truth_t;
+#include "membertrix.h"
+
+typedef std::unordered_map<int, data_id_t> ground_truth_t;
 
 class Results {
     private:
@@ -9,9 +11,15 @@ class Results {
 
         ground_truth_t & _ground_truth;
 
+        double _rand_index;
+
+        double _adjusted_rand_index;
+
         int _verbosity;
     public:
         Results(const membertrix &membertrix, ground_truth_t & ground_truth);
+
+        void calculateSimilarity();
 
         void write(const std::string & path, const std::string & basename);
 };

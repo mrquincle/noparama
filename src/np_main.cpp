@@ -7,7 +7,7 @@
 #include <np_data.h>
 #include <np_results.h>
 
-#include <membertrix>
+#include <membertrix.h>
 
 #include <statistics/multivariatenormal.h>
 #include <statistics/dirichlet.h>
@@ -51,21 +51,23 @@ int main(int argc, char *argv[]) {
 	// The data file should have "a b c" on lines, separated by spaces (without quotes, each value of the type double).
 	fout << "Read dataset" << endl;
 	std::ifstream datafilehandle(datafilename);
-	double a, b;
-	int c;
-	std::vector<int> ground_truth;
+	double a, b,c;
+	ground_truth_t ground_truth;
 	ground_truth.clear();
+	int n = 0;
 	while (datafilehandle >> a >> b >> c) {
 		data_t *data = new data_t(2);
 		*data = { a, b };
 		dataset.push_back(data);
-		ground_truth.push_back(c);
+		ground_truth[n] = (int)c;
+		n++;
 	}
 
-	int I = 4;
+	int I = 20;
 	fout << "Display first " << I << " items of the dataset" << endl;
 	for (int i = 0; i < I; ++i) {
-		fout << "Data: " << *dataset[i] << endl;
+		if (i == (int)ground_truth.size()) break;
+		fout << "Data: " << *dataset[i] << " with ground truth " << ground_truth[i] << endl;
 	}
 
 	// The likelihood function is a multivariate normal distribution (parameters need not be set)

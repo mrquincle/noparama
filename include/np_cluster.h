@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <np_suffies.h>
+#include "np_suffies.h"
 
 // Forward reference to cluster_t
 class cluster_t;

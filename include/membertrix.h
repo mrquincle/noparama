@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <np_data.h>
-#include <np_cluster.h>
+#include "np_data.h"
+#include "np_cluster.h"
 
 #include <map>
 #include <unordered_map>
@@ -10,8 +10,14 @@
 //! Hashmap for the cluster indices and cluster objects
 typedef std::unordered_map<cluster_id_t, cluster_t*> clusters_t;
 
+//! Relabel 
+typedef std::unordered_map<cluster_id_t, cluster_id_t> relabel_t;
+
 //! A dataset per cluster
 typedef std::unordered_map<cluster_id_t, dataset_t*> clusters_dataset_t;
+
+//! Assignments
+typedef std::unordered_map<data_id_t, cluster_id_t> assignments_t;
 
 enum np_error_t { error_none, error_already_assigned, error_assignment_remaining, error_assignment_absent };
 
@@ -99,19 +105,64 @@ class membertrix {
 		 */
 		data_t * getDatum(data_id_t data_id);
 
+		/*!
+		 * Assign a previously added data item (through addData) to a previously added cluster (through addCluster).
+		 *
+		 * @param[in] cluster_id       An index to a cluster object
+		 * @param[in] data_id          An index to a data point
+		 */
 		np_error_t assign(cluster_id_t cluster_id, data_id_t data_id);
 		
+		/*!
+		 * Retract a previously assigned data-cluster pair (through assign). If the cluster does not have any data
+		 * points left, also the object will be deallocated.
+		 *
+		 * @param[in] cluster_id       An index to a cluster object
+		 * @param[in] data_id          An index to a data point
+		 */
 		np_error_t retract(cluster_id_t cluster_id, data_id_t data_id);
 
+		/*!
+		 * Retract a previously assigned data-cluster pair (through assign) where the search for this particular 
+		 * cluster is left to getCluster(data_id). If the cluster does not have any data points left, also the object 
+		 * will be deallocated. This has the same effect as:
+		 * 
+		 *   retract(getCluster(data_id), data_id);
+		 *
+		 * @param[in] cluster_id       An index to a cluster object
+		 * @param[in] data_id          An index to a data point
+		 */
 		np_error_t retract(data_id_t data_id);
 
-		bool assigned(data_id_t data_id);
+		/*!
+		 * If the data item is assigned to any cluster this function will return true. In all other cases it returns
+		 * false.
+		 *
+		 * @param[in] data_id          An index to a data point
+		 * @return                     Boolean representing any assignment
+		 */
+		bool assigned(data_id_t data_id) const;
 
-		cluster_id_t getCluster(data_id_t data_id);
+		cluster_id_t getCluster(data_id_t data_id) const;
 
+		/*!
+		 * Get all clusters to iterate over them. The cluster set is const to protect the user from accidentally 
+		 * removing clusters in a for-loop in a way that destroys the user iterator.
+		 * 
+		 * This function can be used to adjust the parameters of the cluster_t objects. The function only reads
+		 * cluster information and does not change the membertrix instance, hence it is const.
+		 *
+		 * @return                     Set of clusters
+		 */
 		const clusters_t & getClusters() const;
-		
-		const clusters_t & getClusters();
+
+		/*!
+		 * Aggressive restructuring of all data structures. This will relabel all cluster_id's to consecutive numbers.
+		 * The assignments are still valid but with different cluster_id's. 
+		 *
+		 * @return                     A relabelled set of clusters.
+		 */
+//		relabel_t relabel();
 
 		void print(cluster_id_t cluster_id, std::ostream &os) const;
 		
@@ -139,5 +190,7 @@ class membertrix {
 		bool empty(cluster_id_t cluster_id);
 
 		int cleanup();
+
+		membertrix &operator=( const membertrix &other);
 };
 

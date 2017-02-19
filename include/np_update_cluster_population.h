@@ -1,10 +1,9 @@
 #pragma once
 
 #include <random>
-
-#include <membertrix>
-
 #include <iostream>
+
+#include <membertrix.h>
 
 /**
  * This class UpdateClusterPopulation deletes, adds, and adjusts clusters. This in contrast with UpdateCluster which 

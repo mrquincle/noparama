@@ -3,9 +3,7 @@
 #include <random>
 
 #include <statistics/distribution.h>
-
-#include <membertrix>
-
+#include <membertrix.h>
 #include <np_update_cluster_population.h>
 
 struct statistics_t {

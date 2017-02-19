@@ -5,9 +5,7 @@
 #include <Eigen/Dense>
 
 #include <statistics/distribution.h>
-
-#include <membertrix>
-
+#include <membertrix.h>
 #include <np_cluster.h>
 
 /**

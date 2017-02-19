@@ -3,7 +3,7 @@
 #include <vector>
 #include <random>
 
-#include <membertrix>
+#include <membertrix.h>
 
 #include <np_data.h>
 

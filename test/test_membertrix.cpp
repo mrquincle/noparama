@@ -3,7 +3,7 @@
 #include <random>
 
 #include <np_suffies.h>
-#include <membertrix>
+#include <membertrix.h>
 #include <pretty_print.hpp>
 
 using namespace std;

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 # All this is not fast enough to prevent cmake to create CMakeCache.txt and CMakeFiles/
 # We really do not want people by accident overwriting the Makefile.
@@ -36,7 +36,7 @@ include_directories ( "${Eigen3_INCLUDE_DIRS}" )
 #find_package( Boost REQUIRED COMPONENTS random )
 #include_directories( ${Boost_INCLUDE_DIRS} )
 
-set(CMAKE_CXX_FLAGS "-O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
@@ -50,6 +50,8 @@ set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mc
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_executable(noparama ${SOURCE_FILES})
+
+target_link_libraries( noparama -lstdc++fs )
 
 #target_link_libraries( noparama ${Boost_RANDOM_LIBRARY} )
 

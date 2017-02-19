@@ -1,17 +1,25 @@
-#include <membertrix.h>
-#include <assert.h>
-
-#include <pretty_print.hpp>
 #include <iostream>
 #include <iomanip>
 
+#include <assert.h>
+
+#include <pretty_print.hpp>
+#include <membertrix.h>
+
 using namespace std;
 
-#define SEPARATE_STRUCTURE
+/**
+ * A separate data structure can be used for fast access to the observations that belong to a particular cluster. If
+ * SEPARATE_STRUCTURE is set to 0, the membership matrix has to be searched and a vector is populated in 
+ * getData(structure_id_t).
+ */
+#define SEPARATE_STRUCTURE             1
 
-#define ADDITIONAL_CHECKS
-
-//#define NEVER_DELETING_CLUSTERS
+/**
+ * Additional checks that slow done the running time. If the user is comfortable enough with the correct implementation
+ * of this class, ADDITIONAL_CHECKS should be set to 0.
+ */
+#define ADDITIONAL_CHECKS              1
 
 membertrix::membertrix() {
 	_verbosity = 4;
@@ -21,11 +29,7 @@ cluster_id_t membertrix::addCluster(cluster_t *cluster) {
 	// use current number of columns as cluster index
 	int cluster_index = _membership_matrix.cols();
 
-#ifdef NEVER_DELETING_CLUSTERS
-	assert(cluster_index == (int)_cluster_objects.size());
-#endif
-
-#ifdef ADDITIONAL_CHECKS
+#if ADDITIONAL_CHECKS==1
 	for (auto cluster_pair: _cluster_objects) {
 		auto const &prev = cluster_pair.second;
 		fout << "Added cluster " << cluster_index << ": " << cluster->getSuffies() << endl;
@@ -86,7 +90,7 @@ np_error_t membertrix::assign(cluster_id_t cluster_id, data_id_t data_id) {
 	// write value in matrix
 	_membership_matrix(data_id, cluster_id) = true;
 	
-#ifdef SEPARATE_STRUCTURE
+#if SEPARATE_STRUCTURE==1
 	assert (exists(cluster_id));
 	// add data to cluster to prepare for quick access through getData(cluster)
 	dataset_t * cl = _clusters_dataset[cluster_id];
@@ -96,7 +100,7 @@ np_error_t membertrix::assign(cluster_id_t cluster_id, data_id_t data_id) {
 	return error_none;
 }
 
-bool membertrix::assigned(data_id_t data_id) {
+bool membertrix::assigned(data_id_t data_id) const {
 	return (_membership_matrix.row(data_id).any());
 }
 
@@ -116,7 +120,7 @@ np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id) {
 
 //	fout << *_clusters_dataset[cluster_id] << endl;
 
-#ifdef SEPARATE_STRUCTURE
+#if SEPARATE_STRUCTURE==1
 	// remove data from the dataset that belongs to cluster_id for the purpose to have an up-to-date getData(cluster)
 	dataset_t * cl = _clusters_dataset[cluster_id];
 	for (auto data: *cl) {
@@ -148,7 +152,7 @@ np_error_t membertrix::retract(data_id_t data_id) {
 	return retract(cluster_id, data_id);
 }
 
-cluster_id_t membertrix::getCluster(data_id_t data_id) {
+cluster_id_t membertrix::getCluster(data_id_t data_id) const {
 	// maxCoeff could be used, but would iterate till maximum is found, we would need find(...,'first');
 	// we do not first create a col(), assuming directly accessing matrix(i,j) is faster
 	for (int j = 0; j < _membership_matrix.cols(); ++j) {
@@ -168,14 +172,22 @@ const clusters_t & membertrix::getClusters() const {
 	return _cluster_objects;
 }
 
-const clusters_t & membertrix::getClusters() {
-	fout << "Get clusters: " << _cluster_objects.size() << std::endl;
+/*
+relabel_t membertrix::relabel() {
+	relabel_t relabels(_cluster_objects.size());
+
+	int k = 0;
 	for (auto cluster_pair: _cluster_objects) {
-		auto const &key = cluster_pair.first;
-		fout << "Cluster: " << key << std::endl;
+		auto key = cluster_pair.first;
+		relabels[k] = key;
+		k++;
 	}
-	return _cluster_objects;
+		
+	// update cluster_objects
+	assert (_cluster_objects.size() == k);
+	return relabels;
 }
+*/
 
 void membertrix::print(cluster_id_t cluster_id, ostream &os) const {
 	const cluster_t *cluster = _cluster_objects.at(cluster_id);
@@ -194,7 +206,7 @@ std::ostream& operator<<(std::ostream& os, const membertrix & m) {
 }
 
 dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
-#ifdef SEPARATE_STRUCTURE
+#if SEPARATE_STRUCTURE==1
 	return _clusters_dataset.at(cluster_id);
 #else
 	// no separate structure, so we have to populate it from scratch
@@ -231,7 +243,6 @@ size_t membertrix::count() const {
 int membertrix::cleanup() {
 	int clusters_removed = 0;
 	clusters_t &clusters = _cluster_objects;
-	//clusters_t &clusters = getClusters();
 	for (auto cluster_pair: clusters) {
 		auto const &key = cluster_pair.first;
 		fout << "list cluster: " << key << endl;
@@ -250,4 +261,31 @@ int membertrix::cleanup() {
 		}
 	}
 	return clusters_removed;
+}
+		
+membertrix &membertrix::operator=( const membertrix &other) {
+	foutvar(7) << "Copying the membership matrix" << endl;
+	
+	foutvar(7) << "Copying the data objects" << endl;
+	for (auto data_ptr: other._data_objects) {
+		data_t *data = data_ptr;
+		addData(*data);
+	}
+	
+	foutvar(7) << "Copying the cluster objects" << endl;
+	for (auto cluster_pair: other._cluster_objects) {
+		auto cluster_id = cluster_pair.first;
+		auto cluster = cluster_pair.second;
+
+		cluster_id_t new_cluster_id = addCluster(cluster);
+	
+		auto cluster_data = other._membership_matrix.col(cluster_id);
+		for (int i = 0; i < cluster_data.size(); ++i) {
+			if (cluster_data(i)) {
+				assign(new_cluster_id, i);
+			}
+		}
+	}
+
+	return *this;
 }
