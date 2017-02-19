@@ -8,6 +8,10 @@
 
 #include <np_update_cluster_population.h>
 
+struct statistics_t {
+	int new_clusters_events;
+};
+
 /**
  * This class NealAlgorithm8 updates the cluster population as ...
  *
@@ -26,6 +30,9 @@ class NealAlgorithm8: public UpdateClusterPopulation {
 		// verbosity
 		char _verbosity;
 
+		// statistics
+		statistics_t _statistics;
+		
 	public:
 		/*!
 		 * Construct update method for cluster population.
@@ -49,4 +56,6 @@ class NealAlgorithm8: public UpdateClusterPopulation {
 			membertrix & cluster_matrix,
 			data_id_t data_id
 		);
+
+		void printStatistics();
 };

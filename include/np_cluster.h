@@ -30,7 +30,7 @@ class cluster_t {
 		~cluster_t() {};
 
 		//! Get sufficient statistics
-		Suffies & getSuffies() {
+		Suffies & getSuffies() const {
 			return _suffies;
 		}	
 		

@@ -159,22 +159,26 @@ cluster_id_t membertrix::getCluster(data_id_t data_id) {
 	return -1;
 }
 
-clusters_t & membertrix::getClusters() {
+const clusters_t & membertrix::getClusters() const {
 	fout << "Get clusters: " << _cluster_objects.size() << std::endl;
 	for (auto cluster_pair: _cluster_objects) {
 		auto const &key = cluster_pair.first;
 		fout << "Cluster: " << key << std::endl;
-		/*
-		fout << "Cluster: ";
-		print(key, std::cout);
-		std::cout << std::endl;
-		*/
 	}
 	return _cluster_objects;
 }
 
-void membertrix::print(cluster_id_t cluster_id, ostream &os) {
-	cluster_t *cluster = _cluster_objects[cluster_id];
+const clusters_t & membertrix::getClusters() {
+	fout << "Get clusters: " << _cluster_objects.size() << std::endl;
+	for (auto cluster_pair: _cluster_objects) {
+		auto const &key = cluster_pair.first;
+		fout << "Cluster: " << key << std::endl;
+	}
+	return _cluster_objects;
+}
+
+void membertrix::print(cluster_id_t cluster_id, ostream &os) const {
+	const cluster_t *cluster = _cluster_objects.at(cluster_id);
 	os << setw(2) << cluster_id << \
 		"[#" << count(cluster_id) << "]: " << \
 		cluster->getSuffies();
@@ -189,9 +193,9 @@ std::ostream& operator<<(std::ostream& os, const membertrix & m) {
 	return os;
 }
 
-dataset_t* membertrix::getData(cluster_id_t cluster_id) {
+dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
 #ifdef SEPARATE_STRUCTURE
-	return _clusters_dataset[cluster_id];
+	return _clusters_dataset.at(cluster_id);
 #else
 	// no separate structure, so we have to populate it from scratch
 	auto cluster_data = _membership_matrix.col(cluster_id);
@@ -210,13 +214,13 @@ bool membertrix::empty(cluster_id_t cluster_id) {
 	return _clusters_dataset[cluster_id]->size() == 0;
 }
 
-size_t membertrix::count(cluster_id_t cluster_id) {
-	return _clusters_dataset[cluster_id]->size();
+size_t membertrix::count(cluster_id_t cluster_id) const {
+	return _clusters_dataset.at(cluster_id)->size();
 }
 
-size_t membertrix::count() {
+size_t membertrix::count() const {
 	size_t result = 0;
-	clusters_t &clusters = getClusters();
+	const clusters_t &clusters = getClusters();
 	for (auto cluster_pair: clusters) {
 		auto const &key = cluster_pair.first;
 		result += count(key);
@@ -226,7 +230,8 @@ size_t membertrix::count() {
 
 int membertrix::cleanup() {
 	int clusters_removed = 0;
-	clusters_t &clusters = getClusters();
+	clusters_t &clusters = _cluster_objects;
+	//clusters_t &clusters = getClusters();
 	for (auto cluster_pair: clusters) {
 		auto const &key = cluster_pair.first;
 		fout << "list cluster: " << key << endl;

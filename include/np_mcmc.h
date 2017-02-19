@@ -39,5 +39,13 @@ class MCMC {
 				UpdateClusterPopulation & update_cluster_population
 			);
 
-		void run(dataset_t & dataset);
+		/**
+		 * Run the MCMC method (can be one or multiple chains) for T steps.
+		 */
+		void run(dataset_t & dataset, int T);
+
+		/**
+		 * The results of the MCMC algorithm is a membership matrix.
+		 */
+		const membertrix & getMembershipMatrix() const;
 };

@@ -31,8 +31,7 @@ MCMC::MCMC(
 	_verbosity = 4;
 }
 
-void MCMC::run(dataset_t & dataset) {
-	int T = 10000;
+void MCMC::run(dataset_t & dataset, int T) {
 	int K = 30;
 
 	int N = dataset.size();
@@ -73,9 +72,9 @@ void MCMC::run(dataset_t & dataset) {
 
 	// update clusters
 	for (int t = 0; t < T; ++t) {
-			
-		foutvar(5) << "Metropolis Hastings update " << t << endl;
-			
+		
+		if (t % 100 == 0) { foutvar(5) << "Metropolis Hastings update " << t << endl; }
+
 		// iterator over all observations (observations get shifted around, but should not be counted twice)
 		for (int i = 0; i < N; ++i) {
 			fout << "Retract observation " << i << " from membertrix" << endl;
@@ -94,65 +93,8 @@ void MCMC::run(dataset_t & dataset) {
 		_update_clusters.update(_membertrix, number_mh_steps);
 	}
 
-	_verbosity = 1;
-	// write everything out
-	int k = 0;
-	clusters_t &clusters = _membertrix.getClusters();
-	for (auto cluster_pair: clusters) {
-		auto const &key = cluster_pair.first;
-		fout << "Cluster ";
-		_membertrix.print(key, cout);
-		cout << endl;
+}
 
-		dataset_t *dataset = _membertrix.getData(key);
-		for (auto data: *dataset) {
-			fout << *data << endl;
-		}
-
-		stringstream sstream;
-		sstream.str("");
-		sstream << "output" << k << ".txt";
-		string fname = sstream.str();
-		fout << "Print to " << fname << endl;
-		ofstream ofile;
-		ofile.open(fname);
-		for (auto data: *dataset) {
-			ofile << (*data)[0] << " " << (*data)[1] << endl;
-		}
-
-		ofile.close();
-		fout << "Done printing to " << fname << endl;
-
-		k++;
-	}
-
-	stringstream sstream;
-	sstream.str("");
-	sstream << "output" << ".txt";
-	string fname = sstream.str();
-
-	ofstream ofile;
-	ofile.open(fname);
-
-
-	Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, " ", "; ", "", "", "[", "];");
-
-	k = 1;
-	for (auto cluster_pair: clusters) {
-		auto const &key = cluster_pair.first;
-		auto const &cluster = cluster_pair.second;
-		fout << "Cluster ";
-		_membertrix.print(key, cout);
-		cout << endl;
-		
-		Suffies_MultivariateNormal &suffies = (Suffies_MultivariateNormal&)cluster->getSuffies();
-		
-		ofile << "mu(:," << k << ") = [" << suffies.mu[0] << " " << suffies.mu[1] << "];" << endl;
-		ofile << "sigma(:,:," << k << ") = " << suffies.sigma.format(CommaInitFmt) << endl;
-		k++;
-	}
-
-	ofile.close();
-	
-	_verbosity = 4;
+const membertrix & MCMC::getMembershipMatrix() const {
+	return _membertrix;
 }

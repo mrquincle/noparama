@@ -20,6 +20,8 @@ NealAlgorithm8::NealAlgorithm8(
 	_alpha = ((dirichlet_distribution&)nonparametrics).getSuffies().alpha;
 
 	_verbosity = 4;
+
+	_statistics.new_clusters_events = 0;
 }
 
 void NealAlgorithm8::update(
@@ -78,7 +80,7 @@ void NealAlgorithm8::update(
 	}
 	for (int m = 0; m < M; ++m) {
 		_likelihood.init(new_clusters[m]->getSuffies());
-		weighted_likelihood[K+m] = _likelihood.probability(observation) * _alpha / M;
+		weighted_likelihood[K+m] = _likelihood.probability(observation) * _alpha / (double)M;
 		fout << "New cluster " << m << 
 			"[~#" << _alpha/M << "]: " << \
 			_likelihood.probability(observation) << \
@@ -112,6 +114,7 @@ void NealAlgorithm8::update(
 		cluster_id_t cluster_index = cluster_matrix.addCluster(new_cluster);
 		fout << "Assign data to cluster with id " << cluster_index << endl;
 		cluster_matrix.assign(cluster_index, data_id);
+		_statistics.new_clusters_events++;
 	} else {
 		// pick existing cluster with given cluster_id
 		fout << "Existing cluster" << endl;
@@ -133,3 +136,11 @@ void NealAlgorithm8::update(
 	// check
 	assert(cluster_matrix.assigned(data_id));
 }
+
+void NealAlgorithm8::printStatistics() {
+	int verbosity = _verbosity;
+	_verbosity = 0;
+	fout << "Statistics:" << endl;
+	fout << " # of new cluster events: " << _statistics.new_clusters_events << endl;
+	_verbosity = verbosity;
+} 

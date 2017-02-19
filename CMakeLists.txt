@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
-project(noparama)
+
+# All this is not fast enough to prevent cmake to create CMakeCache.txt and CMakeFiles/
 
 if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    file( REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/CMakeCache.txt})
     message( FATAL_ERROR "Do not use source dir to build stuff. Use make which will call cmake properly.")
 endif()
+
+#set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+#set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+
+project(noparama)
 
 set (PROJECT_VERSION "1.0")
 set (PACKAGE "${PROJECT_NAME}")
@@ -13,6 +20,10 @@ set (PACKAGE_NAME "${PACKAGE}")
 set (PACKAGE_TARNAME "${PACKAGE}")
 set (PACKAGE_VERSION "${VERSION}")
 set (PACKAGE_STRING "${PACKAGE} ${VERSION}")
+
+# Flags can be picked up by e.g. YouCompleteMe for code-completion. Generates a .json file.
+# See: https://jonasdevlieghere.com/a-better-youcompleteme-config/
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1) 
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules
     CACHE STRING "CMake module path")
@@ -34,7 +45,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 include_directories ( "include" )
 
-set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_mcmc.cpp src/membertrix.cpp src/np_init_clusters.cpp src/np_update_clusters.cpp src/np_neal_algorithm8.cpp)
+set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mcmc.cpp \\
+    src/membertrix.cpp src/np_init_clusters.cpp \\
+    src/np_update_clusters.cpp src/np_neal_algorithm8.cpp)
 
 # CMAKE_BINARY_DIR is the top of the build-directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

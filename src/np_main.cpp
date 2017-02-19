@@ -1,8 +1,13 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <iomanip>
 
 #include <np_mcmc.h>
 #include <np_data.h>
+#include <np_results.h>
+
+#include <membertrix>
 
 #include <statistics/multivariatenormal.h>
 #include <statistics/dirichlet.h>
@@ -19,6 +24,10 @@ int main(int argc, char *argv[]) {
 	
 	fout << "Welcome to noparama" << endl;
 
+	// Configuration parameters 
+	int T = 1000;
+	double alpha = 100;
+	
 	default_random_engine generator(random_device{}()); 
 
 	// Load data
@@ -27,19 +36,30 @@ int main(int argc, char *argv[]) {
 		datafilename = string(argv[1]);
 	}
 	else {
-		datafilename = "/home/anne/workspace/thesis/dpm/inference/data/many-modal/pattern100_sigma0_1.plain.txt";
+		fout << "The datafile is required as argument." << endl;
+		fout << "For example:" << endl;
+		datafilename = "$HOME/workspace/thesis/dpm/inference/data/many-modal/pattern100_sigma0_1.plain.txt";
+		fout << argv[0] << ' ' << datafilename << endl;
+		fout << "Or:" << endl;
+		datafilename = "datasets/twogaussians.data";
+		fout << argv[0] << ' ' << datafilename << endl;
+		exit(1);
 	}
 	fout << "Load file: " << datafilename << endl;
 
 	dataset_t dataset;
-	// The data file should have "a b" on lines, separated by spaces (without quotes, each value of the type double).
+	// The data file should have "a b c" on lines, separated by spaces (without quotes, each value of the type double).
 	fout << "Read dataset" << endl;
 	std::ifstream datafilehandle(datafilename);
 	double a, b;
-	while (datafilehandle >> a >> b) {
+	int c;
+	std::vector<int> ground_truth;
+	ground_truth.clear();
+	while (datafilehandle >> a >> b >> c) {
 		data_t *data = new data_t(2);
 		*data = { a, b };
 		dataset.push_back(data);
+		ground_truth.push_back(c);
 	}
 
 	int I = 4;
@@ -59,7 +79,7 @@ int main(int argc, char *argv[]) {
 	// The hierarchical prior has an alpha of 1 and the base distribution is handed separately through the prior
 	fout << "Dirichlet distribution" << endl;
 	Suffies_Dirichlet suffies_dirichlet;
-	suffies_dirichlet.alpha = 1;
+	suffies_dirichlet.alpha = alpha;
 
 	fout << "Normal Inverse Wishart distribution" << endl;
 	Suffies_NormalInvWishart suffies_niw(2);
@@ -89,8 +109,25 @@ int main(int argc, char *argv[]) {
 	fout << "Set up MCMC" << endl;
 	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population);
 
-	fout << "Run MCMC" << endl;
-	mcmc.run(dataset);
+	fout << "Run MCMC for " << T << " steps" << endl;
+	mcmc.run(dataset, T);
+
+	update_cluster_population.printStatistics();
+
+	const membertrix trix = mcmc.getMembershipMatrix();
+
+	// analyse and write out results
+	std::chrono::time_point<std::chrono::system_clock> clock;
+	clock = std::chrono::system_clock::now();
+	std::time_t time = std::chrono::system_clock::to_time_t(clock);
+	std::tm tm = *std::localtime(&time);
+	std::stringstream tss; 
+	tss << "output/" << std::put_time(&tm, "%Y%m%d_%H:%M");
+	std::string dirname = tss.str(); 
+	std::string basename = "results";
+
+	Results results(trix, ground_truth);
+	results.write(dirname, basename);
 
 }
 

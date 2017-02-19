@@ -10,7 +10,4 @@ Y1=mvnrnd(mu, sigma, N);
 
 Y=[Y0;Y1];
 
-save('-ascii', 'output.data', 'Y')
-
-
-
+save('-ascii', '../datasets/twogaussians.data', 'Y')

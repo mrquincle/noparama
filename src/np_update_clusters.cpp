@@ -40,10 +40,10 @@ void UpdateClusters::update(
 	// This update procedure exists out of a number of MH steps
 	for (int t = 0; t < number_mh_steps; ++t) {
 
-		fout << "step " << t << endl;
+		fout << "Update step " << t << endl;
 
 		// here getClusters got corrupted...
-		auto & clusters = cluster_matrix.getClusters();
+		const clusters_t &clusters = cluster_matrix.getClusters();
 		for (auto cluster_pair: clusters) {
 			auto const &key = cluster_pair.first;
 			
