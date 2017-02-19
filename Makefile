@@ -13,7 +13,9 @@ clean: build
 	@cd build && make clean
 
 doc:
+	@cp conf/Doxyfile .
 	@doxygen Doxyfile
+	@rm Doxyfile
 
 .ONESHELL:
 push: doc
