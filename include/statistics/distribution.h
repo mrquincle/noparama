@@ -8,7 +8,6 @@
 #include "np_suffies.h"
 #include "np_data.h"
 
-
 typedef std::default_random_engine random_engine_t;
 
 #define TEST_IF_ALL_VIRTUALS_ARE_IMPLEMENTED     0
@@ -23,7 +22,7 @@ class distribution_t {
 		distribution_type_t _distribution_type;
 			
 	public:
-		//! Constructor in case sufficient statistics are not used
+		//! Constructor in case the sufficient statistics are not used
 		distribution_t() {};
 
 #if TEST_IF_ALL_VIRTUALS_ARE_IMPLEMENTED==1

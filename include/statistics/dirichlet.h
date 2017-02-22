@@ -30,6 +30,7 @@ class dirichlet_distribution: public distribution_t {
 		Suffies_Dirichlet & _suffies_dirichlet;
 
 		distribution_t & _base_distribution;
+
 	public:
 		dirichlet_distribution(Suffies_Dirichlet & suffies_dirichlet, distribution_t & base_distribution):
 			_suffies_dirichlet(suffies_dirichlet), _base_distribution(base_distribution)

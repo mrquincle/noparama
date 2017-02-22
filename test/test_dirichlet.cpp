@@ -19,7 +19,9 @@ using namespace Eigen;
  */
 int main() {
 	int _verbosity = 1;
-	
+
+	int D = 2;
+
 	// number of samples to generate
 	int N = 100;
 
@@ -30,26 +32,50 @@ int main() {
 	suffies_dirichlet.alpha = 1;
 
 	fout << "Normal Inverse Wishart distribution" << endl;
-	Suffies_NormalInvWishart suffies_niw(1);
-	suffies_niw.mu << 6;
-	suffies_niw.kappa = 1.0;
-	suffies_niw.nu = 4;
-	suffies_niw.Lambda << 0.01;
+	Suffies_NormalInvWishart *suffies_niw;
+	string ofilename = "";
+	switch (D) {
+		case 1: 
+		{
+			suffies_niw = new Suffies_NormalInvWishart(1);
+			suffies_niw->mu << 6;
+			suffies_niw->kappa = 1.0;
+			suffies_niw->nu = 4;
+			suffies_niw->Lambda << 0.01;
 
-	normal_inverse_wishart_distribution prior(suffies_niw);
+			ofilename = "test_dirichlet.data";
+			break;
+		}
+		case 2: 
+		{
+			suffies_niw = new Suffies_NormalInvWishart(2);
+			suffies_niw->mu << 6, 6;
+			fout << "Hyper mu is: " << suffies_niw->mu.transpose() << endl;
+			suffies_niw->kappa = 1.0/500;
+			suffies_niw->nu = 4;
+			suffies_niw->Lambda << 0.01, 0, 0, 0.01;
+
+			ofilename = "test_dirichlet_2d.data";
+			break;
+		}
+		break;
+	}
+	normal_inverse_wishart_distribution prior(*suffies_niw);
 
 	dirichlet_distribution hyper(suffies_dirichlet, prior);
 
 	bool success;
 
 	const string & path = "output/test";
-	success = fs::create_directories(path);
-	if (!success) {
-		fout << "Error creating directory" << endl;
+	if (!fs::exists(path)) {
+		success = fs::create_directories(path);
+		if (!success) {
+			fout << "Error creating directory" << endl;
+		}
 	}
 
 	ofstream ofile;
-	string ofilename = path + "/test_dirichlet.data";
+	ofilename = path + '/' + ofilename;
 	ofile.open(ofilename);
 
 	for (int i = 0; i < N; ++i) {
@@ -58,4 +84,7 @@ int main() {
 	}
 	ofile.close();
 
+	fout << "Written results to " << ofilename << endl;
+
+	delete suffies_niw;
 }

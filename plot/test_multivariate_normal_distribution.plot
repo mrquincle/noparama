@@ -1,2 +1,8 @@
-plot "test_multivariate_normal_distribution.data" using 1:2
+# Print to stdout
+set print "-"
+
+if (!exists("filename")) print "A filename required as argument"
+
+plot filename using 1:2
+
 pause -1

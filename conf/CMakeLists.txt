@@ -22,8 +22,7 @@ set (PACKAGE_STRING "${PACKAGE} ${VERSION}")
 # See: https://jonasdevlieghere.com/a-better-youcompleteme-config/
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1) 
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules
-    CACHE STRING "CMake module path")
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/conf/modules CACHE STRING "CMake module path")
 
 find_package(PkgConfig)
 pkg_search_module(Eigen3 REQUIRED eigen3)
@@ -59,4 +58,6 @@ enable_testing()
 
 add_subdirectory (test)
 
+# Let's also create a json file with information about header files for YouCompleteMe
+include(compile_header_commands)
 
