@@ -11,6 +11,11 @@
 #include <np_update_clusters.h>
 #include <np_update_cluster_population.h>
 
+/*!
+ * The MCMC class can be equiped with InitCluster, UpdateCluster, and UpdateClusterPopulation objects that each will
+ * be used in a Monte-Carlo Monte Chain algorithm. This algorithm is run for T steps and returns a membership matrix
+ * in the form of a membertrix object.
+ */
 class MCMC {
 	private:
 		//! Todo: set generator
@@ -28,10 +33,18 @@ class MCMC {
 		//! Reference to UpdateClusterPopulation object
 		UpdateClusterPopulation & _update_cluster_population;
 
-		// verbosity
+		//! Verbosity level for the class
 		char _verbosity;
 
 	public:
+		/*!
+		 * Constructor for MCMC.
+		 * 
+		 * @param[in] generator                  A random number generator
+		 * @param[in] init_clusters              An object that initializes clusters
+		 * @param[in] update_clusters            An object that updates the cluster parameters
+		 * @param[in] update_cluster_population  An object that generates and removes clusters
+		 */
 		MCMC(
 				std::default_random_engine & generator,
 				InitClusters & init_clusters, 
@@ -39,13 +52,18 @@ class MCMC {
 				UpdateClusterPopulation & update_cluster_population
 			);
 
-		/**
+		/*!
 		 * Run the MCMC method (can be one or multiple chains) for T steps.
+		 *
+		 * @param[in] dataset                    The dataset to run the MCMC on
+		 * @param[in] T                          The number of steps 
 		 */
 		void run(dataset_t & dataset, int T);
 
-		/**
+		/*!
 		 * The results of the MCMC algorithm is a membership matrix.
+		 *
+		 * @return                               The membership matrix (const)
 		 */
 		const membertrix & getMembershipMatrix() const;
 };

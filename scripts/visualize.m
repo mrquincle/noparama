@@ -4,6 +4,7 @@ cmap = colormap;
 
 %dirname = ['../output/20170215_13:05'];
 %dirname = ['../output/20170215_13:10'];
+dirname = ['../output/LATEST'];
 
 fname = [dirname '/results.txt']
 load(fname)

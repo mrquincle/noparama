@@ -27,7 +27,9 @@ class cluster_t {
 		cluster_t(Suffies & suffies): _suffies(suffies) {
 		}
 		
-		~cluster_t() {};
+		~cluster_t() {
+		//	delete &_suffies;
+		};
 
 		//! Get sufficient statistics
 		Suffies & getSuffies() const {

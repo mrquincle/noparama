@@ -2,9 +2,13 @@
 #include <fstream>
 #include <random>
 
+#include <experimental/filesystem>
+
 #include <np_suffies.h>
 #include <statistics/normalinvwishart.h>
 #include <statistics/dirichlet.h>
+
+namespace fs = std::experimental::filesystem;
 
 using namespace std;
 using namespace Eigen;
@@ -36,8 +40,17 @@ int main() {
 
 	dirichlet_distribution hyper(suffies_dirichlet, prior);
 
+	bool success;
+
+	const string & path = "output/test";
+	success = fs::create_directories(path);
+	if (!success) {
+		fout << "Error creating directory" << endl;
+	}
+
 	ofstream ofile;
-	ofile.open("test_dirichlet.data");
+	string ofilename = path + "/test_dirichlet.data";
+	ofile.open(ofilename);
 
 	for (int i = 0; i < N; ++i) {
 		Suffies_MultivariateNormal *suffies = (Suffies_MultivariateNormal*)hyper(generator);

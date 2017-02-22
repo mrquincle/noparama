@@ -3,16 +3,12 @@
 
 #include <experimental/filesystem>
 
-#include <Eigen/Dense>
-
 #include <np_results.h>
 #include <pretty_print.hpp>
 
 namespace fs = std::experimental::filesystem;
 
 using namespace std;
-
-typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matrix_t;
 
 Results::Results(const membertrix & membertrix, ground_truth_t & ground_truth): 
 	_membertrix(membertrix), _ground_truth(ground_truth) {
@@ -26,7 +22,7 @@ bool compare_clusters(clusters_t::value_type &item1, clusters_t::value_type &ite
 	return item1.first < item2.first;
 }
 
-void Results::calculateSimilarity() {
+matrix_t & Results::calculateContingencyMatrix() {
 	// make a copy (this also reshapes the matrices)
 	membertrix trix_copy;
 	trix_copy = _membertrix;
@@ -44,7 +40,7 @@ void Results::calculateSimilarity() {
 	int max_clusters1 = max_cluster1_id + 1;
 
 	fout << "Create matrix of size " << max_clusters0 << " by " << max_clusters1 << endl;
-	matrix_t frequencies = matrix_t::Zero(max_clusters0, max_clusters1);
+	matrix_t &frequencies = *new matrix_t(max_clusters0, max_clusters1);
 	
 	// Fill Matrix
 	
@@ -56,41 +52,77 @@ void Results::calculateSimilarity() {
 	} 
 	cout << frequencies << endl;
 
+	return frequencies;
+}
+
+void Results::calculateSimilarity() {
+	matrix_t &frequencies = calculateContingencyMatrix();
+
+	// total number of pairs of clusters
 	auto N = frequencies.sum();
+
+	if (N == 0) {
+		delete &frequencies;
+		return;
+	}
+
+	auto A = frequencies;
 	auto R = frequencies.rowwise().sum();
 	auto C = frequencies.colwise().sum();
 
-	auto a = ((frequencies.cwiseProduct(frequencies) - frequencies) / 2).sum();
+	auto a = ((A.cwiseProduct(A) - A) / 2).sum();
 	auto b = ((R.cwiseProduct(R) - R) / 2).sum();
 	auto c = ((C.cwiseProduct(C) - C) / 2).sum();
 
 	double S = ((N * N - N) / (double)2);
+	
+	if (S == 0) {
+		delete &frequencies;
+		return;
+	}
 
 	_rand_index = (2*a-b-c) / S + 1;
-	double bcdivS = b*c/S;
-	_adjusted_rand_index = (a-bcdivS) / ((b+c)/(double)2 - bcdivS);
+
+	// helper variables
+	double b_PROD_c_DIV_S = b*c/S;
+	double b_SUM_c_DIV_2 = (b+c)/(double)2;
+	if (b_PROD_c_DIV_S == b_SUM_c_DIV_2) {
+		delete &frequencies;
+		return;
+	}
+	
+	_adjusted_rand_index = (a - b_PROD_c_DIV_S) / (b_SUM_c_DIV_2 - b_PROD_c_DIV_S);
 
 	fout << "Rand Index: " << _rand_index << endl;
 	fout << "Adjusted Rand Index: " << _adjusted_rand_index << endl;
+
+	delete &frequencies;
 }
 
-void Results::write(const string & path, const string & basename) {
+void Results::write(const string &workspace, const string & path, const string & basename) {
 
 	calculateSimilarity();
 
 	bool success;
 
-	success = fs::create_directory(path);
+	std::string ws_path = std::string(workspace + path);
+
+	success = fs::create_directories(ws_path);
 	if (!success) {
 		fout << "Error creating directory" << endl;
 		// for now, just continue
 	}
 	std::string latest = "LATEST";
+	std::string ws_latest = std::string(workspace + latest);
 
-	if (fs::exists(latest)) {
-		fs::remove(latest);
+	if (fs::exists(ws_latest)) {
+		fout << "Remove symlink" << endl;
+		fs::remove(ws_latest);
+	} else {
+		fout << "No previous symlink " << ws_latest << " found" << endl;
 	}
-	fs::create_symlink(path, latest);
+
+	fs::create_symlink(path, ws_latest);
 
 	_verbosity = 1;
 	// write everything out
@@ -114,7 +146,7 @@ void Results::write(const string & path, const string & basename) {
 
 		stringstream sstream;
 		sstream.str("");
-		sstream << path << '/' << basename << k << ".txt";
+		sstream << ws_path << '/' << basename << k << ".txt";
 		string fname = sstream.str();
 		fout << "Print to " << fname << endl;
 		ofstream ofile;
@@ -137,7 +169,7 @@ void Results::write(const string & path, const string & basename) {
 
 	stringstream sstream;
 	sstream.str("");
-	sstream << path << '/' << basename << ".txt";
+	sstream << ws_path << '/' << basename << ".txt";
 	string fname = sstream.str();
 
 	ofstream ofile;

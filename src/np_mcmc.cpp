@@ -73,7 +73,10 @@ void MCMC::run(dataset_t & dataset, int T) {
 	// update clusters
 	for (int t = 0; t < T; ++t) {
 		
-		if (t % 100 == 0) { foutvar(5) << "Metropolis Hastings update " << t << endl; }
+		if (t % 100 == 0) { 
+			foutvar(5) << "Metropolis Hastings update " << t << endl; 
+			_membertrix.relabel();
+		}
 
 		// iterator over all observations (observations get shifted around, but should not be counted twice)
 		for (int i = 0; i < N; ++i) {

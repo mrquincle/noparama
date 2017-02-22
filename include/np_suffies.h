@@ -3,6 +3,10 @@
 #include <Eigen/Dense>
 #include <map>
 
+/*!
+ * The type of distribution ranges from a standard Normal to a Dirichlet distribution that can be used for 
+ * nonparametric Bayesian models.
+ */
 enum distribution_type_t { 
 	// normals
 	Normal, Unity_Normal,

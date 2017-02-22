@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
 	// Configuration parameters 
 	int T = 1000;
-	double alpha = 100;
+	double alpha = 1;
 	
 	default_random_engine generator(random_device{}()); 
 
@@ -123,13 +123,15 @@ int main(int argc, char *argv[]) {
 	clock = std::chrono::system_clock::now();
 	std::time_t time = std::chrono::system_clock::to_time_t(clock);
 	std::tm tm = *std::localtime(&time);
+
+	std::string workspace = "output/";
 	std::stringstream tss; 
-	tss << "output/" << std::put_time(&tm, "%Y%m%d_%H:%M");
+	tss << std::put_time(&tm, "%Y%m%d_%H:%M");
 	std::string dirname = tss.str(); 
 	std::string basename = "results";
 
 	Results results(trix, ground_truth);
-	results.write(dirname, basename);
+	results.write(workspace, dirname, basename);
 
 }
 

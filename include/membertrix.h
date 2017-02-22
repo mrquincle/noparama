@@ -72,8 +72,26 @@ class membertrix {
 		bool exists(cluster_id_t cluster_id);
 		
 	public:
-
+		/*!
+		 * The default constructor.
+		 */
 		membertrix();
+
+		/*!
+		 * The copy constructor. This is not a true copy constructor. If you copy a membership matrix we assume you
+		 * want to optimize the internal structures. This invalidates all cluster_id's. If an exact clone is required
+		 * you will need to add a clone() member function.
+		 *
+		 * This constructor calls addData and addCluster to have all internal datastructures consistent and reduce
+		 * the matrix to the minimum size. The alternative would be all kind of book-keeping swapping columns in the
+		 * matrix, moving datasets from own cluster to the next, etc.
+		 */
+		membertrix(const membertrix &other);
+
+		/*!
+		 * The destructor.
+		 */
+		~membertrix();
 
 		/*!
 		 * Add a cluster to the membership matrix. The cluster is not physically stored, only a reference is kept. If
@@ -159,10 +177,8 @@ class membertrix {
 		/*!
 		 * Aggressive restructuring of all data structures. This will relabel all cluster_id's to consecutive numbers.
 		 * The assignments are still valid but with different cluster_id's. 
-		 *
-		 * @return                     A relabelled set of clusters.
 		 */
-//		relabel_t relabel();
+		void relabel();
 
 		void print(cluster_id_t cluster_id, std::ostream &os) const;
 		
@@ -191,6 +207,26 @@ class membertrix {
 
 		int cleanup();
 
-		membertrix &operator=( const membertrix &other);
-};
+		/*!
+		 * The assignment operator is implemented by not passing by reference, but having the argument as a copy.
+		 * Subsequently, only a swap operation needs to be called.
+		 *
+		 * @param[in] membertrix       Another membertrix object
+		 * @return                     A copy of this membertrix object, optimized.
+		 */
+		membertrix &operator=(membertrix other);
 
+		/*!
+		 * Swap all member fields of the two objects. This is a very lightweight implementation only swapping the
+		 * five member fields on the level of references, nothing is copied.
+		 */
+		friend void swap(membertrix& first, membertrix& second) {
+			using std::swap;
+
+			swap(first._membership_matrix, second._membership_matrix);
+			swap(first._cluster_objects, second._cluster_objects);
+			swap(first._data_objects, second._data_objects);
+			swap(first._clusters_dataset, second._clusters_dataset);
+			swap(first._verbosity, second._verbosity);
+		}
+};

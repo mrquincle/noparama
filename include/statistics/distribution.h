@@ -1,16 +1,17 @@
 #pragma once
 
-#include <np_suffies.h>
-
-#include <np_data.h>
-
 #include <iostream>
 #include <random>
 #include <memory>
+#include <assert.h>
+
+#include "np_suffies.h"
+#include "np_data.h"
+
 
 typedef std::default_random_engine random_engine_t;
 
-//#define TEST_IF_ALL_VIRTUALS_ARE_IMPLEMENTED
+#define TEST_IF_ALL_VIRTUALS_ARE_IMPLEMENTED     0
 
 #define INIT_SHOULD_BE_IMPLEMENTED 1
 #define SAMPLE_OPERATOR_SHOULD_BE_IMPLEMENTED 1
@@ -25,7 +26,7 @@ class distribution_t {
 		//! Constructor in case sufficient statistics are not used
 		distribution_t() {};
 
-#ifdef TEST_IF_ALL_VIRTUALS_ARE_IMPLEMENTED
+#if TEST_IF_ALL_VIRTUALS_ARE_IMPLEMENTED==1
 		virtual void init(Suffies & suffies) = 0;
 
 		virtual Suffies* operator()(random_engine_t & generator) = 0;

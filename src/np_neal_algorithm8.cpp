@@ -46,7 +46,6 @@ void NealAlgorithm8::update(
 	int M = 3;
 	clusters_t new_clusters(M);
 	for (int m = 0; m < M; ++m) {
-		//Suffies & suffies = _nonparametrics.sample();
 		Suffies *suffies = _nonparametrics(_generator);
 		cluster_t *temp = new cluster_t(*suffies);
 		new_clusters[m] = temp;

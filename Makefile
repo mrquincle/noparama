@@ -1,16 +1,27 @@
 #!/bin/make -f
 
-all: build
+define cmake-prepare
 	@cp conf/CMakeLists.txt .
+	@cp conf/test/CMakeLists.txt test
+endef
+
+define cmake-cleanup
+	@rm CMakeLists.txt
+	@rm test/CMakeLists.txt
+endef
+
+all: build 
+	$(call cmake-prepare)
 	@cd build && cmake .. && make
-	@rm ../CMakeLists.txt
+	@cd ..
+	$(call cmake-cleanup)
 
 verbose: build
-	@cp conf/CMakeLists.txt .
+	$(call cmake-prepare)
 	@cd build && cmake .. && VERBOSE=1 make
-	@rm ../CMakeLists.txt
+	@cd ..
+	$(call cmake-cleanup)
 
-# Existence of build/ path 
 build: 
 	@mkdir -p build
 
@@ -22,6 +33,12 @@ doc:
 	@doxygen Doxyfile
 	@rm Doxyfile
 
+doc-offline:
+	xdg-open doc/html/index.html
+
+doc-online:
+	xdg-open https://mrquincle.github.com/noparama
+
 .ONESHELL:
 push: doc
 	git add .
@@ -32,13 +49,9 @@ push: doc
 	git commit
 	git push
 
-doc-online:
-	xdg-open https://mrquincle.github.com/noparama
-
-doc-offline:
-	xdg-open doc/html/index.html
-
 list:
 	 @$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
-.PHONY: all clean doc push doc-online list
+# The only non-PHONY target is build, which should run (with mkdir -p build) if it does not exist
+
+.PHONY: all clean doc doc-offline doc-online list push verbose

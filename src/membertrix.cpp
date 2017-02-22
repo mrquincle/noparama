@@ -25,6 +25,35 @@ membertrix::membertrix() {
 	_verbosity = 4;
 }
 
+membertrix::membertrix(const membertrix &other) {
+	_verbosity = other._verbosity ;
+	fout << "Copy constructor" << endl;
+	for (auto data_ptr: other._data_objects) {
+		data_t *data = data_ptr;
+		addData(*data);
+	}
+	
+	for (auto cluster_pair: other._cluster_objects) {
+		auto cluster_id = cluster_pair.first;
+		auto cluster = cluster_pair.second;
+
+		cluster_id_t new_cluster_id = addCluster(cluster);
+	
+		auto cluster_data = other._membership_matrix.col(cluster_id);
+		for (int i = 0; i < cluster_data.size(); ++i) {
+			if (cluster_data(i)) {
+				assign(new_cluster_id, i);
+			}
+		}
+	}
+}
+
+membertrix::~membertrix() {
+	_membership_matrix.resize(0,0);
+	_cluster_objects.clear();
+	_data_objects.clear();
+}
+
 cluster_id_t membertrix::addCluster(cluster_t *cluster) {
 	// use current number of columns as cluster index
 	int cluster_index = _membership_matrix.cols();
@@ -136,6 +165,7 @@ np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id) {
 	// if retract is using the iterator over getClusters, this will cause havoc
 	if (empty(cluster_id)) {
 		fout << "Delete cluster: " << cluster_id << " with " << count(cluster_id) << " items" << endl;
+		delete _cluster_objects.at(cluster_id);
 		_cluster_objects.erase(cluster_id);
 	}
 #endif
@@ -172,22 +202,20 @@ const clusters_t & membertrix::getClusters() const {
 	return _cluster_objects;
 }
 
-/*
-relabel_t membertrix::relabel() {
-	relabel_t relabels(_cluster_objects.size());
+void membertrix::relabel() {
+	*this = *this;
+	/*
+	foutvar(7) << "Copy to variable" << endl;
+	membertrix trix = *this;
+	
+	_data_objects.clear();
+	_cluster_objects.clear();
+	_clusters_dataset.clear();
+	_membership_matrix.resize(0,0);
 
-	int k = 0;
-	for (auto cluster_pair: _cluster_objects) {
-		auto key = cluster_pair.first;
-		relabels[k] = key;
-		k++;
-	}
-		
-	// update cluster_objects
-	assert (_cluster_objects.size() == k);
-	return relabels;
+	foutvar(7) << "Copy variable to this" << endl;
+	*this = trix; */
 }
-*/
 
 void membertrix::print(cluster_id_t cluster_id, ostream &os) const {
 	const cluster_t *cluster = _cluster_objects.at(cluster_id);
@@ -263,7 +291,11 @@ int membertrix::cleanup() {
 	return clusters_removed;
 }
 		
-membertrix &membertrix::operator=( const membertrix &other) {
+membertrix &membertrix::operator=(membertrix other) {
+	swap(*this, other);
+
+	return *this;
+/*
 	foutvar(7) << "Copying the membership matrix" << endl;
 	
 	foutvar(7) << "Copying the data objects" << endl;
@@ -287,5 +319,6 @@ membertrix &membertrix::operator=( const membertrix &other) {
 		}
 	}
 
-	return *this;
+	return *this; 
+*/
 }
