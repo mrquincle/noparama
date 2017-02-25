@@ -43,6 +43,7 @@ include_directories ( "include" )
 
 set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mcmc.cpp \\
     src/membertrix.cpp src/np_init_clusters.cpp \\
+    src/clustering_performance.cpp \\
     src/np_update_clusters.cpp src/np_neal_algorithm8.cpp)
 
 # CMAKE_BINARY_DIR is the top of the build-directory

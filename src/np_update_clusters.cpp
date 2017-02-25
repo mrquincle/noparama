@@ -2,6 +2,8 @@
 
 #include <pretty_print.hpp>
 
+#include <statistics/dirichlet.h>
+
 using namespace std;
 
 /**
@@ -22,7 +24,7 @@ UpdateClusters::UpdateClusters(
 
 Suffies * UpdateClusters::propose() {
 	// proposed parameters (can also be Brownian walk)
-	return  _nonparametrics(_generator);
+	return ((dirichlet_process&)_nonparametrics).sample_base(_generator);
 }
 
 /**

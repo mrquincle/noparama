@@ -25,8 +25,8 @@ int main(int argc, char *argv[]) {
 	fout << "Welcome to noparama" << endl;
 
 	// Configuration parameters 
-	int T = 1000;
-	double alpha = 1;
+	int T = 10000;
+	double alpha = 100;
 	
 	default_random_engine generator(random_device{}()); 
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 
 	normal_inverse_wishart_distribution prior(suffies_niw);
 
-	dirichlet_distribution hyper(suffies_dirichlet, prior);
+	dirichlet_process hyper(suffies_dirichlet, prior);
 	
 	fout << "Set up InitClusters object" << endl;
 	InitClusters init_clusters(generator, hyper);

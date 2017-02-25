@@ -1,16 +1,20 @@
-# Noparama
+Noparama
+========
 
 This software is about mathematics, in particular nonparametric Bayesian models.
 
-# Structure
+Structure
+---------
 
 The elements in this software package or often vectors and matrices, hence Eigen is used.
 
-## Density functions
+Density functions
+-----------------
 
 Density functions are represented by their sufficient statistics. A normal probability distribution is represented by mean and covariance matrix.
 
-## Data
+Data
+----
 
 The data is clustered in sets. In MCMC we often loop through all data items, first removing a data item from the cluster it is currently assigned to, then assigning it to an existing or new cluster.
 
@@ -23,6 +27,7 @@ A cluster can also refer to its data items through a pointer to the data item in
 To remove a data item from a cluster, we will have to iterate through all clusters, or also store the membership information per data item. To also store a reference to a cluster per data item is cumbersome and leads to double updates.
 
 Requirements:
+
 * update membership information in O(1) and in one atomic operation
 * iterate over data items in cluster X in O(D), with D number of data items that are a member of cluster X
 * iterate over all data points in O(N), with N number of data items 

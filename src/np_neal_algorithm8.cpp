@@ -17,7 +17,7 @@ NealAlgorithm8::NealAlgorithm8(
 			_likelihood(likelihood),
 			_nonparametrics(nonparametrics)
 {
-	_alpha = ((dirichlet_distribution&)nonparametrics).getSuffies().alpha;
+	_alpha = ((dirichlet_process&)nonparametrics).getSuffies().alpha;
 
 	_verbosity = 4;
 
@@ -46,7 +46,7 @@ void NealAlgorithm8::update(
 	int M = 3;
 	clusters_t new_clusters(M);
 	for (int m = 0; m < M; ++m) {
-		Suffies *suffies = _nonparametrics(_generator);
+		Suffies *suffies = ((dirichlet_process&)_nonparametrics).sample_base(_generator);
 		cluster_t *temp = new cluster_t(*suffies);
 		new_clusters[m] = temp;
 		fout << "Suffies generated: " << new_clusters[m]->getSuffies() << endl;

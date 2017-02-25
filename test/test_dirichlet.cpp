@@ -51,7 +51,7 @@ int main() {
 			suffies_niw = new Suffies_NormalInvWishart(2);
 			suffies_niw->mu << 6, 6;
 			fout << "Hyper mu is: " << suffies_niw->mu.transpose() << endl;
-			suffies_niw->kappa = 1.0/500;
+			suffies_niw->kappa = 0.001;
 			suffies_niw->nu = 4;
 			suffies_niw->Lambda << 0.01, 0, 0, 0.01;
 
@@ -62,7 +62,7 @@ int main() {
 	}
 	normal_inverse_wishart_distribution prior(*suffies_niw);
 
-	dirichlet_distribution hyper(suffies_dirichlet, prior);
+	dirichlet_process hyper(suffies_dirichlet, prior);
 
 	bool success;
 
@@ -78,9 +78,17 @@ int main() {
 	ofilename = path + '/' + ofilename;
 	ofile.open(ofilename);
 
+	std::vector<Suffies_MultivariateNormal *> history;
+	history.clear();
 	for (int i = 0; i < N; ++i) {
-		Suffies_MultivariateNormal *suffies = (Suffies_MultivariateNormal*)hyper(generator);
-		ofile << suffies->mu << endl;
+		Suffies_MultivariateNormal *suffies_mvn = hyper.sample(generator, history);
+		history.push_back(suffies_mvn);
+	
+		multivariate_normal_distribution likelihood(*suffies_mvn);
+		Suffies_Unity_MultivariateNormal *suffies = likelihood(generator);
+
+		//ofile << suffies->mu.transpose() << endl;
+		ofile << suffies->mu.transpose() << endl;
 	}
 	ofile.close();
 

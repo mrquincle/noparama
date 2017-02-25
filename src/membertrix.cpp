@@ -233,6 +233,10 @@ std::ostream& operator<<(std::ostream& os, const membertrix & m) {
 	return os;
 }
 
+dataset_t* membertrix::getData() {
+	return &_data_objects;
+}
+
 dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
 #if SEPARATE_STRUCTURE==1
 	return _clusters_dataset.at(cluster_id);
@@ -265,6 +269,7 @@ size_t membertrix::count() const {
 		auto const &key = cluster_pair.first;
 		result += count(key);
 	}
+	assert (_data_objects.size() == result);
 	return result;
 }
 
@@ -295,30 +300,4 @@ membertrix &membertrix::operator=(membertrix other) {
 	swap(*this, other);
 
 	return *this;
-/*
-	foutvar(7) << "Copying the membership matrix" << endl;
-	
-	foutvar(7) << "Copying the data objects" << endl;
-	for (auto data_ptr: other._data_objects) {
-		data_t *data = data_ptr;
-		addData(*data);
-	}
-	
-	foutvar(7) << "Copying the cluster objects" << endl;
-	for (auto cluster_pair: other._cluster_objects) {
-		auto cluster_id = cluster_pair.first;
-		auto cluster = cluster_pair.second;
-
-		cluster_id_t new_cluster_id = addCluster(cluster);
-	
-		auto cluster_data = other._membership_matrix.col(cluster_id);
-		for (int i = 0; i < cluster_data.size(); ++i) {
-			if (cluster_data(i)) {
-				assign(new_cluster_id, i);
-			}
-		}
-	}
-
-	return *this; 
-*/
 }

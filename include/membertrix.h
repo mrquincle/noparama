@@ -161,6 +161,11 @@ class membertrix {
 		 */
 		bool assigned(data_id_t data_id) const;
 
+		/*!
+		 * Get the cluster id given a particular data id.
+		 * @param[in] data_id          An index to a data point
+		 * @return                     An index to a cluster
+		 */
 		cluster_id_t getCluster(data_id_t data_id) const;
 
 		/*!
@@ -177,15 +182,33 @@ class membertrix {
 		/*!
 		 * Aggressive restructuring of all data structures. This will relabel all cluster_id's to consecutive numbers.
 		 * The assignments are still valid but with different cluster_id's. 
+		 *
+		 * This is called automatically on assignments!!
 		 */
 		void relabel();
 
+		/*!
+		 * Print cluster to stream.
+		 */
 		void print(cluster_id_t cluster_id, std::ostream &os) const;
 		
+		/*!
+		 * Print entire membership matrix to stream.
+		 */
 		void print(std::ostream& os) const;
 
+		/*!
+		 * Allow a membership to be printed to a standard stream using the << operator.
+		 */
 		friend std::ostream& operator<<(std::ostream& os, const membertrix& m);  
 
+		/*!
+		 * Return all data points.
+		 *
+		 * @return                     The entire dataset (do not need to be assigned)
+		 */
+		dataset_t* getData();
+		
 		/*!
 		 * Return all data points that are assigned to a particular cluster.
 		 *
@@ -201,10 +224,23 @@ class membertrix {
 		 */
 		size_t count(cluster_id_t cluster_id) const;
 
+		/*!
+		 * Return total number of data points. This should be the same as calling count(cluster_id_t) for each
+		 * cluster returned by getClusters().
+		 * @return                     The total number of data points
+		 */
 		size_t count() const;
-		
+	
+		/*!
+		 * Indicate if a cluster is empty or non-empty (one or more data items assigned to it).
+		 * @return                     True or false depending on zero or nonzero data items in the cluster
+		 */
 		bool empty(cluster_id_t cluster_id);
 
+		/*!
+		 * Clean up internal data structures after data items and clusters have been assigned to remove all clusters
+		 * that didn't get assigned.
+		 */
 		int cleanup();
 
 		/*!

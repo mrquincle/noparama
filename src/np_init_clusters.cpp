@@ -2,6 +2,8 @@
 
 #include <pretty_print.hpp>
 
+#include <statistics/dirichlet.h>
+
 using namespace std;
 
 InitClusters::InitClusters(
@@ -24,7 +26,7 @@ void InitClusters::init(
 	fout << "Add clusters to membership matrix" << endl;
 	for (int k = 0; k < K; ++k) {
 		// sample sufficient statistics from nonparametrics
-		Suffies *suffies = _nonparametrics(_generator);
+		Suffies *suffies = ((dirichlet_process&)_nonparametrics).sample_base(_generator);
 
 		cluster_t *cluster = new cluster_t(*suffies);
 		int kTest = cluster_matrix.addCluster(cluster);

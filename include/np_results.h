@@ -3,11 +3,13 @@
 
 #include <Eigen/Dense>
 
+#include "common.h"
 #include "membertrix.h"
+#include "clustering_performance.h"
 
-typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matrix_t;
+typedef int cluster_id_t;
 
-typedef std::unordered_map<int, data_id_t> ground_truth_t;
+typedef std::unordered_map<cluster_id_t, data_id_t> ground_truth_t;
 
 class Results {
     private:
@@ -15,17 +17,13 @@ class Results {
 
         ground_truth_t & _ground_truth;
 
-        double _rand_index;
-
-        double _adjusted_rand_index;
-
         int _verbosity;
+
+        clustering_performance _clustering_performance;
     public:
         Results(const membertrix &membertrix, ground_truth_t & ground_truth);
 
         matrix_t & calculateContingencyMatrix();
-
-        void calculateSimilarity();
 
         void write(const std::string & workspace, const std::string & path, const std::string & basename);
 };

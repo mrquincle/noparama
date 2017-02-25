@@ -14,19 +14,38 @@ Results::Results(const membertrix & membertrix, ground_truth_t & ground_truth):
 	_membertrix(membertrix), _ground_truth(ground_truth) {
 }
 
+/*
 bool compare_assignments(assignments_t::value_type &item1, assignments_t::value_type &item2) {
 	return item1.second < item2.second;
 }
 
 bool compare_clusters(clusters_t::value_type &item1, clusters_t::value_type &item2) {
 	return item1.first < item2.first;
-}
+}*/
 
 matrix_t & Results::calculateContingencyMatrix() {
 	// make a copy (this also reshapes the matrices)
 	membertrix trix_copy;
 	trix_copy = _membertrix;
 
+	std::vector<int> gt(_ground_truth.size());
+	for (auto i = 0; i < (int)_ground_truth.size(); ++i) {
+		gt[i] = _ground_truth.at(i);
+	}
+	fout << "Ground truth: " << gt << endl;
+
+	std::vector<int> res;
+	for (auto i = 0; i < (int)trix_copy.count(); ++i) {
+		auto cluster_id = trix_copy.getCluster(i);
+		res.push_back(cluster_id);
+	}
+	
+	fout << "Results: " << res << endl;
+
+	return _clustering_performance.calculateContingencyMatrix(gt, res);
+
+
+	/*
 	// assume id is representative for number of clusters (should not be very large)
 	assignments_t::iterator max_cluster0 = std::max_element(_ground_truth.begin(), _ground_truth.end(), compare_assignments);
 	assert ( max_cluster0 != _ground_truth.end());
@@ -53,55 +72,14 @@ matrix_t & Results::calculateContingencyMatrix() {
 	cout << frequencies << endl;
 
 	return frequencies;
-}
-
-void Results::calculateSimilarity() {
-	matrix_t &frequencies = calculateContingencyMatrix();
-
-	// total number of pairs of clusters
-	auto N = frequencies.sum();
-
-	if (N == 0) {
-		delete &frequencies;
-		return;
-	}
-
-	auto A = frequencies;
-	auto R = frequencies.rowwise().sum();
-	auto C = frequencies.colwise().sum();
-
-	auto a = ((A.cwiseProduct(A) - A) / 2).sum();
-	auto b = ((R.cwiseProduct(R) - R) / 2).sum();
-	auto c = ((C.cwiseProduct(C) - C) / 2).sum();
-
-	double S = ((N * N - N) / (double)2);
-	
-	if (S == 0) {
-		delete &frequencies;
-		return;
-	}
-
-	_rand_index = (2*a-b-c) / S + 1;
-
-	// helper variables
-	double b_PROD_c_DIV_S = b*c/S;
-	double b_SUM_c_DIV_2 = (b+c)/(double)2;
-	if (b_PROD_c_DIV_S == b_SUM_c_DIV_2) {
-		delete &frequencies;
-		return;
-	}
-	
-	_adjusted_rand_index = (a - b_PROD_c_DIV_S) / (b_SUM_c_DIV_2 - b_PROD_c_DIV_S);
-
-	fout << "Rand Index: " << _rand_index << endl;
-	fout << "Adjusted Rand Index: " << _adjusted_rand_index << endl;
-
-	delete &frequencies;
+	*/
 }
 
 void Results::write(const string &workspace, const string & path, const string & basename) {
 
-	calculateSimilarity();
+	matrix_t & mat = calculateContingencyMatrix();
+
+	_clustering_performance.calculateSimilarity(mat);
 
 	bool success;
 
