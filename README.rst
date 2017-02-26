@@ -54,12 +54,12 @@ This data structure is a matrix with columns with only a single 1.
 
   ===  ===  ===  ===  ===  ===  ===
        D0   D1   D2   D3   ...  DN
-  ---  ---  ---  ---  ---  ---  ---
+  ===  ===  ===  ===  ===  ===  ===
   C0    1    0    0    0
-  C1    0    1    0    0
+  C1    0    1    1    0
   C2    0    0    0    0
-  .					
-  .
+  ...
+  ...
   CK
   ===  ===  ===  ===  ===  ===  ===
 
