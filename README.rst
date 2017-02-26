@@ -8,9 +8,10 @@ Use
 
 After compiling the program it can be run as:
 
-./noparam
+./noparama
 
-- file                  file with data to process, e.g. datasets/twogaussians.data  
+--data file                  file with data to process, e.g. datasets/twogaussians.data  
+--config file                file with configuration values
 
 The datasets are not included with the repository.
 
