@@ -41,13 +41,13 @@ Requirements:
 
 This data structure is a matrix with columns with only a single 1.
 
-    	D0	D1	D2	D3	...	DN
-    C0	1	0	0	0
-    C1	0	1	1	0
-    C2	0	0	0	0
-    .					
-    .
-    CK
+|	D0	D1	D2	D3	...	DN
+|	C0	1	0	0	0
+|	C1	0	1	1	0
+|	C2	0	0	0	0
+|	.					
+|	.
+|	CK
 
 A data item that is not assigned is represented by a zero column-vector, a cluster without data points by a zero 
 row-vector. C0, C1, etc. refers to an object with cluster parameters. D0, D1, etc. refer to an object with data values.
@@ -92,5 +92,12 @@ Plus a set structure:
 
 Here we do not have the property anymore that the update is atomic! Setting something to 1 or 0 in the assignment 
 matrix, needs also an update in the set structure.
+
+In Progress
+-----------
+
+.. note:: Be careful
+   This is a work-in-progress. This means it normally can be compiled and should be functionality complete.
+   However, don't use it yet.
 
 
