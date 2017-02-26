@@ -52,16 +52,16 @@ Requirements:
 
 This data structure is a matrix with columns with only a single 1.
 
-  ===  ===  ===  ===  ===  ===  ===
-       D0   D1   D2   D3   ...  DN
-  ===  ===  ===  ===  ===  ===  ===
-  C0    1    0    0    0
-  C1    0    1    1    0
-  C2    0    0    0    0
-  ...
-  ...
-  CK
-  ===  ===  ===  ===  ===  ===  ===
+===  ===  ===  ===  ===  ===  ===
+     D0   D1   D2   D3   ...  DN
+===  ===  ===  ===  ===  ===  ===
+C0    1    0    0    0
+C1    0    1    1    0
+C2    0    0    0    0
+...
+...
+CK
+===  ===  ===  ===  ===  ===  ===
 
 A data item that is not assigned is represented by a zero column-vector, a cluster without data points by a zero 
 row-vector. C0, C1, etc. refers to an object with cluster parameters. D0, D1, etc. refer to an object with data values.
