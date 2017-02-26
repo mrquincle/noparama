@@ -3,6 +3,17 @@ Noparama
 
 This software is about mathematics, in particular nonparametric Bayesian models.
 
+Use
+---
+
+After compiling the program it can be run as:
+
+./noparam
+
+- file                  file with data to process, e.g. datasets/twogaussians.data  
+
+The datasets are not included with the repository.
+
 Structure
 ---------
 
@@ -41,13 +52,16 @@ Requirements:
 
 This data structure is a matrix with columns with only a single 1.
 
-|	D0	D1	D2	D3	...	DN
-|	C0	1	0	0	0
-|	C1	0	1	1	0
-|	C2	0	0	0	0
-|	.					
-|	.
-|	CK
+  ===  ===  ===  ===  ===  ===  ===
+       D0   D1   D2   D3   ...  DN
+  ---  ---  ---  ---  ---  ---  ---
+  C0    1    0    0    0
+  C1    0    1    0    0
+  C2    0    0    0    0
+  .					
+  .
+  CK
+  ===  ===  ===  ===  ===  ===  ===
 
 A data item that is not assigned is represented by a zero column-vector, a cluster without data points by a zero 
 row-vector. C0, C1, etc. refers to an object with cluster parameters. D0, D1, etc. refer to an object with data values.
@@ -96,9 +110,11 @@ matrix, needs also an update in the set structure.
 
 In Progress
 -----------
+   
+This is a work-in-progress. This means it normally can be compiled and should be functionality complete.
+However, don't use it yet.
 
-.. note:: Be careful
-   This is a work-in-progress. This means it normally can be compiled and should be functionality complete.
-   However, don't use it yet.
+:Authors:
+    Anne van Rossum
 
-
+:Version: 0.172 
