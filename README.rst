@@ -53,7 +53,7 @@ Requirements:
 This data structure is a matrix with columns with only a single 1.
 
 ===  ===  ===  ===  ===  ===  ===
-*    D0   D1   D2   D3   ...  DN
+\    D0   D1   D2   D3   ...  DN
 ===  ===  ===  ===  ===  ===  ===
 C0    1    0    0    0
 C1    0    1    1    0
@@ -76,34 +76,40 @@ necessary. It is also preferably to return data without capsulating structures.
 
 If we want to return a container with data items, we might also store the data items directly.
 
-.. math::
-	C0	D0	0	0	0
-	C1	0	D1	D2	0
-	C2	0	0	0	0
-	.					
-	.
-	CK
+===  ===  ===  ===  ===
+C0   D0   0    0    0
+C1   0    D1   D2   0
+C2   0    0    0    0
+...
+...
+CK
+===  ===  ===  ===  ===
 
 This however, would still require us to create a set out of something like [0 D1 D2 0] @C1.
 
 Hence, what we can do is to maintain two data structures. A matrix structure:
 
-		D0	D1	D2	D3	...	DN
-	C0	1	0	0	0
-	C1	0	1	1	0
-	C2	0	0	0	0
-	.					
-	.
-	CK
+===  ===  ===  ===  ===  ===  ===
+\    D0   D1   D2   D3   ...  DN
+===  ===  ===  ===  ===  ===  ===
+C0    1    0    0    0
+C1    0    1    1    0
+C2    0    0    0    0
+...
+...
+CK
+===  ===  ===  ===  ===  ===  ===
 
 Plus a set structure:
 
-	C0	D0
-	C1	D1	D2
-	C2
-	.
-	.
-	CK
+===  ===  ===  ===  ===  ===  ===
+C0   D0
+C1   D1   D2
+C2
+...
+...
+CK
+===  ===  ===  ===  ===  ===  ===
 
 Here we do not have the property anymore that the update is atomic! Setting something to 1 or 0 in the assignment 
 matrix, needs also an update in the set structure.
