@@ -62,6 +62,7 @@ necessary. It is also preferably to return data without capsulating structures.
 
 If we want to return a container with data items, we might also store the data items directly.
 
+.. math::
 	C0	D0	0	0	0
 	C1	0	D1	D2	0
 	C2	0	0	0	0
