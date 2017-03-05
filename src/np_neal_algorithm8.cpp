@@ -1,7 +1,5 @@
 #include <np_neal_algorithm8.h>
 
-#include <statistics/dirichlet.h>
-
 #include <iostream>
 #include <iomanip>
 #include <pretty_print.hpp>
@@ -11,16 +9,18 @@ using namespace std;
 NealAlgorithm8::NealAlgorithm8(
 			random_engine_t & generator,
 			distribution_t & likelihood,
-			distribution_t & nonparametrics
+			dirichlet_process & nonparametrics
 		): 
 			_generator(generator),
 			_likelihood(likelihood),
 			_nonparametrics(nonparametrics)
 {
-	_alpha = ((dirichlet_process&)nonparametrics).getSuffies().alpha;
+	_alpha = _nonparametrics.getSuffies().alpha;
 
-	_verbosity = 4;
+	_verbosity = 5;
 
+	fout << "likelihood: " << _likelihood.getSuffies() << endl;
+		
 	_statistics.new_clusters_events = 0;
 }
 
@@ -29,7 +29,7 @@ void NealAlgorithm8::update(
 			data_id_t data_id
 		) {
 	static int step = 0;
-	fout << "Update step " << ++step << " in algorithm 8" << endl;
+	fout << "Update step " << ++step << " in algorithm 8 for data item " << data_id << endl;
 
 	// existing clusters
 	// if data item removed one of the clusters, this is still in there with a particular weight
@@ -46,7 +46,7 @@ void NealAlgorithm8::update(
 	int M = 3;
 	clusters_t new_clusters(M);
 	for (int m = 0; m < M; ++m) {
-		Suffies *suffies = ((dirichlet_process&)_nonparametrics).sample_base(_generator);
+		Suffies *suffies = _nonparametrics.sample_base(_generator);
 		cluster_t *temp = new cluster_t(*suffies);
 		new_clusters[m] = temp;
 		fout << "Suffies generated: " << new_clusters[m]->getSuffies() << endl;
@@ -67,7 +67,11 @@ void NealAlgorithm8::update(
 
 		fout << "Obtained suffies from cluster " << key << ": " << cluster->getSuffies() << endl;
 
+		// here _likelihood is sudden a niw distribution...
 		_likelihood.init(cluster->getSuffies());
+		fout << "calculate probability " << endl;
+		double ll = _likelihood.probability(observation);
+		fout << "which is: " << ll << endl;
 		weighted_likelihood[k] = _likelihood.probability(observation) * cluster_matrix.count(key);
 		/*
 		fout << "Cluster ";

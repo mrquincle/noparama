@@ -38,7 +38,7 @@ class inverse_wishart_distribution: public distribution_t {
 			normal_distribution normal_dist(_suffies_normal);
 
 			Eigen::MatrixXd L( _suffies_iw.Lambda.llt().matrixL() );
-			auto x = L.transpose() * normal_dist(generator)->mu;
+			auto x = L.transpose() * normal_dist(generator)->val;
 			
 			_suffies_result->sigma = x * x.transpose();
 			

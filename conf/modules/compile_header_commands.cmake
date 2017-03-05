@@ -7,7 +7,7 @@ foreach(D ${INCLUDE_DIRS})
     set(INCLUDE_DIRS_FLAGS "${INCLUDE_DIRS_FLAGS} -I${D}")
 endforeach()
 
-set(ALL_INCLUDES ${INCLUDE_DIRS_FLAGS} ${FLAGS})
+set(ALL_INCLUDES ${INCLUDE_DIRS_FLAGS} ${CMAKE_CXX_FLAGS})
 
 set(header_commands_file ${PROJECT_BINARY_DIR}/header/compile_commands.json)
 

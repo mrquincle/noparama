@@ -8,10 +8,12 @@
  * nonparametric Bayesian models.
  */
 enum distribution_type_t { 
+	// gamma
+	Gamma,
 	// normals
 	Normal, Unity_Normal,
 	// multivariate normals
-	MultivariateNormal, Unity_MultivariateNormal, ZeroCentered_MultivariateNormal, 
+	MultivariateNormal, Unity_MultivariateNormal, ZeroCentered_MultivariateNormal, ScalarNoise_MultivariateNormal,
 	// inverse wisharts and alike, useful as priors for normals
 	NormalInvWishart, InvWishart, NormalInvGamma, 
 	// hierarchical priors
@@ -19,16 +21,22 @@ enum distribution_type_t {
 };
 
 static std::map< distribution_type_t, const char * > distribution_type_str = {
+	{Gamma,                            "gamma"},
 	{Normal,                           "normal"},
 	{Unity_Normal,                     "unity normal"},
 	{MultivariateNormal,               "multivariate normal"},
 	{Unity_MultivariateNormal,         "unity multivariate normal"},
 	{ZeroCentered_MultivariateNormal,  "zero-centered multivariate normal"},
+	{ScalarNoise_MultivariateNormal,  "zero-centered multivariate normal"},
 	{NormalInvWishart,                 "normal inverse-Wishart"},
 	{InvWishart,                       "inverse-Wishart"},
 	{NormalInvGamma,                   "normal inverse-Gamma"},
 	{Dirichlet,                        "Dirichlet"}
 };
+
+/*! Concise way of representing a matrix on a single line.
+ */
+static Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, " ", "; ", "", "", "", "");
 
 /*!
  * Suffies describes a probability distribution. On the moment it does not contain any information on itself.
@@ -39,6 +47,7 @@ static std::map< distribution_type_t, const char * > distribution_type_str = {
  */
 class Suffies {
 	public:
+		//! dimension
 		int D;
 
 		virtual ~Suffies() {
@@ -49,6 +58,16 @@ class Suffies {
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const Suffies& s);  
+};
+
+class Suffies_Gamma: public Suffies {
+	public:
+		double alpha;
+		double beta;
+		
+		void print(std::ostream& os) const {
+			os << "g[alpha|beta]: " << alpha << " | " << beta;
+		}
 };
 
 class Suffies_NormalInvWishart: public Suffies {
@@ -63,7 +82,7 @@ class Suffies_NormalInvWishart: public Suffies {
 		}
 		
 		void print(std::ostream& os) const {
-			os << nu << " | " << kappa << " | " << nu << " | " << Lambda;
+			os << "niw[nu|kappa|nu|Lambda]: " << nu << " | " << kappa << " | " << nu << " | " << Lambda.format(CommaInitFmt);
 		}
 };
 
@@ -73,25 +92,28 @@ class Suffies_InvWishart: public Suffies {
 		Eigen::MatrixXd Lambda;
 		
 		Suffies_InvWishart(int D): Lambda(D,D) {
+			Suffies::D = D;
 		}
 		
 		void print(std::ostream& os) const {
-			os << nu << " | " << Lambda;
+			os << "iw[nu|Lambda]: " << nu << " | " << Lambda.format(CommaInitFmt);
 		}
 };
 
 class Suffies_NormalInvGamma: public Suffies {
 	public:
 		Eigen::VectorXd mu;
-		double a;
-		double b;
-		Eigen::MatrixXd Lambda;
+		double alpha;
+		double beta;
+		//double gamma;
+		Eigen::MatrixXd Lambda; // the multidimensional version
 		
 		Suffies_NormalInvGamma(int D): mu(D), Lambda(D,D) {
+			Suffies::D = D;
 		}
 		
 		void print(std::ostream& os) const {
-			os << mu << " | " << a << " | " << b << " | " << Lambda;
+			os << "nig[mu|alpha|beta|gamma]: " << mu << " | " << alpha << " | " << beta << " | " << Lambda.format(CommaInitFmt);
 		}
 };
 
@@ -101,16 +123,16 @@ class Suffies_Normal: public Suffies {
 		double sigma;
 		
 		void print(std::ostream& os) const {
-			os << mu << " | " << sigma;
+			os << "n[mu|sigma]: " << mu << " | " << sigma;
 		}
 };
 
-class Suffies_Unity_Normal: public Suffies {
+class Suffies_Double: public Suffies {
 	public:
-		double mu;
+		double val;
 
 		void print(std::ostream& os) const {
-			os << mu;
+			os << "[val]: " << val;
 		}
 };
 
@@ -122,10 +144,11 @@ class Suffies_Unity_MultivariateNormal: public Suffies {
 		Eigen::VectorXd mu;
 
 		Suffies_Unity_MultivariateNormal(int D): mu(D) {
+			Suffies::D = D;
 		}
 		
 		void print(std::ostream& os) const {
-			os << mu;
+			os << "mvn[mu]: " << mu;
 		}
 };
 
@@ -137,14 +160,13 @@ class Suffies_ZeroCentered_MultivariateNormal: public Suffies {
 		Eigen::MatrixXd sigma;
 		
 		Suffies_ZeroCentered_MultivariateNormal(int D): sigma(D, D) {
+			Suffies::D = D;
 		}
 		
 		void print(std::ostream& os) const {
-			os << sigma;
+			os << "mvn[sigma]: " << sigma.format(CommaInitFmt);
 		}
 };
-
-static Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, " ", "; ", "", "", "", "");
 
 class Suffies_MultivariateNormal: public Suffies {
 	public:
@@ -152,11 +174,25 @@ class Suffies_MultivariateNormal: public Suffies {
 		Eigen::MatrixXd sigma;
 		
 		Suffies_MultivariateNormal(int D): mu(D), sigma(D,D) {
+			Suffies::D = D;
 		}
-
+		
 		void print(std::ostream& os) const {
+			os << "mvn[mu|sigma]: " << mu.transpose() << " | " << sigma.format(CommaInitFmt);
+		}
+};
 
-			os << "[mu | sigma]: [" << mu.transpose() << " | " << sigma.format(CommaInitFmt) << "]";
+class Suffies_ScalarNoise_MultivariateNormal: public Suffies {
+	public:
+		Eigen::VectorXd mu;
+		double sigma;
+		
+		Suffies_ScalarNoise_MultivariateNormal(int D): mu(D)  {
+			Suffies::D = D;
+		}
+		
+		void print(std::ostream& os) const {
+			os << "mvn[mu|sigma]: " << mu.transpose() << " | " << sigma;
 		}
 };
 
@@ -166,7 +202,7 @@ class Suffies_Dirichlet: public Suffies {
 //		Suffies base_suffies;
 		
 		void print(std::ostream& os) const {
-			os << alpha;
+			os << "d[alpha]: " << alpha;
 		}
 		
 };

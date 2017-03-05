@@ -19,7 +19,7 @@ UpdateClusters::UpdateClusters(
 			_nonparametrics(nonparametrics),
 			_distribution(0.0, 1.0)
 {
-	_verbosity = 4;
+	_verbosity = 5;
 }
 
 Suffies * UpdateClusters::propose() {

@@ -42,6 +42,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 include_directories ( "include" )
 
 set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mcmc.cpp \\
+    src/statistics/multivariatenormal.cpp \\
+    src/statistics/scalarnoise_multivariatenormal.cpp \\
     src/membertrix.cpp src/np_init_clusters.cpp \\
     src/clustering_performance.cpp \\
     src/np_update_clusters.cpp src/np_neal_algorithm8.cpp)

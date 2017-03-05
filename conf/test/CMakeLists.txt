@@ -1,7 +1,8 @@
 include_directories ( "../include" )
 
 set(TEST test_multivariate_normal_distribution)
-set(SOURCE_FILES ${TEST}.cpp)
+set(TEST_SOURCE_FILES ../src/np_suffies.cpp ../src/statistics/multivariatenormal.cpp)
+set(SOURCE_FILES ${TEST}.cpp ${TEST_SOURCE_FILES})
 add_executable(${TEST} ${SOURCE_FILES})
 add_test(NAME ${TEST} COMMAND ${TEST})
 
@@ -11,7 +12,8 @@ add_executable(${TEST} ${SOURCE_FILES})
 add_test(NAME ${TEST} COMMAND ${TEST})
 
 set(TEST test_mvn_likelihood)
-set(SOURCE_FILES ${TEST}.cpp)
+set(TEST_SOURCE_FILES ../src/np_suffies.cpp ../src/statistics/multivariatenormal.cpp)
+set(SOURCE_FILES ${TEST}.cpp ${TEST_SOURCE_FILES})
 add_executable(${TEST} ${SOURCE_FILES})
 add_test(NAME ${TEST} COMMAND ${TEST})
 
@@ -22,7 +24,7 @@ add_executable(${TEST} ${SOURCE_FILES})
 add_test(NAME ${TEST} COMMAND ${TEST})
 
 set(TEST test_dirichlet)
-set(TEST_SOURCE_FILES ../src/np_suffies.cpp)
+set(TEST_SOURCE_FILES ../src/np_suffies.cpp ../src/statistics/multivariatenormal.cpp)
 set(SOURCE_FILES ${TEST}.cpp ${TEST_SOURCE_FILES})
 add_executable(${TEST} ${SOURCE_FILES})
 add_test(NAME ${TEST} COMMAND ${TEST})

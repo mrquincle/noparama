@@ -10,8 +10,6 @@
 #include <np_suffies.h>
 #include <pretty_print.hpp>
 
-
-
 /*!
  * To sample from a Dirichlet process, we need to initialize it with a dispersion factor and a base distribution
  * and then get samples out using a uniform random generator as input.
@@ -43,7 +41,13 @@ class dirichlet_process: public distribution_t {
 		}
 
 		void init(Suffies & suffies) {
-			_suffies_dirichlet = (Suffies_Dirichlet&)suffies;
+			if (typeid(suffies)!=typeid(_suffies_dirichlet)) {
+				std::cout << "init dirichlet" << std::endl;
+				std::cout << "current suffies: " << _suffies_dirichlet << std::endl;
+				std::cout << "incoming suffies: " << suffies << std::endl;
+				assert (typeid(suffies)==typeid(_suffies_dirichlet));
+			}
+			_suffies_dirichlet = dynamic_cast<Suffies_Dirichlet&>(suffies);
 		}
 
 		Suffies_Dirichlet & getSuffies() {

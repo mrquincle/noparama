@@ -15,7 +15,7 @@ class normal_distribution: public distribution_t {
 		double _mean;
 		double _variance;
 
-		Suffies_Unity_Normal *_suffies_result;
+		Suffies_Double *_suffies_result;
 	public:
 		/**
 		 * Constructor for a normal distribution. The mean is assumed to be a zero.
@@ -54,13 +54,13 @@ class normal_distribution: public distribution_t {
 		 * @param[in] generator		a uniform random number generator
 		 * @return					a double, representing a single sample from the distribution
 		 */
-		Suffies_Unity_Normal* operator()(random_engine_t & generator) 
+		Suffies_Double* operator()(random_engine_t & generator) 
 		{
-			_suffies_result = new Suffies_Unity_Normal();
+			_suffies_result = new Suffies_Double();
 
 			static std::normal_distribution<> dist(_mean, _variance);
 			
-			_suffies_result->mu = dist(generator);
+			_suffies_result->val = dist(generator);
 
 			return _suffies_result;
 		}
@@ -77,6 +77,8 @@ class normal_distribution: public distribution_t {
 		 */
 		double operator()(double & value) const
 		{
+			// to be implemented
+			assert(false);
 			return -1;
 			/*
 			size_t D = value.size();

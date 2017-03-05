@@ -27,7 +27,7 @@ void InitClusters::init(
 	for (int k = 0; k < K; ++k) {
 		// sample sufficient statistics from nonparametrics
 		Suffies *suffies = ((dirichlet_process&)_nonparametrics).sample_base(_generator);
-
+		
 		cluster_t *cluster = new cluster_t(*suffies);
 		int kTest = cluster_matrix.addCluster(cluster);
 

@@ -68,7 +68,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 	fout << "Removed " << removed << " empty clusters" << endl;
 	removed = _membertrix.cleanup();
 	fout << "Removed " << removed << " empty clusters" << endl;
-	foutvar(7) << "We have in total " << _membertrix.count() << " assigned data items" << endl;
+	foutvar(7) << "After cleanup we have " << _membertrix.count() << " assigned data items (should be the same)" << endl;
 
 	// update clusters
 	for (int t = 0; t < T; ++t) {

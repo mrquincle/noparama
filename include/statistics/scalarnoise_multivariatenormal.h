@@ -24,7 +24,7 @@
  *   	Vector2d mean(1, 1);
  *   	Matrix2d covar; covar << 1, 0, 0.2, 1;
  *   			
- *   	multivariate_normal_distribution distribution(mean, covar);
+ *   	scalarnoise_multivariate_normal_distribution distribution(mean, covar);
  *   	default_random_engine generator;
  *   
  *   	const int nRolls = 100;
@@ -33,16 +33,16 @@
  *   	}
  *   }
  */
-class multivariate_normal_distribution: public distribution_t {
+class scalarnoise_multivariate_normal_distribution: public distribution_t {
 	private:
 		//! Store result in the form 
 		Eigen::VectorXd _mean;
-		Eigen::MatrixXd _covar;
+		double _var;
 		Eigen::MatrixXd _transform;
 		int _D;
 
-		Suffies_MultivariateNormal * _suffies_mvn;
-			
+		Suffies_ScalarNoise_MultivariateNormal * _suffies_mvn;
+		
 		Suffies_Unity_MultivariateNormal * _suffies_result;
 	
 		//! Regression flag
@@ -61,7 +61,7 @@ class multivariate_normal_distribution: public distribution_t {
 		 *
 		 * TODO: Find out a way to communicate that the caller has to take care of the lifetime of suffies 
 		 */
-		multivariate_normal_distribution(Suffies_MultivariateNormal & suffies, bool regression = false);
+		scalarnoise_multivariate_normal_distribution(Suffies_ScalarNoise_MultivariateNormal & suffies, bool regression = false);
 		
 		inline void setRegression(bool regression);
 
@@ -96,22 +96,4 @@ class multivariate_normal_distribution: public distribution_t {
 		double probability(data_t & data) const;
 		
 		double probability(dataset_t & dataset) const;
-
-		/**
-		 * Calculate the likelihood of mean and covariance given a series of observations.
-		 *
-		 * Mathematically, with mu, the mean and S the covariance matrix, this is:
-		 *
-		 *   L(mu,S|x0,x1,...,xN)
-		 *
-		 * @param[in] values           a vector of supposedly normally distribution multivariate variables
-		 * @return                     likelihood (unnormalized probability).
-		 */
-
-/*		double operator()(std::vector< Eigen::VectorXd&> & values) const
-		{
-			return 0;
-		}
-*/
-
 };

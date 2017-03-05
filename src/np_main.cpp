@@ -2,6 +2,10 @@
 #include <fstream>
 #include <chrono>
 #include <iomanip>
+#include <unordered_map>
+
+// Include getopt
+#include <unistd.h>
 
 #include <np_mcmc.h>
 #include <np_data.h>
@@ -9,9 +13,11 @@
 
 #include <membertrix.h>
 
+#include <statistics/scalarnoise_multivariatenormal.h>
 #include <statistics/multivariatenormal.h>
 #include <statistics/dirichlet.h>
 #include <statistics/normalinvwishart.h>
+#include <statistics/normalinvgamma.h>
 
 #include <np_neal_algorithm8.h>
 
@@ -19,48 +25,93 @@
 
 using namespace std;
 
+
+
 int main(int argc, char *argv[]) {
 	char _verbosity = 2;
 	
 	fout << "Welcome to noparama" << endl;
 
 	// Configuration parameters 
-	int T = 10000;
-	double alpha = 100;
-	
+	int T = 10;
+	double alpha = 1;
+	// limit number of data items
+	bool limit = true;
+	int N = 10;
+
 	default_random_engine generator(random_device{}()); 
 
-	// Load data
+	// Configuration strings that can be filled from CLI arguments
 	string datafilename;
-	if (argc > 1) {
-		datafilename = string(argv[1]);
+	string configuration;
+
+	int token;
+	unordered_map<int, string> flags;
+	while( (token = getopt(argc, argv, "d:c:")) != EOF)
+	{
+		switch (token)
+		{
+			case 'd':
+				flags['d'] = string(optarg);
+				break;
+			case 'c':
+				flags['c'] = string(optarg);
+				break;
+		}
 	}
-	else {
-		fout << "The datafile is required as argument." << endl;
-		fout << "For example:" << endl;
+
+	if (flags.find('d') == flags.end()) {
+		// required, so show help and exit
+		cout << "noparama [version 0.0.1]" << endl;
+		cout << endl << endl;
+		cout << "Usage: " << endl;
+		fout << "  noparama [arguments]" << endl;
 		datafilename = "$HOME/workspace/thesis/dpm/inference/data/many-modal/pattern100_sigma0_1.plain.txt";
-		fout << argv[0] << ' ' << datafilename << endl;
+		fout << argv[0] << " -d " << datafilename << endl;
 		fout << "Or:" << endl;
 		datafilename = "datasets/twogaussians.data";
-		fout << argv[0] << ' ' << datafilename << endl;
+		fout << argv[0] << " -d " << datafilename << endl;
 		exit(1);
+	} else {
+		datafilename = flags['d'];
 	}
+
+	bool regression = false;
+	if (flags.find('c') == flags.end()) {
+		// no configuration parameter, but optional anyway
+			fout << "Clustering mode" << endl;
+	} else {
+		configuration = flags['c'];
+		if (configuration == "regression") {
+			regression = true;
+			fout << "Regression mode" << endl;
+		}
+	}
+
 	fout << "Load file: " << datafilename << endl;
 
 	dataset_t dataset;
 	// The data file should have "a b c" on lines, separated by spaces (without quotes, each value of the type double).
 	fout << "Read dataset" << endl;
 	std::ifstream datafilehandle(datafilename);
-	double a, b,c;
+	double a, b, c;
 	ground_truth_t ground_truth;
 	ground_truth.clear();
 	int n = 0;
 	while (datafilehandle >> a >> b >> c) {
-		data_t *data = new data_t(2);
-		*data = { a, b };
-		dataset.push_back(data);
+		if (regression) {
+			// prepend vector with constant for regression
+			data_t *data = new data_t(3);
+			*data = { 1, a, b };
+			dataset.push_back(data);
+		} else {
+			data_t *data = new data_t(2);
+			*data = { a, b };
+			dataset.push_back(data);
+		}
 		ground_truth[n] = (int)c;
 		n++;
+		if (limit && (n == N)) break;
 	}
 
 	int I = 20;
@@ -70,29 +121,57 @@ int main(int argc, char *argv[]) {
 		fout << "Data: " << *dataset[i] << " with ground truth " << ground_truth[i] << endl;
 	}
 
-	// The likelihood function is a multivariate normal distribution (parameters need not be set)
-	fout << "Multivariate normal suffies" << endl;
-	Suffies_MultivariateNormal suffies_mvn(2);
-	suffies_mvn.mu << 0, 0;
-	suffies_mvn.sigma << 1, 0, 0, 1;
-	fout << "Multivariate normal distribution" << endl;
-	multivariate_normal_distribution likelihood(suffies_mvn);
+	// The likelihood function only is required w.r.t. type, parameters are normally set later
+	distribution_t *likelihood;
+	if (regression) {
+		fout << "Multivariate normal suffies (sigma scalar)" << endl;
+		// note that we need to allocate the suffies or else it won't exists after the call to new multivar..
+		//Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
+		Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
+		suffies_mvn->mu << 0, 0;
+		suffies_mvn->sigma = 1;
+		likelihood = new scalarnoise_multivariate_normal_distribution(*suffies_mvn, true);
+	} else {
+		fout << "Multivariate normal suffies" << endl;
+		Suffies_MultivariateNormal * suffies_mvn = new Suffies_MultivariateNormal(2);
+		suffies_mvn->mu << 0, 0;
+		suffies_mvn->sigma << 1, 0, 0, 1; // get rid of this
+		likelihood = new multivariate_normal_distribution(*suffies_mvn);
+	}
+		
+	fout << "likelihood still: " << likelihood->getSuffies() << endl;
 
 	// The hierarchical prior has an alpha of 1 and the base distribution is handed separately through the prior
 	fout << "Dirichlet distribution" << endl;
 	Suffies_Dirichlet suffies_dirichlet;
 	suffies_dirichlet.alpha = alpha;
+	distribution_t *prior;
 
-	fout << "Normal Inverse Wishart distribution" << endl;
-	Suffies_NormalInvWishart suffies_niw(2);
-	suffies_niw.mu << 6, 6;
-	suffies_niw.kappa = 1.0/500;
-	suffies_niw.nu = 4;
-	suffies_niw.Lambda << 0.01, 0, 0, 0.01;
-
-	normal_inverse_wishart_distribution prior(suffies_niw);
-
-	dirichlet_process hyper(suffies_dirichlet, prior);
+	if (regression) {
+		fout << "Normal Inverse Gamma distribution" << endl;
+		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(2);
+		fout << "Set to prior" << endl;
+		suffies_nig->mu << 0, 0;
+		fout << "Set to prior" << endl;
+		suffies_nig->alpha = 10;
+		fout << "Set beta" << endl;
+		suffies_nig->beta = 0.1;
+		fout << "Set Lambda" << endl;
+		suffies_nig->Lambda << 0.01, 0, 0, 0.01;
+		fout << "Set to prior" << endl;
+		prior = new normal_inverse_gamma_distribution(*suffies_nig);
+		fout << "Prior set" << endl;
+	} else {
+		fout << "Normal Inverse Wishart distribution" << endl;
+		Suffies_NormalInvWishart * suffies_niw = new Suffies_NormalInvWishart(2);
+		suffies_niw->mu << 6, 6;
+		suffies_niw->kappa = 1.0/500;
+		suffies_niw->nu = 4;
+		suffies_niw->Lambda << 0.01, 0, 0, 0.01;
+		prior = new normal_inverse_wishart_distribution(*suffies_niw);
+	}
+	fout << "Create Dirichlet Process" << endl;
+	dirichlet_process hyper(suffies_dirichlet, *prior);
 	
 	fout << "Set up InitClusters object" << endl;
 	InitClusters init_clusters(generator, hyper);
@@ -100,12 +179,12 @@ int main(int argc, char *argv[]) {
 	// To update cluster parameters we need prior (hyper parameters) and likelihood, the membership matrix is left 
 	// invariant
 	fout << "Set up UpdateClusters object" << endl;
-	UpdateClusters update_clusters(generator, likelihood, hyper);
+	UpdateClusters update_clusters(generator, *likelihood, hyper);
 
 	// To update the cluster population we need	to sample new clusters using hyper parameters and adjust existing ones
 	// using prior and likelihood
 	fout << "Set up UpdateClusterPopulation object" << endl;
-	NealAlgorithm8 update_cluster_population(generator, likelihood, hyper);
+	NealAlgorithm8 update_cluster_population(generator, *likelihood, hyper);
 
 	// create MCMC object
 	fout << "Set up MCMC" << endl;
@@ -114,8 +193,10 @@ int main(int argc, char *argv[]) {
 	fout << "Run MCMC for " << T << " steps" << endl;
 	mcmc.run(dataset, T);
 
+	fout << "Print statistics" << endl;
 	update_cluster_population.printStatistics();
 
+	fout << "Write results" << endl;
 	const membertrix trix = mcmc.getMembershipMatrix();
 
 	// analyse and write out results
@@ -132,7 +213,15 @@ int main(int argc, char *argv[]) {
 
 	Results results(trix, ground_truth);
 	results.write(workspace, dirname, basename);
+	
+	fout << "Memory deallocation" << endl;
 
+	delete &mcmc;
+	delete likelihood;
+	delete prior;
+	for (int i = 0; i < N; ++i) {
+		delete dataset[i];
+	}
 }
 
 
