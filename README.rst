@@ -3,6 +3,15 @@ Noparama
 
 This software is about mathematics, in particular nonparametric Bayesian models.
 
+Installation
+------------
+
+On Ubuntu:
+
+    sudo apt install git cmake gcc libeigen3-dev
+    git clone git@github.com:mrquincle/noparama.git
+    make
+
 Use
 ---
 
