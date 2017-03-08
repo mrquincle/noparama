@@ -8,7 +8,7 @@ Installation
 
 On Ubuntu:
 
-.. code-block:: console
+.. code-block:: bash
 
 	sudo apt install git cmake gcc libeigen3-dev
 	echo "Go to your preferred installation directory"
@@ -24,7 +24,7 @@ Use
 
 After compiling the program it can be run as:
 
-.. code-block:: console
+.. code-block:: bash
 
 	./noparama
 
@@ -33,7 +33,7 @@ After compiling the program it can be run as:
 
 Example:
 
-.. code-block:: console
+.. code-block:: bash
 
 	cd build/bin
 	./noparama -d ../datasets/twogaussians.data

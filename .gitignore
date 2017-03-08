@@ -3,3 +3,4 @@ doc/html
 /CMake*
 test/CMake*
 *.swp
+/output
