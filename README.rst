@@ -8,6 +8,8 @@ Installation
 
 On Ubuntu:
 
+.. code-block:: sh
+
     sudo apt install git cmake gcc libeigen3-dev
     git clone git@github.com:mrquincle/noparama.git
     make
