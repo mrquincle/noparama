@@ -114,6 +114,11 @@ int main(int argc, char *argv[]) {
 		if (limit && (n == N)) break;
 	}
 
+	if (n == 0) {
+		fout << "No data found... Check the file or the contents of the file." << endl;
+		exit(7);
+	}
+
 	int I = 20;
 	fout << "Display first " << I << " items of the dataset" << endl;
 	for (int i = 0; i < I; ++i) {

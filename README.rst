@@ -10,21 +10,35 @@ On Ubuntu:
 
 .. code-block:: console
 
-    sudo apt install git cmake gcc libeigen3-dev
-    git clone git@github.com:mrquincle/noparama.git
-    make
+	sudo apt install git cmake gcc libeigen3-dev
+	echo "Go to your preferred installation directory"
+	git clone git@github.com:mrquincle/noparama.git
+	cd noparama
+	make
+	echo "The compiled binary you can find in build/bin/
+
+A dataset can be found in a companion repository: https://github.com/mrquincle/noparama-datasets.git.
 
 Use
 ---
 
 After compiling the program it can be run as:
 
-./noparama
+.. code-block:: console
+
+	./noparama
 
 --data file                  file with data to process, e.g. datasets/twogaussians.data  
 --config file                file with configuration values
 
-The datasets are not included with the repository.
+Example:
+
+.. code-block:: console
+
+	cd build/bin
+	./noparama -d ../datasets/twogaussians.data
+
+The datasets are not included with the repository, but in https://github.com/mrquincle/noparama-datasets.git.
 
 Structure
 ---------
