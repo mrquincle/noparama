@@ -68,54 +68,54 @@ void Results::write(const string &workspace, const string & path, const string &
 	int k = 0;
 	const clusters_t &clusters = _membertrix.getClusters();
 	
-	int K = clusters.size();
-
 	for (auto cluster_pair: clusters) {
 		auto const &key = cluster_pair.first;
-		fout << "Cluster ";
+		fout << "Write this cluster ";
 		_membertrix.print(key, cout);
 		cout << endl;
 
 		dataset_t *dataset = _membertrix.getData(key);
-		/*
-		for (auto data: *dataset) {
-			fout << *data << endl;
-		}
-		*/
 
 		stringstream sstream;
 		sstream.str("");
 		sstream << ws_path << '/' << basename << k << ".txt";
 		string fname = sstream.str();
-		fout << "Print to " << fname << endl;
+		fout << "Write to file " << fname << endl;
 		ofstream ofile;
 		ofile.open(fname);
 		for (auto data: *dataset) {
-			ofile << (*data)[0] << " " << (*data)[1] << endl;
+			for (auto d: *data) {
+				ofile << d << " ";
+			}			
+			ofile << endl;
 		}
-
 		ofile.close();
 
 		k++;
 	}
 	
-	for (auto cluster_pair: clusters) {
-		auto const &key = cluster_pair.first;
-		fout << "Cluster ";
-		_membertrix.print(key, cout);
-		cout << endl;
-	}
-
 	fout << "Write to file " << basename << ".txt" << endl;
 	stringstream sstream;
 	sstream.str("");
 	sstream << ws_path << '/' << basename << ".txt";
 	string fname = sstream.str();
+	writeOctave(fname);
+	_verbosity = 4;
+}
 
+void Results::writeOctave(const std::string & fname) {
 	ofstream ofile;
 	ofile.open(fname);
 
 	Eigen::IOFormat SpaceFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, " ", " ", "", "", " ", "");
+	
+	const clusters_t &clusters = _membertrix.getClusters();
+	int K = clusters.size();
+	if (K == 0) {
+		return;
+	}
+	auto const example = (*clusters.begin()).second;
+	distribution_type_t distribution_type = example->getSuffies().distribution_type;
 
 	ofile << "# name: mu" << endl;
 	ofile << "# type: matrix" << endl;
@@ -123,30 +123,65 @@ void Results::write(const string &workspace, const string & path, const string &
 	ofile << "# columns: 2" << endl;
 	for (auto cluster_pair: clusters) {
 		auto const &cluster = cluster_pair.second;
-		assert(false);	
-//		Suffies_MultivariateNormal &suffies = (Suffies_MultivariateNormal&)cluster->getSuffies();
-//		ofile << suffies.mu.format(SpaceFmt) << endl;
+		switch (distribution_type) {
+			case MultivariateNormal: {
+				Suffies_MultivariateNormal &suffies = (Suffies_MultivariateNormal&)cluster->getSuffies();
+				ofile << suffies.mu.format(SpaceFmt) << endl;
+				break;
+			}
+			case ScalarNoise_MultivariateNormal: {
+				Suffies_ScalarNoise_MultivariateNormal &suffies = (Suffies_ScalarNoise_MultivariateNormal&)cluster->getSuffies();
+				ofile << suffies.mu.format(SpaceFmt) << endl;
+				break;
+			}
+			default: {
+				fout << "Needs to be implemented!" << endl;
+				assert(false);
+			}
+		}
 	}
 
 	Eigen::IOFormat NewlineFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, " \n", " \n", "", "", " ", "");
 	
 	ofile << endl << endl;
 	ofile << "# name: sigma" << endl;
-	ofile << "# type: matrix" << endl;
-	ofile << "# ndims: 3" << endl;
-	ofile << " 2 2 " << K << endl;
+
+	switch (distribution_type) {
+		case MultivariateNormal: 
+			ofile << "# type: matrix" << endl;
+			ofile << "# ndims: 3" << endl;
+			ofile << " 2 2 " << K << endl;
+		break;
+		case ScalarNoise_MultivariateNormal:
+			ofile << "# type: matrix" << endl;
+			ofile << "# rows: " << K << endl;
+			ofile << "# columns: 1" << endl;
+		break;
+		default:
+			fout << "Needs to be implemented!" << endl;
+	}
 
 	for (auto cluster_pair: clusters) {
 		auto const &cluster = cluster_pair.second;
-		
-//		Suffies_MultivariateNormal &suffies = (Suffies_MultivariateNormal&)cluster->getSuffies();
-//		ofile << suffies.sigma.format(NewlineFmt) << endl;
+		switch (distribution_type) {
+			case MultivariateNormal: {
+				Suffies_MultivariateNormal &suffies = (Suffies_MultivariateNormal&)cluster->getSuffies();
+				ofile << suffies.sigma.format(NewlineFmt) << endl;
+				break;
+			}
+			case ScalarNoise_MultivariateNormal: {
+				Suffies_ScalarNoise_MultivariateNormal &suffies = (Suffies_ScalarNoise_MultivariateNormal&)cluster->getSuffies();
+				ofile << suffies.sigma << endl;
+				break;
+			}
+			default: {
+				fout << "Needs to be implemented!" << endl;
+				assert(false);
+			}
+		}
 	}
 
 	ofile.close();
 	
-	_verbosity = 4;
-
 	fout << "Wrote all to file" << endl;
-
 }

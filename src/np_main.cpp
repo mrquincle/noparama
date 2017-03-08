@@ -25,18 +25,16 @@
 
 using namespace std;
 
-
-
 int main(int argc, char *argv[]) {
 	char _verbosity = 2;
 	
 	fout << "Welcome to noparama" << endl;
 
 	// Configuration parameters 
-	int T = 10;
+	int T = 10000;
 	double alpha = 1;
 	// limit number of data items
-	bool limit = true;
+	bool limit = false;
 	int N = 10;
 
 	default_random_engine generator(random_device{}()); 
@@ -155,17 +153,11 @@ int main(int argc, char *argv[]) {
 	if (regression) {
 		fout << "Normal Inverse Gamma distribution" << endl;
 		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(2);
-		fout << "Set to prior" << endl;
 		suffies_nig->mu << 0, 0;
-		fout << "Set to prior" << endl;
 		suffies_nig->alpha = 10;
-		fout << "Set beta" << endl;
 		suffies_nig->beta = 0.1;
-		fout << "Set Lambda" << endl;
 		suffies_nig->Lambda << 0.01, 0, 0, 0.01;
-		fout << "Set to prior" << endl;
 		prior = new normal_inverse_gamma_distribution(*suffies_nig);
-		fout << "Prior set" << endl;
 	} else {
 		fout << "Normal Inverse Wishart distribution" << endl;
 		Suffies_NormalInvWishart * suffies_niw = new Suffies_NormalInvWishart(2);

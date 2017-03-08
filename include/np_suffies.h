@@ -27,7 +27,7 @@ static std::map< distribution_type_t, const char * > distribution_type_str = {
 	{MultivariateNormal,               "multivariate normal"},
 	{Unity_MultivariateNormal,         "unity multivariate normal"},
 	{ZeroCentered_MultivariateNormal,  "zero-centered multivariate normal"},
-	{ScalarNoise_MultivariateNormal,  "zero-centered multivariate normal"},
+	{ScalarNoise_MultivariateNormal,   "zero-centered multivariate normal"},
 	{NormalInvWishart,                 "normal inverse-Wishart"},
 	{InvWishart,                       "inverse-Wishart"},
 	{NormalInvGamma,                   "normal inverse-Gamma"},
@@ -50,6 +50,9 @@ class Suffies {
 		//! dimension
 		int D;
 
+		//! distribution type
+		distribution_type_t distribution_type;
+
 		virtual ~Suffies() {
 		};
 
@@ -64,6 +67,10 @@ class Suffies_Gamma: public Suffies {
 	public:
 		double alpha;
 		double beta;
+
+		Suffies_Gamma() {
+			distribution_type = Gamma;
+		}
 		
 		void print(std::ostream& os) const {
 			os << "g[alpha|beta]: " << alpha << " | " << beta;
@@ -79,6 +86,7 @@ class Suffies_NormalInvWishart: public Suffies {
 		
 		Suffies_NormalInvWishart(int D): mu(D), Lambda(D,D) {
 			Suffies::D = D;
+			distribution_type = NormalInvWishart;
 		}
 		
 		void print(std::ostream& os) const {
@@ -93,6 +101,7 @@ class Suffies_InvWishart: public Suffies {
 		
 		Suffies_InvWishart(int D): Lambda(D,D) {
 			Suffies::D = D;
+			distribution_type = InvWishart;
 		}
 		
 		void print(std::ostream& os) const {
@@ -110,6 +119,7 @@ class Suffies_NormalInvGamma: public Suffies {
 		
 		Suffies_NormalInvGamma(int D): mu(D), Lambda(D,D) {
 			Suffies::D = D;
+			distribution_type = NormalInvGamma;
 		}
 		
 		void print(std::ostream& os) const {
@@ -121,7 +131,11 @@ class Suffies_Normal: public Suffies {
 	public:
 		double mu;
 		double sigma;
-		
+	
+		Suffies_Normal() {
+			distribution_type = Normal;
+		}
+
 		void print(std::ostream& os) const {
 			os << "n[mu|sigma]: " << mu << " | " << sigma;
 		}
@@ -145,6 +159,7 @@ class Suffies_Unity_MultivariateNormal: public Suffies {
 
 		Suffies_Unity_MultivariateNormal(int D): mu(D) {
 			Suffies::D = D;
+			distribution_type = Unity_MultivariateNormal;
 		}
 		
 		void print(std::ostream& os) const {
@@ -161,6 +176,7 @@ class Suffies_ZeroCentered_MultivariateNormal: public Suffies {
 		
 		Suffies_ZeroCentered_MultivariateNormal(int D): sigma(D, D) {
 			Suffies::D = D;
+			distribution_type = ZeroCentered_MultivariateNormal;
 		}
 		
 		void print(std::ostream& os) const {
@@ -175,6 +191,7 @@ class Suffies_MultivariateNormal: public Suffies {
 		
 		Suffies_MultivariateNormal(int D): mu(D), sigma(D,D) {
 			Suffies::D = D;
+			distribution_type = MultivariateNormal;
 		}
 		
 		void print(std::ostream& os) const {
@@ -189,6 +206,7 @@ class Suffies_ScalarNoise_MultivariateNormal: public Suffies {
 		
 		Suffies_ScalarNoise_MultivariateNormal(int D): mu(D)  {
 			Suffies::D = D;
+			distribution_type = ScalarNoise_MultivariateNormal;
 		}
 		
 		void print(std::ostream& os) const {
@@ -200,7 +218,11 @@ class Suffies_Dirichlet: public Suffies {
 	public:
 		double alpha;
 //		Suffies base_suffies;
-		
+
+		Suffies_Dirichlet() {
+			distribution_type = Dirichlet;
+		}
+
 		void print(std::ostream& os) const {
 			os << "d[alpha]: " << alpha;
 		}

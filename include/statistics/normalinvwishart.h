@@ -48,13 +48,11 @@ class normal_inverse_wishart_distribution: public distribution_t {
 			// first sample covariance matrix from IW
 			inverse_wishart_distribution invwishart_dist(_suffies_iw);
 			Suffies_ZeroCentered_MultivariateNormal *suffies_mvn0 = invwishart_dist(generator);
-			std::cout << "Sigma comes from: " << *suffies_mvn0 << std::endl;
 			_suffies_result->sigma = suffies_mvn0->sigma;
 //			delete suffies_mvn0;
 
 			// next sample mu from normal distribution
 			_suffies_mvn.sigma = _suffies_result->sigma / _suffies_normalinvwishart.kappa;
-			std::cout << "Mu comes from: " << _suffies_mvn << std::endl;
 			multivariate_normal_distribution multivariate_normal_dist(_suffies_mvn);
 			Suffies_Unity_MultivariateNormal *suffies_mvn1 = multivariate_normal_dist(generator);
 

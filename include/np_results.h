@@ -26,4 +26,6 @@ class Results {
         matrix_t & calculateContingencyMatrix();
 
         void write(const std::string & workspace, const std::string & path, const std::string & basename);
+
+	void writeOctave(const std::string & fname);
 };
