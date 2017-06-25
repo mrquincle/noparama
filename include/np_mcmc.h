@@ -36,6 +36,11 @@ class MCMC {
 		//! Verbosity level for the class
 		char _verbosity;
 
+		//! Fixed scan or random scan
+		bool _random_scan;
+
+		//! Number of simultaneous data points under consideration
+		int _subset_count;
 	public:
 		/*!
 		 * Constructor for MCMC.

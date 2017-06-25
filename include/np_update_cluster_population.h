@@ -26,11 +26,11 @@ class UpdateClusterPopulation {
 		/*!
 		 * Update the cluster population. The observation has to be deleted beforehand.
 		 * @param[inout] cluster_matrix				Cluster-observation membership matrix
-		 * @param[in] data_id						Observation to be considered for existing and new cluster
+		 * @param[in] data_ids						Observations to be considered for existing and new cluster
 		 */
 		virtual void update(
 				membertrix & cluster_matrix,
-				data_id_t data_id
+				std::vector<data_id_t> data_ids
 			) {
 			std::cout << "General update" << std::endl;
 		}

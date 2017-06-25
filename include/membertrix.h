@@ -10,14 +10,11 @@
 //! Hashmap for the cluster indices and cluster objects
 typedef std::unordered_map<cluster_id_t, cluster_t*> clusters_t;
 
-//! Relabel 
-typedef std::unordered_map<cluster_id_t, cluster_id_t> relabel_t;
-
 //! A dataset per cluster
 typedef std::unordered_map<cluster_id_t, dataset_t*> clusters_dataset_t;
 
-//! Assignments
-typedef std::unordered_map<data_id_t, cluster_id_t> assignments_t;
+//! Assignments for an individual cluster
+typedef std::vector<data_id_t> data_ids_t;
 
 enum np_error_t { error_none, error_already_assigned, error_assignment_remaining, error_assignment_absent };
 
@@ -147,7 +144,6 @@ class membertrix {
 		 * 
 		 *   retract(getCluster(data_id), data_id);
 		 *
-		 * @param[in] cluster_id       An index to a cluster object
 		 * @param[in] data_id          An index to a data point
 		 */
 		np_error_t retract(data_id_t data_id);
@@ -160,6 +156,14 @@ class membertrix {
 		 * @return                     Boolean representing any assignment
 		 */
 		bool assigned(data_id_t data_id) const;
+
+		/*!
+		 * Get all assignments to given cluster.
+		 *
+		 * @param[in] cluster_id       An index to a cluster object
+		 * @return                     Set of data ids.
+		 */
+		data_ids_t* getAssignments(cluster_id_t cluster_id) const;
 
 		/*!
 		 * Get the cluster id given a particular data id.
@@ -178,6 +182,13 @@ class membertrix {
 		 * @return                     Set of clusters
 		 */
 		const clusters_t & getClusters() const;
+
+		/*!
+		 * Get number of clusters. Note that retract and assign adjust the number of clusters!
+		 *
+		 * @return                     Total number of clusters
+		 */
+		size_t getClusterCount() const;
 
 		/*!
 		 * Aggressive restructuring of all data structures. This will relabel all cluster_id's to consecutive numbers.

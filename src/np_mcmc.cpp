@@ -12,10 +12,12 @@
 #include <iostream>
 
 #include <pretty_print.hpp>
-
 #include <chrono>
 
+#include <dim1algebra.hpp>
+
 using namespace std;
+using namespace algebra;
 
 MCMC::MCMC(
 		default_random_engine & generator,
@@ -29,6 +31,8 @@ MCMC::MCMC(
 	_update_cluster_population(update_cluster_population)
 {
 	_verbosity = 4;
+
+	_subset_count = 2;
 }
 
 void MCMC::run(dataset_t & dataset, int T) {
@@ -78,18 +82,28 @@ void MCMC::run(dataset_t & dataset, int T) {
 			_membertrix.relabel();
 		}
 
-		// iterator over all observations (observations get shifted around, but should not be counted twice)
-		for (int i = 0; i < N; ++i) {
-			fout << "Retract observation " << i << " from membertrix" << endl;
-	
-			// remove observation under consideration from cluster
-			_membertrix.retract(i);
-		
-			// update cluster assignments, delete and create clusters
-			_update_cluster_population.update(_membertrix, i);
-		
+		/* We iterate over all observations. We are using a fixed scan where we randomize all items once and then loop
+		 * over them.
+		 */
+		std::vector< std::vector<int> > indices(3);
+		for (int i = 0; i < _subset_count; ++i) {
+			indices[i].resize(N);
+			fill_successively(indices[i].begin(), indices[i].end());
+			random_order(indices[i].begin(), indices[i].end());
 		}
-			
+
+		for (int i = 0; i < N; ++i) {
+			// create subset vector of size _subset_count
+			std::vector<int> subset(_subset_count);
+			for (int j = 0; j < _subset_count; ++j) {
+				subset[j] = indices[j][i];
+			}
+	
+			// update cluster assignments, delete and create clusters
+			_update_cluster_population.update(_membertrix, subset);
+
+		}
+
 		fout << "Update cluster " << endl;
 
 		// update cluster parameters

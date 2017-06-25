@@ -28,8 +28,14 @@ Suffies * UpdateClusters::propose() {
 }
 
 /**
- * Update cluster parameters. This function should leave the clusters invariant. The membership matrix should not
- * be different 
+ * Update cluster parameters. This function should leave the number of clusters invariant. The membership matrix should 
+ * not be different after the function has been executed. There are not more, not less clusters. Only the parameters
+ * of the clusters are updated. The update of the parameters uses the data by shifting the prior towards the 
+ * likelihood, but does not perform maximum likelihood. In this way ergodicity of the chain is maintained and it
+ * evolves to the right target distribution.
+ *
+ * The parameters of a cluster is called "suffies". This does not mean that the algorithm uses conjugacy, only that
+ * there is a limited set of parameters that are sufficient to describe the probability density function.
  */
 void UpdateClusters::update(
 			membertrix & cluster_matrix,

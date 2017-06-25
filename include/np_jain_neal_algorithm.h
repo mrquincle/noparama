@@ -12,10 +12,10 @@ struct statistics_t {
 };
 
 /**
- * This class NealAlgorithm8 updates the cluster population assuming a dirichlet process as nonparametric prior.
+ * This class JainNealAlgorithm updates the cluster population assuming a dirichlet process as nonparametric prior.
  *
  */
-class NealAlgorithm8: public UpdateClusterPopulation {
+class JainNealAlgorithm: public UpdateClusterPopulation {
 	private:
 		//! Random generator to sample values between 0 and 1 for the Metropolis Hasting step.
 		std::default_random_engine _generator;
@@ -48,7 +48,7 @@ class NealAlgorithm8: public UpdateClusterPopulation {
 		 * @param[in] likelihood                 Likelihood function to be used in update()
 		 * @param[in] nonparametrics             Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
 		 */
-		NealAlgorithm8(
+		JainNealAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
 			dirichlet_process & nonparametrics

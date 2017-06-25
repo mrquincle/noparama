@@ -193,6 +193,10 @@ cluster_id_t membertrix::getCluster(data_id_t data_id) const {
 	return -1;
 }
 
+size_t membertrix::getClusterCount() const {
+	return _cluster_objects.size();
+}
+
 const clusters_t & membertrix::getClusters() const {
 	fout << "Get clusters: " << _cluster_objects.size() << std::endl;
 	for (auto cluster_pair: _cluster_objects) {
@@ -252,6 +256,17 @@ dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
 	}
 	return dataset; 
 #endif
+}
+
+data_ids_t* membertrix::getAssignments(cluster_id_t cluster_id) const {
+	data_ids_t *data_ids = new data_ids_t();
+	auto cluster_data = _membership_matrix.col(cluster_id);
+	for (int i = 0; i < cluster_data.size(); ++i) {
+		if (cluster_data(i)) {
+			data_ids->push_back(i);
+		}
+	}
+	return data_ids;
 }
 
 bool membertrix::empty(cluster_id_t cluster_id) {

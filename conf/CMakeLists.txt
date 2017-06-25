@@ -28,7 +28,7 @@ find_package(PkgConfig)
 pkg_search_module(Eigen3 REQUIRED eigen3)
 
 if( NOT Eigen3_INCLUDE_DIRS )
-    message( FATAL_ERROR "Install Eigen3 (we have used pkg-config to find it and can't find the include paths).")
+    message( FATAL_ERROR "Install Eigen3 (cmake used pkg-config to find it and can't find the include paths).")
 endif()
 include_directories ( "${Eigen3_INCLUDE_DIRS}" )
 
@@ -40,13 +40,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 include_directories ( "include" )
+include_directories ( "include/helper" )
 
 set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mcmc.cpp \\
     src/statistics/multivariatenormal.cpp \\
     src/statistics/scalarnoise_multivariatenormal.cpp \\
     src/membertrix.cpp src/np_init_clusters.cpp \\
     src/clustering_performance.cpp \\
-    src/np_update_clusters.cpp src/np_neal_algorithm8.cpp)
+    src/np_update_clusters.cpp \\
+    src/np_neal_algorithm8.cpp \\
+    src/np_jain_neal_algorithm.cpp 
+    )
 
 # CMAKE_BINARY_DIR is the top of the build-directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

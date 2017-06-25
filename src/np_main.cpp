@@ -19,13 +19,24 @@
 #include <statistics/normalinvwishart.h>
 #include <statistics/normalinvgamma.h>
 
+#define ALGORITHM 9
+
+#if ALGORITHM==8
 #include <np_neal_algorithm8.h>
+#else
+#include <np_jain_neal_algorithm.h>
+#endif
 
 #include <pretty_print.hpp>
 
 using namespace std;
 
-
+/**
+ * With the dataset twogaussians it is important to realize that this did not originate from a Dirichlet process. Even
+ * if alpha is chosen to be very low (say 0.0001), there will be multiple clusters generated, not just two. The purity
+ * will be quite high (very few misclassifications) but the specificity is low (identification of multiple clusters
+ * where there is only one).
+ */
 
 int main(int argc, char *argv[]) {
 	char _verbosity = 2;
@@ -33,11 +44,20 @@ int main(int argc, char *argv[]) {
 	fout << "Welcome to noparama" << endl;
 
 	// Configuration parameters 
-	int T = 10;
+	int T = 1000;
+	fout << "Run MCMC sampler for " << T << " steps " << endl;
+
 	double alpha = 1;
+	fout << "The Dirichlet Process is run with alpha=" << alpha << endl;
+
 	// limit number of data items
-	bool limit = true;
+	bool limit = false;
 	int N = 10;
+	if (limit) {
+		fout << "Using limited dataset with only " << N << " items " << endl;
+	} else {
+		fout << "Using full dataset" << endl;
+	}
 
 	default_random_engine generator(random_device{}()); 
 
@@ -114,7 +134,7 @@ int main(int argc, char *argv[]) {
 		if (limit && (n == N)) break;
 	}
 
-	int I = 20;
+	int I = 5;
 	fout << "Display first " << I << " items of the dataset" << endl;
 	for (int i = 0; i < I; ++i) {
 		if (i == (int)ground_truth.size()) break;
@@ -184,8 +204,14 @@ int main(int argc, char *argv[]) {
 	// To update the cluster population we need	to sample new clusters using hyper parameters and adjust existing ones
 	// using prior and likelihood
 	fout << "Set up UpdateClusterPopulation object" << endl;
-	NealAlgorithm8 update_cluster_population(generator, *likelihood, hyper);
 
+#if ALGORITHM==8
+	fout << "We will be using algorithm 8 by Neal" << endl;
+	NealAlgorithm8 update_cluster_population(generator, *likelihood, hyper);
+#else
+	fout << "We will be using algorithm 8 by Neal" << endl;
+	JainNealAlgorithm update_cluster_population(generator, *likelihood, hyper);
+#endif
 	// create MCMC object
 	fout << "Set up MCMC" << endl;
 	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population);

@@ -1,4 +1,4 @@
-#include <np_neal_algorithm8.h>
+#include <np_jain_neal_algorithm.h>
 
 #include <iostream>
 #include <iomanip>
@@ -6,7 +6,7 @@
 
 using namespace std;
 
-NealAlgorithm8::NealAlgorithm8(
+JainNealAlgorithm::JainNealAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
 			dirichlet_process & nonparametrics
@@ -24,6 +24,13 @@ NealAlgorithm8::NealAlgorithm8(
 	_statistics.new_clusters_events = 0;
 }
 
+int factorial(int n) {
+	int ret = 1;
+	for(int i = 1; i <= n; ++i)
+		ret *= i;
+	return ret;
+}
+
 /*
  * This function assigns the given data item and updates the number of clusters if it is assigned to a new cluster.
  * It does not reassign other data items. Hence, it is a single update step. This naturally has disadvantages for
@@ -37,26 +44,75 @@ NealAlgorithm8::NealAlgorithm8(
  * is a not data-driven either. We just sample from the base distribution "_nonparametrics.sample_base" without 
  * regard for that part of parameter space that makes sense from the perspective of the data.
  */
-void NealAlgorithm8::update(
+void JainNealAlgorithm::update(
 			membertrix & cluster_matrix,
 			std::vector<data_id_t> data_ids
 		) {
-	
-	assert (data_ids.size() == 1);
-	data_id_t data_id = data_ids[0];
-
 	static int step = 0;
-	fout << "Update step " << ++step << " in algorithm 8 for data item " << data_id << endl;
-	
-	// remove observation under consideration from cluster
+	fout << "Update step " << ++step << " in Jain & Neal's split-merge algorithm for data item " << data_id << endl;
+
+	// remove observation under consideration from cluster, store cluster indices
+	std::vector<cluster_id_t> prev_clusters(data_ids.size());
 	for (auto index: data_ids) {
 		fout << "Retract observation " << index << " from cluster matrix" << endl;
-		cluster_matrix.retract(index);
+		cluster_id_t cluster_id = cluster_matrix.getCluster(index);
+		prev_clusters.push_back( cluster_id );
+		cluster_matrix.retract(cluster_id, index);
 	}
 
+	std::set<cluster_id_t> prev_uniq_clusters;
+	for (auto cl: prev_clusters) {
+		prev_uniq_clusters.insert(cl);
+	}
+	int uniq_cluster_count = prev_uniq_clusters.size();
+
+	// a single cluster
+	switch (uniq_cluster_count) {
+		case 0: default:
+			assert(false);
+		break;
+		case 1: {
+			// split step
+		}
+		break;
+		case 2: {
+			size_t Ka = cluster_matrix.getClusterCount();
+
+			// merge step
+			
+			// copy each element by value, so we can correct the step later
+			data_ids_t data_ids0 = *cluster_matrix.getAssignments(prev_clusters[0]);
+			data_ids_t data_ids1 = *cluster_matrix.getAssignments(prev_clusters[1]);
+
+			int nc0 = data_ids0.size();
+			int nc1 = data_ids1.size();
+			int nc = nc0 + nc1;
+
+			// check if type is correct (no rounding off to ints by accident)
+			double p12 = 1.0/_alpha * factorial(nc - 1) / (  factorial(nc0 - 1) * factorial(nc1 - 1) );
+			double q21 = pow(0.5, nc - 2);
+
+			// calculate likelihoods
+
+			// move all items from i to j
+			for (auto data: data_ids0) {
+				cluster_matrix.retract(data);
+				cluster_matrix.assign(prev_clusters[1], data);
+			}
+			
+			size_t Kb = cluster_matrix.getClusterCount();
+			assert (Kb == Ka - 1);
+
+			// needs to be re-established on rejection!
+		}
+		break;
+	} 
+	
 	// existing clusters
 	// if data item removed one of the clusters, this is still in there with a particular weight
+	// assume getClusters() will be a copy
 	auto clusters = cluster_matrix.getClusters();
+
 
 	// Create temporary data structure for K clusters
 	size_t K = clusters.size();
@@ -64,9 +120,9 @@ void NealAlgorithm8::update(
 
 	fout << "Calculate likelihood for K=" << K << " existing clusters" << endl;
 
-	fout << "Calculate parameters for M new clusters" << endl;
+	fout << "Calculate parameters for M=1 new clusters" << endl;
 	// Calculate parameters for M new clusters
-	int M = 3;
+	int M = 1;
 	clusters_t new_clusters(M);
 	for (int m = 0; m < M; ++m) {
 		Suffies *suffies = _nonparametrics.sample_base(_generator);
@@ -122,6 +178,11 @@ void NealAlgorithm8::update(
 			new_clusters[m]->getSuffies() << endl;
 	}
 
+	/*
+	 * If samples come from the same cluster... (do we still know?)
+	 */
+
+
 	// sample uniformly from the vector "weighted_likelihood" according to the weights in the vector
 	// hence [0.5 0.25 0.25] will be sampled in the ratio 2:1:1
 	fout << "Pick a cluster given their weights" << endl;
@@ -176,7 +237,7 @@ void NealAlgorithm8::update(
 	assert(cluster_matrix.assigned(data_id));
 }
 
-void NealAlgorithm8::printStatistics() {
+void JainNealAlgorithm::printStatistics() {
 	int verbosity = _verbosity;
 	_verbosity = 0;
 	fout << "Statistics:" << endl;

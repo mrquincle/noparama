@@ -16,8 +16,17 @@ NealAlgorithm2::NealAlgorithm2(
 
 void NealAlgorithm2::update(
 			membertrix & cluster_matrix,
-			data_id_t data_id
+			std::vector<data_id_t> data_ids
 		) {
+
+	assert (data_ids.size() == 1);
+	data_id_t data_id = data_ids[0];
+	
+	// remove observation under consideration from cluster
+	for (auto index: data_ids) {
+		fout << "Retract observation " << index << " from cluster matrix" << endl;
+		cluster_matrix.retract(index);
+	}
 
 	// Create temporary data structure for K clusters
 	size_t K = clusters.length();
