@@ -40,10 +40,17 @@ doc-online:
 	xdg-open https://mrquincle.github.com/noparama
 
 .ONESHELL:
-push: doc
-	git add .
-	git commit 
+update-version:
+	@sed -i 's/^:Version: .*$$/:Version: 0.1.$(shell git rev-list master --count)/' README.rst
+
+.ONESHELL:
+push: update-version
+	git add -u .
+	git commit
 	git push
+
+.ONESHELL:
+push-doc: push doc
 	cd doc/html
 	git add .
 	git commit

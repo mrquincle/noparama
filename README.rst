@@ -3,17 +3,42 @@ Noparama
 
 This software is about mathematics, in particular nonparametric Bayesian models.
 
+Installation
+------------
+
+On Ubuntu:
+
+.. code-block:: bash
+
+	sudo apt install git cmake gcc libeigen3-dev
+	echo "Go to your preferred installation directory"
+	git clone git@github.com:mrquincle/noparama.git
+	cd noparama
+	make
+	echo "The compiled binary you can find in build/bin/
+
+A dataset can be found in a companion repository: https://github.com/mrquincle/noparama-datasets.git.
+
 Use
 ---
 
 After compiling the program it can be run as:
 
-./noparama
+.. code-block:: bash
+
+	./noparama
 
 --data file                  file with data to process, e.g. datasets/twogaussians.data  
 --config file                file with configuration values
 
-The datasets are not included with the repository.
+Example:
+
+.. code-block:: bash
+
+	cd build/bin
+	./noparama -d ../datasets/twogaussians.data
+
+The datasets are not included with the repository, but in https://github.com/mrquincle/noparama-datasets.git.
 
 Structure
 ---------
@@ -124,4 +149,4 @@ However, don't use it yet.
 :Authors:
     Anne van Rossum
 
-:Version: 0.172 
+:Version: 0.1.47

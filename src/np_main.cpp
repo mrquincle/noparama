@@ -37,7 +37,6 @@ using namespace std;
  * will be quite high (very few misclassifications) but the specificity is low (identification of multiple clusters
  * where there is only one).
  */
-
 int main(int argc, char *argv[]) {
 	char _verbosity = 2;
 	
@@ -134,6 +133,11 @@ int main(int argc, char *argv[]) {
 		if (limit && (n == N)) break;
 	}
 
+	if (n == 0) {
+		fout << "No data found... Check the file or the contents of the file." << endl;
+		exit(7);
+	}
+
 	int I = 5;
 	fout << "Display first " << I << " items of the dataset" << endl;
 	for (int i = 0; i < I; ++i) {
@@ -170,17 +174,11 @@ int main(int argc, char *argv[]) {
 	if (regression) {
 		fout << "Normal Inverse Gamma distribution" << endl;
 		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(2);
-		fout << "Set to prior" << endl;
 		suffies_nig->mu << 0, 0;
-		fout << "Set to prior" << endl;
 		suffies_nig->alpha = 10;
-		fout << "Set beta" << endl;
 		suffies_nig->beta = 0.1;
-		fout << "Set Lambda" << endl;
 		suffies_nig->Lambda << 0.01, 0, 0, 0.01;
-		fout << "Set to prior" << endl;
 		prior = new normal_inverse_gamma_distribution(*suffies_nig);
-		fout << "Prior set" << endl;
 	} else {
 		fout << "Normal Inverse Wishart distribution" << endl;
 		Suffies_NormalInvWishart * suffies_niw = new Suffies_NormalInvWishart(2);
