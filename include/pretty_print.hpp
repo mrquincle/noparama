@@ -18,17 +18,34 @@
 
 enum { Emergency, Alert, Critical, Error, Warning, Notice, Information, Debug};
 
+static std::vector<std::string> levels_str { "Emergency", "Alert", "Critical", "Error", "Warning", "Notice", "Information", "Debug"};
+
+enum { Black, Red, Green, Yellow, Blue, Purple, Cyan, White };
+
+static std::vector<std::string> levels_clr { "\033[0;30m", "\033[0;31m", "\033[0;32m", "\033[0;33m", "\033[0;34m", "\033[0;35m", "\033[0;36m", "\033[0;37m" };
+
+static std::vector<int> levels_clr_map { Red, Red, Red, Red, Yellow, Yellow, Green, White };
+
+static std::string fblue = "\033[1;34m";
+static std::string fpurple = "\033[1;35m";
+
 #define __SHORT_FORM_OF_FILE__ \
     (strrchr(__FILE__,'/') \
      ? strrchr(__FILE__,'/')+1 \
      : __FILE__ \
     )
 
-#define fout \
-    if (_verbosity < Warning) std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m \033[1;34m" << __func__ << "(): \033[0m" 
-
+/*
+ * Assume there is a local variable "_verbosity" that can be used!
+ */
 #define foutvar(var) \
-    if (_verbosity < var) std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m \033[1;34m" << __func__ << "(): \033[0m" 
+    if (_verbosity >= var) std::cout << levels_clr[ levels_clr_map[var] ] << '[' << levels_str[var] << "] " << levels_clr[Purple] << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m " << levels_clr[Blue] << __func__ << "(): \033[0m" 
+
+/*
+ * Set default fout level at Information
+ */
+#define fout \
+    foutvar(Information)
 
 // This works similar to ostream_iterator, but doesn't print a delimiter after the final item
 template<typename T, typename TChar = char, typename TCharTraits = std::char_traits<TChar> >

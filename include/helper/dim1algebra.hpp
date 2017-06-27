@@ -1823,7 +1823,8 @@ void
 fill_successively(ForwardIterator first, ForwardIterator last)
 {
 	typedef typename std::iterator_traits<ForwardIterator>::value_type ValueType;
-	generate(first, last, [] { static ValueType i {1}; return i++; });
+	ValueType i = {0};
+	std::generate(first, last, [&i] { return i++; });
 }
 
 /***********************************************************************************************************************

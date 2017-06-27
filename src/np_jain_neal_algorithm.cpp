@@ -17,6 +17,7 @@ JainNealAlgorithm::JainNealAlgorithm(
 {
 	_alpha = _nonparametrics.getSuffies().alpha;
 
+//	_verbosity = Debug;
 	_verbosity = Warning;
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
@@ -55,18 +56,27 @@ void JainNealAlgorithm::update(
 	fout << "Update step " << ++step << " in Jain & Neal's split-merge algorithm for several data items at once" << endl;
 
 	// store cluster indices and retract only current observations
-	std::vector<cluster_id_t> prev_clusters(data_ids.size());
-	for (auto index: data_ids) {
-		cluster_id_t cluster_id = cluster_matrix.getClusterId(index);
+	std::vector<cluster_id_t> prev_clusters; //data_ids.size());
+	prev_clusters.clear();
+	for (auto data_id: data_ids) {
+		//fout << "Retract data item " << data_id << endl;
+		//assert (cluster_matrix.assigned(data_id) );
+		cluster_id_t cluster_id = cluster_matrix.getClusterId(data_id);
+		fout << "Found data " << data_id << " at cluster " << cluster_id << endl;
 		prev_clusters.push_back( cluster_id );
 		// Todo: check c_j, should it be retracted?
-		cluster_matrix.retract(cluster_id, index);
+		//assert (cluster_matrix.assigned(data_id) );
+		//fout << "Retract data " << data_id << " from cluster " << cluster_id << endl;
+		//cluster_matrix.retract(cluster_id, data_id);
+		//fout << "Retracted" << endl;
 	}
+	fout << "Calculate number of unique clusters" << endl;
 	std::set<cluster_id_t> prev_uniq_clusters;
 	for (auto cl: prev_clusters) {
 		prev_uniq_clusters.insert(cl);
 	}
 	int uniq_cluster_count = prev_uniq_clusters.size();
+	fout << "There are " << uniq_cluster_count << " unique clusters" << endl;
 
 	// a single cluster
 	switch (uniq_cluster_count) {
@@ -74,6 +84,7 @@ void JainNealAlgorithm::update(
 			assert(false);
 		break;
 		case 1: { // split step
+			fout << "Split this cluster" << endl;
 			assert (prev_clusters[0] == prev_clusters[1]);
 
 			size_t Ka = cluster_matrix.getClusterCount();
@@ -85,6 +96,8 @@ void JainNealAlgorithm::update(
 			data_ids_t data_ids2_1 = { data_ids[1] };
 
 			for (auto data_id: *data_ids1) {
+				if (data_id == data_ids[0]) continue;
+				if (data_id == data_ids[1]) continue;
 				
 				// sample uniform random variable to randomly split over clusters
 				double toss = _distribution(_generator);
@@ -100,6 +113,7 @@ void JainNealAlgorithm::update(
 			int nc0 = data_ids2_0.size();
 			int nc1 = data_ids2_1.size();
 			int nc = nc0 + nc1; // TODO: check again size
+			fout << "Cluster is size " << nc << " and after split becomes " << nc0 << " and " << nc1 << endl;
 
 			// TODO: check if factorials do not become too big
 			// TODO: check if we can have a lookup for the Beta function
@@ -127,15 +141,19 @@ void JainNealAlgorithm::update(
 
 			bool accept;
 			if (a_split < u) {
+				fout << "Reject!" << endl;
 				accept = false;
 			} else {
+				fout << "Accept!" << endl;
 				accept = true;
 			}
 
 			if (accept) {
 				// actually perform the move: only points that move have to be moved...
 				cluster_id_t new_cluster_id = cluster_matrix.addCluster(new_cluster);
+				fout << "Add cluster with id " << new_cluster_id << endl;				
 				for (auto data: data_ids2_0) {
+					fout << "Add data " << data << " to the new cluster " << new_cluster_id << endl;
 					cluster_matrix.retract(data);
 					cluster_matrix.assign(new_cluster_id, data);
 				}
@@ -148,6 +166,7 @@ void JainNealAlgorithm::update(
 		}
 		break;
 		case 2: { // merge step
+			fout << "Merge these clusters" << endl;
 			assert (prev_clusters[0] != prev_clusters[1]);
 
 			size_t Ka = cluster_matrix.getClusterCount();
@@ -159,10 +178,13 @@ void JainNealAlgorithm::update(
 			int nc0 = data_ids0->size();
 			int nc1 = data_ids1->size();
 			int nc = nc0 + nc1;
+			fout << "Clusters are size " << nc0 << " and " << nc1 << " and after merge become " << nc << endl;
 
 			// check if type is correct (no rounding off to ints by accident)
 			double p12 = 1.0/_alpha * factorial(nc - 1) / (  factorial(nc0 - 1) * factorial(nc1 - 1) );
+			fout << "Fraction P(1)/P(2) becomes: " << p12 << endl;
 			double q21 = pow(0.5, nc - 2);
+			fout << "Fraction q(1|2)/q(2|1) becomes: " << q21 << endl;
 
 			// calculate likelihoods
 			// if we would have stored the likelihoods somewhere of the original clusters we might have reused them
@@ -173,6 +195,7 @@ void JainNealAlgorithm::update(
 			_likelihood.init(cluster0->getSuffies());
 			dataset_t * data0 = cluster_matrix.getData(prev_clusters[0]);
 			double l2_0 = _likelihood.probability(*data0);
+			fout << "Likelihood of data in cluster 0 before merge " << l2_0 << endl;
 
 #define CLUSTER_SUFFICIENT_STATISTICS_UNCHANGED_AND_LIKELIHOOD_DATA_INDEPENDENT
 #ifdef CLUSTER_SUFFICIENT_STATISTICS_UNCHANGED_AND_LIKELIHOOD_DATA_INDEPENDENT
@@ -180,7 +203,15 @@ void JainNealAlgorithm::update(
 			auto cluster1 = cluster_matrix.getCluster(prev_clusters[1]);
 			_likelihood.init(cluster1->getSuffies());
 			double l1_0 = _likelihood.probability(*data0);
-			double l12 = l1_0 / l2_0;
+			
+			fout << "Likelihood of same data in cluster 1 after merge " << l1_0 << endl;
+			double l12;
+			if (l1_0 == 0 && l2_0 == 0) {
+				// likelihood is zero before and after merge... we should just walk...
+				l12 = 1;
+			} else {
+				l12 = l1_0 / l2_0;
+			}
 #else
 			// likelihood of cluster 1 before merge
 			auto cluster1 = cluster_matrix.getCluster(prev_clusters[1]);
@@ -202,18 +233,25 @@ void JainNealAlgorithm::update(
 
 			bool accept;
 			if (a_merge < u) {
+				fout << "Reject!" << endl;
 				accept = false;
 			} else {
+				fout << "Accept!" << endl;
 				accept = true;
 			}
 
 			if (accept) {
 				// actually perform the move: all items from i go to j
 				for (auto data: *data_ids0) {
-					cluster_matrix.retract(data);
+					// data_ids[0] is already retracted
+					//if (data != data_ids[0]) {
+						cluster_matrix.retract(data);
+					//}
 					cluster_matrix.assign(prev_clusters[1], data);
 				}
+				//cluster_matrix.assign(
 
+				fout << "Check cluster count again" << endl;
 				size_t Kb = cluster_matrix.getClusterCount();
 				assert (Kb == Ka - 1);
 			}
@@ -224,6 +262,7 @@ void JainNealAlgorithm::update(
 
 	// check
 	for (auto data_id: data_ids) {
+		fout << "Check data id " << data_id << endl;
 		assert(cluster_matrix.assigned(data_id));
 	}
 }

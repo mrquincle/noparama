@@ -30,7 +30,7 @@ MCMC::MCMC(
 	_update_clusters(update_clusters), 
 	_update_cluster_population(update_cluster_population)
 {
-	_verbosity = 4;
+	_verbosity = Notice;
 
 	_subset_count = 2;
 }
@@ -46,7 +46,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 	for (int i = 0; i < N; ++i) {
 		data_t & datum = *dataset[i];
 		data_id_t j = _membertrix.addData(datum);
-//		fout << "Data " << datum << " got index " << j <<endl;
+		fout << "Data " << datum << " got index " << j <<endl;
 		assert (i == j);
 	}
 
@@ -78,24 +78,29 @@ void MCMC::run(dataset_t & dataset, int T) {
 	for (int t = 0; t < T; ++t) {
 		
 		if (t % 100 == 0) { 
-			foutvar(5) << "Metropolis Hastings update " << t << endl; 
+			foutvar(Notice) << "Metropolis Hastings update " << t << endl; 
 			_membertrix.relabel();
 		}
 
 		/* We iterate over all observations. We are using a fixed scan where we randomize all items once and then loop
 		 * over them.
 		 */
-		std::vector< std::vector<int> > indices(3);
+		fout << "Create multiple vectors with indices and randomly order each of them" << endl;
+		std::vector< std::vector<int> > indices(_subset_count);
 		for (int i = 0; i < _subset_count; ++i) {
 			indices[i].resize(N);
 			fill_successively(indices[i].begin(), indices[i].end());
+			//cout << indices[i] << endl;
 			random_order(indices[i].begin(), indices[i].end());
+			//cout << indices[i] << endl;
 		}
 
+		fout << "Create subset of size " << _subset_count << endl;
 		for (int i = 0; i < N; ++i) {
 			// create subset vector of size _subset_count
 			std::vector<int> subset(_subset_count);
 			for (int j = 0; j < _subset_count; ++j) {
+				fout << "Set next item to " << indices[j][i] << endl;
 				subset[j] = indices[j][i];
 			}
 	

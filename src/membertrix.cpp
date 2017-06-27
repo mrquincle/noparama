@@ -22,7 +22,7 @@ using namespace std;
 #define ADDITIONAL_CHECKS              1
 
 membertrix::membertrix() {
-	_verbosity = 4;
+	_verbosity = Warning;
 }
 
 membertrix::membertrix(const membertrix &other) {

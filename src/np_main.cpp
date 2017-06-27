@@ -38,7 +38,7 @@ using namespace std;
  * where there is only one).
  */
 int main(int argc, char *argv[]) {
-	char _verbosity = 2;
+	char _verbosity = Debug;
 	
 	fout << "Welcome to noparama" << endl;
 
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 	fout << "We will be using algorithm 8 by Neal" << endl;
 	NealAlgorithm8 update_cluster_population(generator, *likelihood, hyper);
 #else
-	fout << "We will be using algorithm 8 by Neal" << endl;
+	fout << "We will be using the Jain-Neal algorithm" << endl;
 	JainNealAlgorithm update_cluster_population(generator, *likelihood, hyper);
 #endif
 	// create MCMC object
