@@ -87,6 +87,10 @@ cluster_id_t membertrix::addCluster(cluster_t *cluster) {
 	return cluster_index;
 }
 
+cluster_t * membertrix::getCluster(cluster_id_t cluster_id) {
+	return _cluster_objects.at(cluster_id);
+}
+
 data_id_t membertrix::addData(data_t & data) {
 	// use current number of rows as data index
 	int data_index = _membership_matrix.rows();
@@ -178,11 +182,11 @@ np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id) {
 }
 
 np_error_t membertrix::retract(data_id_t data_id) {
-	cluster_id_t cluster_id = getCluster(data_id);
+	cluster_id_t cluster_id = getClusterId(data_id);
 	return retract(cluster_id, data_id);
 }
 
-cluster_id_t membertrix::getCluster(data_id_t data_id) const {
+cluster_id_t membertrix::getClusterId(data_id_t data_id) const {
 	// maxCoeff could be used, but would iterate till maximum is found, we would need find(...,'first');
 	// we do not first create a col(), assuming directly accessing matrix(i,j) is faster
 	for (int j = 0; j < _membership_matrix.cols(); ++j) {
@@ -256,6 +260,16 @@ dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
 	}
 	return dataset; 
 #endif
+}
+
+dataset_t* membertrix::getData(data_ids_t data_ids) const {
+	dataset_t *dataset = new dataset_t();
+
+	for (auto data_id: data_ids) {
+		auto data_object = _data_objects [ data_id ];
+		dataset->push_back(data_object);
+	}
+	return dataset;
 }
 
 data_ids_t* membertrix::getAssignments(cluster_id_t cluster_id) const {

@@ -6,6 +6,18 @@
 #include <vector>
 #include <algorithm>
 
+// Using syslog severity levels: https://en.wikipedia.org/wiki/Syslog#Severity_level
+//       Emergency: system is unusable
+//       Alert: action must be taken immediately
+//       Critical: critical conditions
+//       Error: error conditions
+//       Warning: warning conditions
+//       Notice: normal but significant condition
+//       Informational: informational messages
+//       Debug: debug-level messages
+
+enum { Emergency, Alert, Critical, Error, Warning, Notice, Information, Debug};
+
 #define __SHORT_FORM_OF_FILE__ \
     (strrchr(__FILE__,'/') \
      ? strrchr(__FILE__,'/')+1 \
@@ -13,7 +25,7 @@
     )
 
 #define fout \
-    if (_verbosity < 3) std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m \033[1;34m" << __func__ << "(): \033[0m" 
+    if (_verbosity < Warning) std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m \033[1;34m" << __func__ << "(): \033[0m" 
 
 #define foutvar(var) \
     if (_verbosity < var) std::cout << "\033[1;35m" << __SHORT_FORM_OF_FILE__ << '[' << __LINE__ << "]\033[0m \033[1;34m" << __func__ << "(): \033[0m" 

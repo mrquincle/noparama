@@ -13,9 +13,6 @@ typedef std::unordered_map<cluster_id_t, cluster_t*> clusters_t;
 //! A dataset per cluster
 typedef std::unordered_map<cluster_id_t, dataset_t*> clusters_dataset_t;
 
-//! Assignments for an individual cluster
-typedef std::vector<data_id_t> data_ids_t;
-
 enum np_error_t { error_none, error_already_assigned, error_assignment_remaining, error_assignment_absent };
 
 static std::map< np_error_t, const char * > np_error_str = {
@@ -42,7 +39,12 @@ typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> binary_matrix_t;
  * The structure is stored with clusters as columns, and data items as rows. Reasons:
  *   + Eigen by default uses column-major storage [1]
  *   + The getData() function retrieves multiple data items (columns)
- *   + The getCluster() function can return on first item found (rows)
+ *   + The getClusterId() function can return on first item found (rows)
+ *
+ * Usage:
+ *   + Call cluster_id = addCluster(cluster),   store cluster id somewhere safe
+ *   + Call data_id = addData(data),            store data id somewhere safe
+ *   + Call assign(cluster_id, data_id),        assign data to clusters
  *
  * References:
  *   [1] https://eigen.tuxfamily.org/dox/group__TopicStorageOrders.html
@@ -96,10 +98,18 @@ class membertrix {
 		 *
 		 * The returned index should be kept as a reference for use in the functions assign() and retract().
 		 *
-		 * @param[in] cluster_t        A cluster object
+		 * @param[in] cluster          A cluster object
 		 * @return                     An index to the given cluster object
 		 */
 		cluster_id_t addCluster(cluster_t *cluster);
+
+		/*!
+		 * Get cluster given cluster id.
+		 *
+		 * @param[in] cluster_id       An index to a cluster object
+		 * @return                     The cluster object itself
+		 */
+		cluster_t * getCluster(cluster_id_t cluster_id);
 
 		/*!
 		 * Add a data point to the membership matrix. The data are not physically stored, only a reference is kept. If
@@ -107,7 +117,7 @@ class membertrix {
 		 *
 		 * The returned index should be kept as a reference for use in the functions assign() and retract().
 		 *
-		 * @param[in] data_t           A data object
+		 * @param[in] data             A data object
 		 * @return                     An index to the given data object
 		 */
 		data_id_t addData(data_t & data);
@@ -139,10 +149,10 @@ class membertrix {
 
 		/*!
 		 * Retract a previously assigned data-cluster pair (through assign) where the search for this particular 
-		 * cluster is left to getCluster(data_id). If the cluster does not have any data points left, also the object 
+		 * cluster is left to getClusterId(data_id). If the cluster does not have any data points left, also the object 
 		 * will be deallocated. This has the same effect as:
 		 * 
-		 *   retract(getCluster(data_id), data_id);
+		 *   retract(getClusterId(data_id), data_id);
 		 *
 		 * @param[in] data_id          An index to a data point
 		 */
@@ -170,7 +180,7 @@ class membertrix {
 		 * @param[in] data_id          An index to a data point
 		 * @return                     An index to a cluster
 		 */
-		cluster_id_t getCluster(data_id_t data_id) const;
+		cluster_id_t getClusterId(data_id_t data_id) const;
 
 		/*!
 		 * Get all clusters to iterate over them. The cluster set is const to protect the user from accidentally 
@@ -227,6 +237,15 @@ class membertrix {
 		 * @return                     A dataset (vector) of data points that have been assigned through assign()
 		 */
 		dataset_t* getData(cluster_id_t cluster_id) const;
+
+		/*!
+		 * Return a particular subset of data points. Can belong to a particular cluster or not. As long as they have
+		 * been added through addData(). They do not have to be assigned to a cluster yet.
+		 *
+		 * @param[in] data_ids         A set of data point ids
+		 * @return                     The data points themselves
+		 */
+		dataset_t* getData(data_ids_t data_ids) const;
 
 		/*!
 		 * Return count of data points within the given cluster.

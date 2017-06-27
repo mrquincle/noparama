@@ -27,7 +27,7 @@ matrix_t & Results::calculateContingencyMatrix() {
 
 	std::vector<int> res;
 	for (auto i = 0; i < (int)trix_copy.count(); ++i) {
-		auto cluster_id = trix_copy.getCluster(i);
+		auto cluster_id = trix_copy.getClusterId(i);
 		res.push_back(cluster_id);
 	}
 	

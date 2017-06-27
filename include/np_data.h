@@ -20,6 +20,11 @@ typedef std::vector<data_t*> dataset_t;
 typedef int data_id_t;
 
 /*!
+ * A set of data ids, not the data itself.
+ */
+typedef std::vector<data_id_t> data_ids_t;
+
+/*!
  * The data item exists of multiple variables, each of which can be dependent or independent.
  */
 enum variable_type { vt_independent_variable, vt_dependent_variable };

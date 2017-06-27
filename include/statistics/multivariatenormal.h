@@ -90,11 +90,18 @@ class multivariate_normal_distribution: public distribution_t {
 		 *
 		 *   p(x|mu,S)
 		 *
-		 * @param[in] generator        a uniform random number generator
+		 * @param[in] data             individual data item
 		 * @return                     probability (value between 0 and 1)
 		 */
 		double probability(data_t & data) const;
-		
+	
+		/**
+		 * Calculate the probability of multiple values given mean and covariance. 
+		 *
+		 * This is equivalent to the product of individual data items for the multivariate normal distribution.
+		 * @param[in] dataset          multiple data items
+		 * @return                     probability (value between 0 and 1)
+		 */
 		double probability(dataset_t & dataset) const;
 
 		/**

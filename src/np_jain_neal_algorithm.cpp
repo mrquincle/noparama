@@ -17,7 +17,7 @@ JainNealAlgorithm::JainNealAlgorithm(
 {
 	_alpha = _nonparametrics.getSuffies().alpha;
 
-	_verbosity = 5;
+	_verbosity = Warning;
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 		
@@ -46,20 +46,22 @@ int factorial(int n) {
  */
 void JainNealAlgorithm::update(
 			membertrix & cluster_matrix,
-			std::vector<data_id_t> data_ids
+			data_ids_t data_ids
 		) {
-	static int step = 0;
-	fout << "Update step " << ++step << " in Jain & Neal's split-merge algorithm for data item " << data_id << endl;
+	// there should be exactly two data points sampled
+	assert (data_ids.size() == 2);
 
-	// remove observation under consideration from cluster, store cluster indices
+	static int step = 0;
+	fout << "Update step " << ++step << " in Jain & Neal's split-merge algorithm for several data items at once" << endl;
+
+	// store cluster indices and retract only current observations
 	std::vector<cluster_id_t> prev_clusters(data_ids.size());
 	for (auto index: data_ids) {
-		fout << "Retract observation " << index << " from cluster matrix" << endl;
-		cluster_id_t cluster_id = cluster_matrix.getCluster(index);
+		cluster_id_t cluster_id = cluster_matrix.getClusterId(index);
 		prev_clusters.push_back( cluster_id );
+		// Todo: check c_j, should it be retracted?
 		cluster_matrix.retract(cluster_id, index);
 	}
-
 	std::set<cluster_id_t> prev_uniq_clusters;
 	for (auto cl: prev_clusters) {
 		prev_uniq_clusters.insert(cl);
@@ -71,21 +73,91 @@ void JainNealAlgorithm::update(
 		case 0: default:
 			assert(false);
 		break;
-		case 1: {
-			// split step
-		}
-		break;
-		case 2: {
+		case 1: { // split step
+			assert (prev_clusters[0] == prev_clusters[1]);
+
 			size_t Ka = cluster_matrix.getClusterCount();
 
-			// merge step
-			
-			// copy each element by value, so we can correct the step later
-			data_ids_t data_ids0 = *cluster_matrix.getAssignments(prev_clusters[0]);
-			data_ids_t data_ids1 = *cluster_matrix.getAssignments(prev_clusters[1]);
+			// get assignments (just ids, not the data itself)
+			data_ids_t *data_ids1 = cluster_matrix.getAssignments(prev_clusters[0]);
 
-			int nc0 = data_ids0.size();
-			int nc1 = data_ids1.size();
+			data_ids_t data_ids2_0 = { data_ids[0] };
+			data_ids_t data_ids2_1 = { data_ids[1] };
+
+			for (auto data_id: *data_ids1) {
+				
+				// sample uniform random variable to randomly split over clusters
+				double toss = _distribution(_generator);
+				if (toss <= 0.5) {
+					// move these points
+					data_ids2_0.push_back(data_id);
+				} else {
+					// keep these points
+					data_ids2_1.push_back(data_id);
+				}
+			}
+
+			int nc0 = data_ids2_0.size();
+			int nc1 = data_ids2_1.size();
+			int nc = nc0 + nc1; // TODO: check again size
+
+			// TODO: check if factorials do not become too big
+			// TODO: check if we can have a lookup for the Beta function
+			double p21 = _alpha * (factorial(nc0 - 1) * factorial(nc1 - 1)) / factorial(nc - 1);
+			double q12 = pow(2, nc - 2);
+			
+			// only consider the data points that move to the new one, but at the old cluster
+			auto cluster0 = cluster_matrix.getCluster(prev_clusters[0]);
+			_likelihood.init(cluster0->getSuffies());
+			dataset_t *data0 = cluster_matrix.getData(data_ids2_0);
+			double l2_0 = _likelihood.probability(*data0);
+
+			// create new cluster, and consider same dataset there
+			Suffies *suffies = _nonparametrics.sample_base(_generator);
+			cluster_t *new_cluster = new cluster_t(*suffies);
+			_likelihood.init(new_cluster->getSuffies());
+			double l1 = _likelihood.probability(*data0);
+
+			double l21 = l2_0 / l1; 
+
+			double a_split = q12 * p21 * l21; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
+
+			// sample uniform random variable
+			double u = _distribution(_generator);
+
+			bool accept;
+			if (a_split < u) {
+				accept = false;
+			} else {
+				accept = true;
+			}
+
+			if (accept) {
+				// actually perform the move: only points that move have to be moved...
+				cluster_id_t new_cluster_id = cluster_matrix.addCluster(new_cluster);
+				for (auto data: data_ids2_0) {
+					cluster_matrix.retract(data);
+					cluster_matrix.assign(new_cluster_id, data);
+				}
+				// points in data_ids2_1 need not be moved
+
+				size_t Kb = cluster_matrix.getClusterCount();
+				assert (Kb == Ka + 1);
+			}
+			// TODO: anything that needs to be re-established on rejection?
+		}
+		break;
+		case 2: { // merge step
+			assert (prev_clusters[0] != prev_clusters[1]);
+
+			size_t Ka = cluster_matrix.getClusterCount();
+
+			// get assignments (just ids, not the data itself)
+			data_ids_t *data_ids0 = cluster_matrix.getAssignments(prev_clusters[0]);
+			data_ids_t *data_ids1 = cluster_matrix.getAssignments(prev_clusters[1]);
+
+			int nc0 = data_ids0->size();
+			int nc1 = data_ids1->size();
 			int nc = nc0 + nc1;
 
 			// check if type is correct (no rounding off to ints by accident)
@@ -93,148 +165,67 @@ void JainNealAlgorithm::update(
 			double q21 = pow(0.5, nc - 2);
 
 			// calculate likelihoods
-
-			// move all items from i to j
-			for (auto data: data_ids0) {
-				cluster_matrix.retract(data);
-				cluster_matrix.assign(prev_clusters[1], data);
-			}
+			// if we would have stored the likelihoods somewhere of the original clusters we might have reused them
+			// now we have to calculate them from scratch
 			
-			size_t Kb = cluster_matrix.getClusterCount();
-			assert (Kb == Ka - 1);
+			// likelihood of cluster 0 before merge
+			auto cluster0 = cluster_matrix.getCluster(prev_clusters[0]);
+			_likelihood.init(cluster0->getSuffies());
+			dataset_t * data0 = cluster_matrix.getData(prev_clusters[0]);
+			double l2_0 = _likelihood.probability(*data0);
 
-			// needs to be re-established on rejection!
+#define CLUSTER_SUFFICIENT_STATISTICS_UNCHANGED_AND_LIKELIHOOD_DATA_INDEPENDENT
+#ifdef CLUSTER_SUFFICIENT_STATISTICS_UNCHANGED_AND_LIKELIHOOD_DATA_INDEPENDENT
+			// 
+			auto cluster1 = cluster_matrix.getCluster(prev_clusters[1]);
+			_likelihood.init(cluster1->getSuffies());
+			double l1_0 = _likelihood.probability(*data0);
+			double l12 = l1_0 / l2_0;
+#else
+			// likelihood of cluster 1 before merge
+			auto cluster1 = cluster_matrix.getCluster(prev_clusters[1]);
+			_likelihood.init(cluster1->getSuffies());
+			dataset_t * data1 = cluster_matrix.getData(prev_clusters[1]);
+			double l2_1 = _likelihood.probability(data1);
+
+			// likelihood of cluster 1 [c_j] after merge (cluster 0 [c_i] is removed)
+			// likelihood is still initialized to sufficient statistics of second cluster
+			double l1_0 = _likelihood.probability(data0);
+			double l1_1 = l2_1;
+			double l1 = l1_0 * l1_1;
+			double l12 = l1/(l2_0*l2_1);
+#endif
+			double a_merge = q21 * p12 * l12; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
+
+			// sample uniform random variable
+			double u = _distribution(_generator);
+
+			bool accept;
+			if (a_merge < u) {
+				accept = false;
+			} else {
+				accept = true;
+			}
+
+			if (accept) {
+				// actually perform the move: all items from i go to j
+				for (auto data: *data_ids0) {
+					cluster_matrix.retract(data);
+					cluster_matrix.assign(prev_clusters[1], data);
+				}
+
+				size_t Kb = cluster_matrix.getClusterCount();
+				assert (Kb == Ka - 1);
+			}
+			// TODO: anything that needs to be re-established on rejection?
 		}
 		break;
 	} 
-	
-	// existing clusters
-	// if data item removed one of the clusters, this is still in there with a particular weight
-	// assume getClusters() will be a copy
-	auto clusters = cluster_matrix.getClusters();
-
-
-	// Create temporary data structure for K clusters
-	size_t K = clusters.size();
-	std::vector<int> cluster_ids(K);
-
-	fout << "Calculate likelihood for K=" << K << " existing clusters" << endl;
-
-	fout << "Calculate parameters for M=1 new clusters" << endl;
-	// Calculate parameters for M new clusters
-	int M = 1;
-	clusters_t new_clusters(M);
-	for (int m = 0; m < M; ++m) {
-		Suffies *suffies = _nonparametrics.sample_base(_generator);
-		cluster_t *temp = new cluster_t(*suffies);
-		new_clusters[m] = temp;
-		fout << "Suffies generated: " << new_clusters[m]->getSuffies() << endl;
-	}	
-	
-	data_t & observation = *cluster_matrix.getDatum(data_id);
-	fout << "Current observation " << data_id << " under consideration: " << observation << endl;
-
-	// Get (weighted) likelihoods for each existing and new cluster given the above observation
-	std::vector<double> weighted_likelihood(K+M);
-
-	int k = 0;
-	for (auto cluster_pair: clusters) {
-		auto const &key = cluster_pair.first;
-		auto const &cluster = cluster_pair.second;
-	
-		cluster_ids[k] = key;
-
-		fout << "Obtained suffies from cluster " << key << ": " << cluster->getSuffies() << endl;
-
-		// here _likelihood is sudden a niw distribution...
-		_likelihood.init(cluster->getSuffies());
-		fout << "calculate probability " << endl;
-		double ll = _likelihood.probability(observation);
-		fout << "which is: " << ll << endl;
-		weighted_likelihood[k] = _likelihood.probability(observation) * cluster_matrix.count(key);
-		/*
-		fout << "Cluster ";
-		cluster_matrix.print(key, std::cout);
-		cout << '\t' << _likelihood.probability(observation) << endl;
-		*/
-		k++;
-		
-	}
-
-	/*
-	 * The Metropolis-Hastings step with generating M proposals at the same time does not look like the typical 
-	 * alpha < u rule, however, it is. With a single proposal we can first sample for accept when it falls under
-	 * a uniform random variable. And then select one of the existing proposals with a probability proportional to
-	 * their (weighted) likelihoods. To remind you, the weight is determined by the number of observations tied to
-	 * that cluster for existing clusters and alpha for proposed clusters. With multiple proposals we can just directly
-	 * sample from the complete vector (existing and proposed clusters) with weighted likelihoods.
-	 */
-	for (int m = 0; m < M; ++m) {
-		_likelihood.init(new_clusters[m]->getSuffies());
-		weighted_likelihood[K+m] = _likelihood.probability(observation) * _alpha / (double)M;
-		fout << "New cluster " << m << 
-			"[~#" << _alpha/M << "]: " << \
-			_likelihood.probability(observation) << \
-			new_clusters[m]->getSuffies() << endl;
-	}
-
-	/*
-	 * If samples come from the same cluster... (do we still know?)
-	 */
-
-
-	// sample uniformly from the vector "weighted_likelihood" according to the weights in the vector
-	// hence [0.5 0.25 0.25] will be sampled in the ratio 2:1:1
-	fout << "Pick a cluster given their weights" << endl;
-	double pick = _distribution(_generator);
-	fout << "Pick " << pick << endl;
-	std::vector<double> cumsum_likelihood(weighted_likelihood.size());
-	fout << "Weighted likelihood: " << weighted_likelihood << endl;
-	std::partial_sum(weighted_likelihood.begin(), weighted_likelihood.end(), cumsum_likelihood.begin());
-	fout << "Cumulative weights: " << cumsum_likelihood << endl;
-
-	pick = pick * cumsum_likelihood.back();
-	fout << "Pick scaled with maximum cumsum: " << pick << endl;
-
-	auto lower = std::lower_bound(cumsum_likelihood.begin(), cumsum_likelihood.end(), pick);
-	size_t index = std::distance(cumsum_likelihood.begin(), lower);
-
-	assert (index < cumsum_likelihood.size());
-	fout << "Pick value just below pick: " << index << endl;
-
-	/*
-	 * Pick either a new or old cluster using calculated values. With a new cluster generate new sufficient 
-	 * statistics and update the membership matrix.
-	 */
-	if (index >= K) {
-		// pick new cluster
-		fout << "New cluster: " << index-K << endl;
-		cluster_t *new_cluster = new cluster_t(new_clusters[index-K]->getSuffies());
-		fout << "Add to membership matrix" << endl;
-		cluster_id_t cluster_index = cluster_matrix.addCluster(new_cluster);
-		fout << "Assign data to cluster with id " << cluster_index << endl;
-		cluster_matrix.assign(cluster_index, data_id);
-		_statistics.new_clusters_events++;
-	} else {
-		// pick existing cluster with given cluster_id
-		fout << "Existing cluster" << endl;
-		
-		cluster_id_t cluster_id = cluster_ids[index];
-
-		fout << "Assign data to cluster with id " << cluster_id << endl;
-		assert (cluster_matrix.count(cluster_id) != 0);
-		
-		cluster_matrix.assign(cluster_id, data_id);
-	}
-	
-	// deallocate new clusters that have not been used
-	fout << "Deallocate temporary clusters" << endl;
-	for (int m = 0; m < M; ++m) {
-		delete new_clusters[m];
-	}
 
 	// check
-	assert(cluster_matrix.assigned(data_id));
+	for (auto data_id: data_ids) {
+		assert(cluster_matrix.assigned(data_id));
+	}
 }
 
 void JainNealAlgorithm::printStatistics() {
