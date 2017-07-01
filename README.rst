@@ -149,4 +149,4 @@ However, don't use it yet.
 :Authors:
     Anne van Rossum
 
-:Version: 0.1.47
+:Version: 0.1.53
