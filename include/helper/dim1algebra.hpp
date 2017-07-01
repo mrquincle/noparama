@@ -32,6 +32,8 @@
 #include <sstream>
 #include <limits>
 #include <set>
+#include <unordered_map>
+#include <vector>
 
 #include <random>
 
@@ -1814,6 +1816,28 @@ count(InputIterator first, InputIterator last, OutputIterator result) {
 	result++;
 }
 
+/**
+ * Number of unique elements in a container. Different from std::unique this does not make a vector unique by erasing
+ * duplicates, but counts the number of unique elements.
+ *
+ * @param first              start of range
+ * @param last               end of range
+ * @return                   number of unique elements
+ */
+template<typename InputIterator>
+size_t
+count_unique(InputIterator first, InputIterator last) {
+	__attribute__((unused)) typedef typename std::iterator_traits<InputIterator>::value_type ValueType;
+
+	std::set<ValueType> _set;
+	
+	while (first != last) {
+		_set.insert(*first);
+		first++;
+	}
+	return _set.size();
+}
+
 /***********************************************************************************************************************
  * Fill in particular ways
  **********************************************************************************************************************/
@@ -1836,9 +1860,12 @@ fill_successively(ForwardIterator first, ForwardIterator last)
  * The function random_subset returns a (small) random subset from a large STL container. It is
  * different from using std::random_shuffle and then picking the first k elements. It is namely
  * of the order O(k) and not of the order O(N) with k the number of elements to pick, and N the
- * total number of elements. It is known as the so-called Floyd Algorithm.
+ * total number of elements. 
  *
- * @see http://eyalsch.wordpress.com/2010/04/01/random-sample/
+ * First I implemented the so-called Floyd Algorithm. 
+ *   @see http://eyalsch.wordpress.com/2010/04/01/random-sample/
+ * However, I didn't like the fact that the order of elements picked is not uniformly random when the number of
+ * elements to pick is the size of the array or close to it. For m=n the result is not even shuffled.
  *
  * @ingroup random_algorithms
  * @param first              start of range
@@ -1848,6 +1875,7 @@ fill_successively(ForwardIterator first, ForwardIterator last)
  * @param result             output set with random elements
  * @return Iterator          referencing the first instance of the random subset
  */
+/*
 template<typename ForwardIterator, typename OutputIterator, typename RandomGenerator>
 OutputIterator
 random_subset(ForwardIterator first, ForwardIterator last, int elements, RandomGenerator & gen, OutputIterator result)
@@ -1863,6 +1891,38 @@ random_subset(ForwardIterator first, ForwardIterator last, int elements, RandomG
 	if (first == last)
 		return first;
 
+	if (last - first < elements) {
+		elements = last-first;
+	}
+
+	std::unordered_map<int, int> indices;
+	std::unordered_map<int, std::vector<int> > swap_struct;
+	for (int i = 0; i != elements; ++i) { // order O(k)
+		int m = (last - 1 - first) - i;
+		std::uniform_int_distribution<> dis(0, m);
+		int pos = dis(gen);
+		if (swap_struct.find(m) == swap_struct.end()) { // order O(k)
+			swap_struct[pos].push_back(m);
+		} else {
+			int mm = swap_struct[m].back();
+			swap_struct[pos].push_back(mm);
+		}
+		int rpos = swap_struct.size() - 1;
+		if (indices.find(rpos) == indices.end()) indices[ rpos ] = pos; // order O(k)
+	}
+		
+	for (int j = 0; j < (int) indices.size(); ++j) { // order O(k)
+		int pos = indices[j];
+		*result = *(first + pos);
+		++result;
+		std::vector<int> & tmp = swap_struct[pos];
+		for (int i = 0; i != (int)tmp.size() - 1; ++i) {
+			*result = *(first + tmp[i]);
+			++result;
+		}
+	}
+
+#ifdef NOT_UNIFORM_FOR_M_NEAR_N
 	std::set<int> indices; indices.clear();
 	for (ForwardIterator i = last - elements; i != last; ++i) {
 		std::uniform_int_distribution<> dis(0, std::distance(first, i));
@@ -1876,8 +1936,10 @@ random_subset(ForwardIterator first, ForwardIterator last, int elements, RandomG
 		}
 		++result;
 	}
+#endif
 	return result;
 }
+*/
 
 /**
  * @brief Returns a random subset from a potentially very large set
@@ -1895,6 +1957,7 @@ random_subset(ForwardIterator first, ForwardIterator last, int elements, RandomG
  * @param result             output set with random elements
  * @return Iterator          referencing the first instance of the random subset
  */
+/*
 template<typename ForwardIterator, typename OutputIterator>
 OutputIterator
 random_subset(ForwardIterator first, ForwardIterator last, int elements, OutputIterator result)
@@ -1902,7 +1965,7 @@ random_subset(ForwardIterator first, ForwardIterator last, int elements, OutputI
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
 	return random_subset(first, last, elements, gen, result);
-}
+}*/
 
 /**
  * @brief Reorders input in-place

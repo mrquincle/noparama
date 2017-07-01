@@ -54,7 +54,8 @@ class MCMC {
 				std::default_random_engine & generator,
 				InitClusters & init_clusters, 
 				UpdateClusters & update_clusters, 
-				UpdateClusterPopulation & update_cluster_population
+				UpdateClusterPopulation & update_cluster_population,
+				int subset_count
 			);
 
 		/*!

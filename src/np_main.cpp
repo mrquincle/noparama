@@ -203,16 +203,19 @@ int main(int argc, char *argv[]) {
 	// using prior and likelihood
 	fout << "Set up UpdateClusterPopulation object" << endl;
 
+	int subset_count;
 #if ALGORITHM==8
 	fout << "We will be using algorithm 8 by Neal" << endl;
 	NealAlgorithm8 update_cluster_population(generator, *likelihood, hyper);
+	subset_count = 1;
 #else
 	fout << "We will be using the Jain-Neal algorithm" << endl;
 	JainNealAlgorithm update_cluster_population(generator, *likelihood, hyper);
+	subset_count = 2;
 #endif
 	// create MCMC object
 	fout << "Set up MCMC" << endl;
-	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population);
+	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population, subset_count);
 
 	fout << "Run MCMC for " << T << " steps" << endl;
 	mcmc.run(dataset, T);

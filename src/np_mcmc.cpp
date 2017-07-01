@@ -23,7 +23,8 @@ MCMC::MCMC(
 		default_random_engine & generator,
 		InitClusters & init_clusters, 
 		UpdateClusters & update_clusters, 
-		UpdateClusterPopulation & update_cluster_population
+		UpdateClusterPopulation & update_cluster_population,
+		int subset_count
 	):
 	_generator(generator),
 	_init_clusters(init_clusters), 
@@ -32,7 +33,7 @@ MCMC::MCMC(
 {
 	_verbosity = Notice;
 
-	_subset_count = 2;
+	_subset_count = subset_count;
 }
 
 void MCMC::run(dataset_t & dataset, int T) {
@@ -99,10 +100,13 @@ void MCMC::run(dataset_t & dataset, int T) {
 		for (int i = 0; i < N; ++i) {
 			// create subset vector of size _subset_count
 			std::vector<int> subset(_subset_count);
+			std::set<int> uniq;
 			for (int j = 0; j < _subset_count; ++j) {
 				fout << "Set next item to " << indices[j][i] << endl;
 				subset[j] = indices[j][i];
+				uniq.insert(subset[j]);
 			}
+			if ((int)uniq.size() != _subset_count) continue;
 	
 			// update cluster assignments, delete and create clusters
 			_update_cluster_population.update(_membertrix, subset);

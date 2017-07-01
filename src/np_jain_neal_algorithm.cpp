@@ -3,6 +3,9 @@
 #include <iostream>
 #include <iomanip>
 #include <pretty_print.hpp>
+#include <dim1algebra.hpp>
+#define __STDCPP_WANT_MATH_SPEC_FUNCS__ 1
+#include <cmath>
 
 using namespace std;
 
@@ -52,6 +55,9 @@ void JainNealAlgorithm::update(
 	// there should be exactly two data points sampled
 	assert (data_ids.size() == 2);
 
+	// the data ids should be unique
+	assert (data_ids[0] != data_ids[1]);
+
 	static int step = 0;
 	fout << "Update step " << ++step << " in Jain & Neal's split-merge algorithm for several data items at once" << endl;
 
@@ -70,14 +76,8 @@ void JainNealAlgorithm::update(
 		//cluster_matrix.retract(cluster_id, data_id);
 		//fout << "Retracted" << endl;
 	}
-	fout << "Calculate number of unique clusters" << endl;
-	std::set<cluster_id_t> prev_uniq_clusters;
-	for (auto cl: prev_clusters) {
-		prev_uniq_clusters.insert(cl);
-	}
-	int uniq_cluster_count = prev_uniq_clusters.size();
+	int uniq_cluster_count = algebra::count_unique(prev_clusters.begin(), prev_clusters.end());
 	fout << "There are " << uniq_cluster_count << " unique clusters" << endl;
-
 	// a single cluster
 	switch (uniq_cluster_count) {
 		case 0: default:
@@ -111,13 +111,14 @@ void JainNealAlgorithm::update(
 			}
 
 			int nc0 = data_ids2_0.size();
+			assert (nc0 > 0);
 			int nc1 = data_ids2_1.size();
+			assert (nc1 > 0);
 			int nc = nc0 + nc1; // TODO: check again size
 			fout << "Cluster is size " << nc << " and after split becomes " << nc0 << " and " << nc1 << endl;
 
-			// TODO: check if factorials do not become too big
-			// TODO: check if we can have a lookup for the Beta function
-			double p21 = _alpha * (factorial(nc0 - 1) * factorial(nc1 - 1)) / factorial(nc - 1);
+			// note, you'll need g++-7 and C++17 to obtain special_math function beta.
+			double p21 = _alpha * beta(nc0-1, nc1-1);
 			double q12 = pow(2, nc - 2);
 			
 			// only consider the data points that move to the new one, but at the old cluster
@@ -132,10 +133,24 @@ void JainNealAlgorithm::update(
 			_likelihood.init(new_cluster->getSuffies());
 			double l1 = _likelihood.probability(*data0);
 
-			double l21 = l2_0 / l1; 
+			double l21; 
+	
+			if (l2_0 == 0 && l1 == 0) {
+				// both ways zero, so just random walk
+				l21 = 1;
+				//std::cout << "|";
+			} else if (l1 == 0) {
+				// likelihood is zero where we are going
+				l21 = 0;
+				//std::cout << "|";
+			} else {
+				// if we do not have a stream of . then there is nothing to accept!
+				l21 = l2_0 / l1; 
+				//std::cout << ".";
+			}
 
 			double a_split = q12 * p21 * l21; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
-
+			
 			// sample uniform random variable
 			double u = _distribution(_generator);
 
@@ -181,7 +196,7 @@ void JainNealAlgorithm::update(
 			fout << "Clusters are size " << nc0 << " and " << nc1 << " and after merge become " << nc << endl;
 
 			// check if type is correct (no rounding off to ints by accident)
-			double p12 = 1.0/_alpha * factorial(nc - 1) / (  factorial(nc0 - 1) * factorial(nc1 - 1) );
+			double p12 = 1.0/(_alpha * beta(nc0-1, nc1-1));
 			fout << "Fraction P(1)/P(2) becomes: " << p12 << endl;
 			double q21 = pow(0.5, nc - 2);
 			fout << "Fraction q(1|2)/q(2|1) becomes: " << q21 << endl;
@@ -209,8 +224,15 @@ void JainNealAlgorithm::update(
 			if (l1_0 == 0 && l2_0 == 0) {
 				// likelihood is zero before and after merge... we should just walk...
 				l12 = 1;
+				//std::cout << "]";
+			} else if (l2_0 == 0) {
+				// just reject
+				l12 = 0;
+				//std::cout << "-";
 			} else {
+//				assert (l2_0 != 0);
 				l12 = l1_0 / l2_0;
+				//std::cout << "o";
 			}
 #else
 			// likelihood of cluster 1 before merge
@@ -243,13 +265,9 @@ void JainNealAlgorithm::update(
 			if (accept) {
 				// actually perform the move: all items from i go to j
 				for (auto data: *data_ids0) {
-					// data_ids[0] is already retracted
-					//if (data != data_ids[0]) {
-						cluster_matrix.retract(data);
-					//}
+					cluster_matrix.retract(data);
 					cluster_matrix.assign(prev_clusters[1], data);
 				}
-				//cluster_matrix.assign(
 
 				fout << "Check cluster count again" << endl;
 				size_t Kb = cluster_matrix.getClusterCount();
