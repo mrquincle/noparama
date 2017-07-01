@@ -17,7 +17,9 @@ On Ubuntu:
 	make
 	echo "The compiled binary you can find in build/bin/
 
-A dataset can be found in a companion repository: https://github.com/mrquincle/noparama-datasets.git.
+A dataset can be found in a companion repository: dataset_
+
+.. _dataset: https://github.com/mrquincle/noparama-datasets.git.
 
 Use
 ---
@@ -38,7 +40,6 @@ Example:
 	cd build/bin
 	./noparama -d ../datasets/twogaussians.data
 
-The datasets are not included with the repository, but in https://github.com/mrquincle/noparama-datasets.git.
 
 Structure
 ---------
@@ -140,6 +141,17 @@ CK
 Here we do not have the property anymore that the update is atomic! Setting something to 1 or 0 in the assignment 
 matrix, needs also an update in the set structure.
 
+References
+----------
+
+1. Markov chain sampling methods for Dirichlet process mixture models (`Neal, 2000`_).
+2. A split-merge Markov chain Monte Carlo procedure for the Dirichlet process mixture model (`Jain, Neal, 2004`_).
+3. An improved merge-split sampler for conjugate Dirichlet process mixture models (`Dahl, 2003`_).
+
+.. _Neal, 2000: https://pdfs.semanticscholar.org/de79/8ab2f2e7ca312c12ba34a0d9c05cff9fbf3c.pdf
+.. _Jain, Neal, 2004: https://pdfs.semanticscholar.org/6305/dcc03c8378e371e73b0a68ff29f1167a65f0.pdf
+.. _Dahl, 2003: https://pdfs.semanticscholar.org/cfbe/dd12e5040c76e7c9981b19e6e333d6111656.pdf
+
 In Progress
 -----------
    
@@ -149,4 +161,4 @@ However, don't use it yet.
 :Authors:
     Anne van Rossum
 
-:Version: 0.1.53
+:Version: 0.1.54
