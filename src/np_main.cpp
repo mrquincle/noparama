@@ -42,11 +42,16 @@ int main(int argc, char *argv[]) {
 	
 	fout << "Welcome to noparama" << endl;
 
+	// ---------------------------------------------------------------------------------------------------------------
 	// Configuration parameters 
-	int T = 1000;
-	fout << "Run MCMC sampler for " << T << " steps " << endl;
+	// ---------------------------------------------------------------------------------------------------------------
+	int T = 5000;
 
 	double alpha = 1;
+	// ---------------------------------------------------------------------------------------------------------------
+
+	fout << "Run MCMC sampler for " << T << " steps " << endl;
+
 	fout << "The Dirichlet Process is run with alpha=" << alpha << endl;
 
 	// limit number of data items

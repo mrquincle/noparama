@@ -8,7 +8,26 @@
 #include <statistics/dirichlet.h>
 
 struct statistics_t {
-	int new_clusters_events;
+	// number of new clusters
+	int split_attempts;
+	int split_cluster_events_accept;
+	int split_cluster_events_reject;
+	int split_target_likelihood_zero;
+	int split_source_likelihood_zero;
+	int split_likelihood_both_zero;
+	int split_likelihood_both_nonzero;
+	int split_likelihood_both_nonzero_accept;
+	int split_likelihood_both_nonzero_reject;
+
+	int merge_attempts;
+	int merge_cluster_events_accept;
+	int merge_cluster_events_reject;
+	int merge_target_likelihood_zero;
+	int merge_source_likelihood_zero;
+	int merge_likelihood_both_zero;
+	int merge_likelihood_both_nonzero;
+	int merge_likelihood_both_nonzero_accept;
+	int merge_likelihood_both_nonzero_reject;
 };
 
 /**
@@ -40,6 +59,8 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 		// statistics
 		statistics_t _statistics;
 		
+		bool split(membertrix & cluster_matrix, data_ids_t data_ids, std::vector<cluster_id_t> & prev_clusters);
+		bool merge(membertrix & cluster_matrix, data_ids_t data_ids, std::vector<cluster_id_t> & prev_clusters);
 	public:
 		/*!
 		 * Construct update method for cluster population.

@@ -173,7 +173,8 @@ class membertrix {
 		 * @param[in] cluster_id       An index to a cluster object
 		 * @return                     Set of data ids.
 		 */
-		data_ids_t* getAssignments(cluster_id_t cluster_id) const;
+//		data_ids_t* getAssignments(cluster_id_t cluster_id) const;
+		void getAssignments(cluster_id_t cluster_id, data_ids_t & data_ids) const;
 
 		/*!
 		 * Get the cluster id given a particular data id.
@@ -234,9 +235,11 @@ class membertrix {
 		 * Return all data points that are assigned to a particular cluster.
 		 *
 		 * @param[in] cluster_id       An index to a particular cluster
-		 * @return                     A dataset (vector) of data points that have been assigned through assign()
+		 * @param[out] dataset         A dataset (vector) of data points that have been assigned through assign()
 		 */
 		dataset_t* getData(cluster_id_t cluster_id) const;
+
+		void getData(cluster_id_t cluster_id, dataset_t & dataset) const;
 
 		/*!
 		 * Return a particular subset of data points. Can belong to a particular cluster or not. As long as they have
@@ -245,7 +248,7 @@ class membertrix {
 		 * @param[in] data_ids         A set of data point ids
 		 * @return                     The data points themselves
 		 */
-		dataset_t* getData(data_ids_t data_ids) const;
+		void getData(data_ids_t data_ids, dataset_t & dataset) const;
 
 		/*!
 		 * Return count of data points within the given cluster.

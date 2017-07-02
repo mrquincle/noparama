@@ -87,5 +87,6 @@ double multivariate_normal_distribution::probability(dataset_t & dataset) const
 	for (int i = 0; i < (int)dataset.size(); ++i) {
 		result *= probability(*dataset[i]);
 	}
+	result *= dataset.size();
 	return result;
 }

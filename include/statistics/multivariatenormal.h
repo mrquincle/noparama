@@ -98,7 +98,9 @@ class multivariate_normal_distribution: public distribution_t {
 		/**
 		 * Calculate the probability of multiple values given mean and covariance. 
 		 *
-		 * This is equivalent to the product of individual data items for the multivariate normal distribution.
+		 * This is equivalent to the product of individual data items for the multivariate normal distribution
+		 * times the number of these data items.
+		 *
 		 * @param[in] dataset          multiple data items
 		 * @return                     probability (value between 0 and 1)
 		 */

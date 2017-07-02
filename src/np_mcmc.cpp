@@ -91,9 +91,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 		for (int i = 0; i < _subset_count; ++i) {
 			indices[i].resize(N);
 			fill_successively(indices[i].begin(), indices[i].end());
-			//cout << indices[i] << endl;
 			random_order(indices[i].begin(), indices[i].end());
-			//cout << indices[i] << endl;
 		}
 
 		fout << "Create subset of size " << _subset_count << endl;
@@ -112,6 +110,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 			_update_cluster_population.update(_membertrix, subset);
 
 		}
+		//_update_cluster_population.printStatistics();
 
 		fout << "Update cluster " << endl;
 

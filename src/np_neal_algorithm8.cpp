@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <pretty_print.hpp>
+#include <dim1algebra.hpp>
 
 using namespace std;
 
@@ -124,6 +125,8 @@ void NealAlgorithm8::update(
 
 	// sample uniformly from the vector "weighted_likelihood" according to the weights in the vector
 	// hence [0.5 0.25 0.25] will be sampled in the ratio 2:1:1
+	size_t index = algebra::random_weighted_pick(weighted_likelihood.begin(), weighted_likelihood.end(), _generator);
+	/*
 	fout << "Pick a cluster given their weights" << endl;
 	double pick = _distribution(_generator);
 	fout << "Pick " << pick << endl;
@@ -137,9 +140,9 @@ void NealAlgorithm8::update(
 
 	auto lower = std::lower_bound(cumsum_likelihood.begin(), cumsum_likelihood.end(), pick);
 	size_t index = std::distance(cumsum_likelihood.begin(), lower);
-
 	assert (index < cumsum_likelihood.size());
 	fout << "Pick value just below pick: " << index << endl;
+	*/
 
 	/*
 	 * Pick either a new or old cluster using calculated values. With a new cluster generate new sufficient 

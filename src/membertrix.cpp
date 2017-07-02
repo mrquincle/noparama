@@ -27,12 +27,13 @@ membertrix::membertrix() {
 
 membertrix::membertrix(const membertrix &other) {
 	_verbosity = other._verbosity ;
-	fout << "Copy constructor" << endl;
+	fout << "Copy constructor (is used to clean up stuff)" << endl;
 	for (auto data_ptr: other._data_objects) {
 		data_t *data = data_ptr;
 		addData(*data);
 	}
 	
+	fout << "There are " << other._cluster_objects.size() << " cluster objects" << endl;
 	for (auto cluster_pair: other._cluster_objects) {
 		auto cluster_id = cluster_pair.first;
 		auto cluster = cluster_pair.second;
@@ -49,6 +50,7 @@ membertrix::membertrix(const membertrix &other) {
 }
 
 membertrix::~membertrix() {
+	fout << "Clear a lot of stuff" << endl;
 	_membership_matrix.resize(0,0);
 	_cluster_objects.clear();
 	_data_objects.clear();
@@ -211,18 +213,8 @@ const clusters_t & membertrix::getClusters() const {
 }
 
 void membertrix::relabel() {
+	// we relabel by calling the copy constructor
 	*this = *this;
-	/*
-	foutvar(7) << "Copy to variable" << endl;
-	membertrix trix = *this;
-	
-	_data_objects.clear();
-	_cluster_objects.clear();
-	_clusters_dataset.clear();
-	_membership_matrix.resize(0,0);
-
-	foutvar(7) << "Copy variable to this" << endl;
-	*this = trix; */
 }
 
 void membertrix::print(cluster_id_t cluster_id, ostream &os) const {
@@ -249,38 +241,41 @@ dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
 #if SEPARATE_STRUCTURE==1
 	return _clusters_dataset.at(cluster_id);
 #else
-	// no separate structure, so we have to populate it from scratch
-	auto cluster_data = _membership_matrix.col(cluster_id);
-
-	dataset_t *dataset = new dataset_t();
-	for (int i = 0; i < cluster_data.size(); ++i) {
-		if (cluster_data(i)) {
-			dataset->push_back(_data_objects[i]);
-		}
-	}
-	return dataset; 
+	assert(false); // shouldn't be used, use getData(cluster_id, dataset) instead
+	return NULL; 
 #endif
 }
 
-dataset_t* membertrix::getData(data_ids_t data_ids) const {
-	dataset_t *dataset = new dataset_t();
+void membertrix::getData(cluster_id_t cluster_id, dataset_t & dataset) const {
+#if SEPARATE_STRUCTURE==1
+	assert(false); // shouldn't be used, use getData(cluster_id) instead
+#else
+	// no separate structure, so we have to populate it from scratch
+	auto cluster_data = _membership_matrix.col(cluster_id);
+
+	for (int i = 0; i < cluster_data.size(); ++i) {
+		if (cluster_data(i)) {
+			dataset.push_back(_data_objects[i]);
+		}
+	}
+#endif
+}
+
+void membertrix::getData(data_ids_t data_ids, dataset_t & dataset) const {
 
 	for (auto data_id: data_ids) {
 		auto data_object = _data_objects [ data_id ];
-		dataset->push_back(data_object);
+		dataset.push_back(data_object);
 	}
-	return dataset;
 }
 
-data_ids_t* membertrix::getAssignments(cluster_id_t cluster_id) const {
-	data_ids_t *data_ids = new data_ids_t();
+void membertrix::getAssignments(cluster_id_t cluster_id, data_ids_t & data_ids) const {
 	auto cluster_data = _membership_matrix.col(cluster_id);
 	for (int i = 0; i < cluster_data.size(); ++i) {
 		if (cluster_data(i)) {
-			data_ids->push_back(i);
+			data_ids.push_back(i);
 		}
 	}
-	return data_ids;
 }
 
 bool membertrix::empty(cluster_id_t cluster_id) {

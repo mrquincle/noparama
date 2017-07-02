@@ -1982,6 +1982,27 @@ template<typename ForwardIterator, typename RandomGenerator>
 void
 random_order(ForwardIterator first, ForwardIterator last, RandomGenerator & gen)
 {
+	std::shuffle(first, last, gen);
+}
+
+/**
+ * @brief Reorders input in-place for first elements.
+ *
+ * This algorithm is known as the Fisher-Yates shuffle and in particular the modern variant by Durstenfeld. We quit
+ * prematurely when the given number of elements have been shuffled leaving the rest of the input invariant.
+ *
+ * @ingroup random_algorithms
+ * @param first              start of range
+ * @param last               end of range
+ * @param elements           number of elements to randomize
+ * @param gen                random generator to use
+ * @param result             output set with random elements
+ * @return Iterator          referencing the first instance of the random subset
+ */
+template<typename ForwardIterator, typename RandomGenerator>
+void
+random_order_subset(ForwardIterator first, ForwardIterator last, int elements, RandomGenerator & gen)
+{
 	// concept requirements
 	__attribute__((unused)) typedef typename std::iterator_traits<ForwardIterator>::value_type ValueType;
 	__attribute__((unused)) typedef typename std::iterator_traits<ForwardIterator>::difference_type DiffType;
@@ -1991,13 +2012,17 @@ random_order(ForwardIterator first, ForwardIterator last, RandomGenerator & gen)
 
 	if (first == last)
 		return;
+	
+	ForwardIterator end = last;
+	if (first + elements < last) end = first + elements;
 
-	for (ForwardIterator i = first; i != last; ++i) {
+	for (ForwardIterator i = first; i != end; ++i) {
 		std::uniform_int_distribution<> dis(std::distance(first, i), std::distance(first, last) - 1);
 		int pos = dis(gen);
 		std::swap(*i, *(first+pos));
 	}
 }
+
 
 template<typename ForwardIterator>
 void
@@ -2007,6 +2032,38 @@ random_order(ForwardIterator first, ForwardIterator last)
 	static std::mt19937 gen(rd());
 	return random_order(first, last, gen);
 }
+
+/**
+ * Pick element from a vector with weights.
+ */
+template<typename ForwardIterator, typename RandomGenerator>
+size_t
+random_weighted_pick(ForwardIterator first, ForwardIterator last, RandomGenerator & gen)
+{
+	// concept requirements
+	__attribute__((unused)) typedef typename std::iterator_traits<ForwardIterator>::value_type ValueType;
+	__attribute__((unused)) typedef typename std::iterator_traits<ForwardIterator>::difference_type DiffType;
+
+	__glibcxx_function_requires(_ForwardIteratorConcept<ForwardIterator>);
+	__glibcxx_requires_valid_range(first, last);
+
+	size_t N = last - first;
+	if (first == last)
+		return 0;
+	
+	std::vector<ValueType> cumsum(N);
+	std::partial_sum(first, last, cumsum.begin());
+		
+	std::uniform_real_distribution<> dis;
+	double u = dis(gen);
+
+	u = u * cumsum.back();
+
+	auto lower = std::lower_bound(cumsum.begin(), cumsum.end(), u);
+	size_t index = std::distance(cumsum.begin(), lower);
+	return index;
+}
+
 
 /***********************************************************************************************************************
  * Subset manipulations

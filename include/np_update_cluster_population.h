@@ -32,6 +32,13 @@ class UpdateClusterPopulation {
 				membertrix & cluster_matrix,
 				std::vector<data_id_t> data_ids
 			) {
-			std::cout << "General update" << std::endl;
+			std::cout << "Update function not yet implemented" << std::endl;
+		}
+		
+		/*!
+		 * MCMC statistics. How many times are steps rejected, etc.
+		 */
+		virtual void printStatistics() {
+			std::cout << "Statistics function not yet implemented" << std::endl;
 		}
 };

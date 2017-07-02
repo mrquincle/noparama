@@ -40,6 +40,9 @@ if (plot_gaussians)
 
 else
 
+	mmax=5;
+	printf("Only display lines with more than %i points\n", mmax);
+
 	for i = 1:K
 		j=i*2;
 		color = cmap(mod(5*j,63)+1,:); 
@@ -56,16 +59,19 @@ else
 		hor = [ones(1,10); t];
 		y = mu_i' * hor;
 
-		plot(t, y, "r", "LineWidth", 2, 'color', color);
-		% plot the ellipse
-		hold on;
-		%plot(x(1,:), x(2,:), "r", "LineWidth", 2, 'color', color);
-
 		% plot the data
 		fname = [dirname '/results' num2str(i-1) '.txt'];
-		printf "Load data from %s\n", fname
+		%printf "Load data from %s\n", fname
 		data = load(fname)';
-		plot(data(2,:), data(3,:), '.', 'MarkerSize', 10, 'color', color);
+
+		if length(data) > mmax
+			plot(t, y, "r", "LineWidth", 2, 'color', color);
+			% plot the ellipse
+			hold on;
+		end
+			%plot(x(1,:), x(2,:), "r", "LineWidth", 2, 'color', color);
+			plot(data(2,:), data(3,:), '.', 'MarkerSize', 10, 'color', color);
+%		end
 	end
 end
 
