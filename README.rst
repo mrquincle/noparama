@@ -163,4 +163,4 @@ However, don't use it yet.
 :Authors:
     Anne van Rossum
 
-:Version: 0.1.54
+:Version: 0.1.57
