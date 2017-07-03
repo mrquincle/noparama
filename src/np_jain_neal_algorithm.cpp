@@ -23,7 +23,7 @@ JainNealAlgorithm::JainNealAlgorithm(
 	_alpha = _nonparametrics.getSuffies().alpha;
 
 	_verbosity = Debug;
-	//_verbosity = Warning;
+	_verbosity = Warning;
 	
 	_statistics = (statistics_t){0};
 
@@ -136,14 +136,14 @@ bool JainNealAlgorithm::split(
 					// SAMS
 					_likelihood.init(new_clusters[m]->getSuffies());
 					data_t * datum = cluster_matrix.getDatum(data_id);
-					fout << "Consider datum: " << data_id << ": " << *datum << endl;
-					double l2_0 = _likelihood.probability(*datum);
+					//fout << "Consider datum: " << data_id << ": " << *datum << endl;
+					double l2_0 = _likelihood.probability(*datum) * data_ids2_0.size();
 
-					fout << "It has a likelihood at the new cluster of " << l2_0 << endl;
+					//fout << "It has a likelihood at the new cluster of " << l2_0 << endl;
 					_likelihood.init(cluster0->getSuffies());
 
-					double l2_1 = _likelihood.probability(*datum);
-					fout << "It has a likelihood at the existing cluster of " << l2_1 << endl;
+					double l2_1 = _likelihood.probability(*datum) * data_ids2_1.size();
+					//fout << "It has a likelihood at the existing cluster of " << l2_1 << endl;
 
 					double frac;
 					if (l2_0 + l2_1 == 0) {
@@ -155,12 +155,13 @@ bool JainNealAlgorithm::split(
 					double u = _distribution(_generator);
 
 					if (frac > u) {
-						fout << "Add " << data_id << " to new cluster" << endl;
+						//fout << "Add " << data_id << " to new cluster" << endl;
 						data_ids2_0.push_back(data_id);
 					} else {
-						fout << "Keep " << data_id << " at existing cluster" << endl;
+						//fout << "Keep " << data_id << " at existing cluster" << endl;
 						data_ids2_1.push_back(data_id);
 					}
+
 					break;
 				}
 			case sams_random_walk: 
@@ -220,12 +221,19 @@ bool JainNealAlgorithm::split(
 		_statistics.split_likelihood_both_nonzero++;
 	}
 
+	// if the point we randomly picked is the only one under consideration, overwrite everything and reject
+	if (data_ids2_0.size() < 3) {
+		overwrite = true;
+		accept = false;
+	}
+
 	if (!overwrite) {
 		double a_split = q12 * p21 * l21; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
 		fout << "Acceptance for split: " << a_split << endl;
 
 		// sample uniform random variable
 		double u = _distribution(_generator);
+		fout << "Sampled u: " << u << endl;
 
 		if (a_split < u) {
 			_statistics.split_likelihood_both_nonzero_reject++;
@@ -237,6 +245,7 @@ bool JainNealAlgorithm::split(
 	}
 
 	if (accept) {
+		fout << "--------------------------------------------------------------------------------------------" << endl;
 		fout << "Accept split!" << endl;
 		// actually perform the move: only points that move have to be moved...
 		cluster_id_t new_cluster_id = cluster_matrix.addCluster(new_clusters[m]);
@@ -295,19 +304,36 @@ bool JainNealAlgorithm::merge(
 	// if we would have stored the likelihoods somewhere of the original clusters we might have reused them
 	// now we have to calculate them from scratch
 
-	// likelihood of cluster 0 before merge
+	// likelihood of data in cluster 0 before merge
 	auto cluster0 = cluster_matrix.getCluster(prev_clusters[0]);
 	_likelihood.init(cluster0->getSuffies());
 	dataset_t * data0 = cluster_matrix.getData(prev_clusters[0]);
 	double l2_0 = _likelihood.probability(*data0);
 	fout << "Likelihood of data in cluster 0 before merge " << l2_0 << endl;
 
-	// likelihood of cluster 1 before merge
+	// likelihood of data if moved to cluster 1 
 	auto cluster1 = cluster_matrix.getCluster(prev_clusters[1]);
 	_likelihood.init(cluster1->getSuffies());
 	double l1_0 = _likelihood.probability(*data0);
-
 	fout << "Likelihood of same data in case of moving them to cluster 1 (after merge) " << l1_0 << endl;
+
+	// likelihood of data in cluster 1 
+	dataset_t * data1 = cluster_matrix.getData(prev_clusters[1]);
+	double l2_1 = _likelihood.probability(*data1);
+	fout << "Likelihood of data in cluster 1 before merge " << l2_1 << endl;
+
+	fout << "Likelihood of cluster 1 and cluster 2 before merge " << l2_0 * l2_1 << endl;
+	// likelihood of all data in cluster 1
+	dataset_t data01;
+	for (auto d: *data0) {
+		data01.push_back(d);
+	}
+	for (auto d: *data1) {
+		data01.push_back(d);
+	}
+	double l1 = _likelihood.probability(data01);
+	fout << "Likelihood of all data after merge " << l1 << endl;
+
 	double l12;
 	bool overwrite = false;
 	if (l1_0 == 0 && l2_0 == 0) {
@@ -337,6 +363,7 @@ bool JainNealAlgorithm::merge(
 
 		// sample uniform random variable
 		double u = _distribution(_generator);
+		fout << "Sampled u: " << u << endl;
 
 		if (a_merge < u) {
 			_statistics.merge_likelihood_both_nonzero_reject++;
@@ -348,6 +375,7 @@ bool JainNealAlgorithm::merge(
 	}
 
 	if (accept) {
+		fout << "--------------------------------------------------------------------------------------------" << endl;
 		fout << "Accept merge!" << endl;
 		// actually perform the move: all items from i go to j
 		for (auto data: data_ids0) {

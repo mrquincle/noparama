@@ -147,10 +147,12 @@ References
 1. Markov chain sampling methods for Dirichlet process mixture models (`Neal, 2000`_).
 2. A split-merge Markov chain Monte Carlo procedure for the Dirichlet process mixture model (`Jain, Neal, 2004`_).
 3. An improved merge-split sampler for conjugate Dirichlet process mixture models (`Dahl, 2003`_).
+4. Sequentially-allocated merge-split sampler for conjugate and nonconjugate Dirichlet process mixture models (`Dahl, 2005`_).
 
 .. _Neal, 2000: https://pdfs.semanticscholar.org/de79/8ab2f2e7ca312c12ba34a0d9c05cff9fbf3c.pdf
 .. _Jain, Neal, 2004: https://pdfs.semanticscholar.org/6305/dcc03c8378e371e73b0a68ff29f1167a65f0.pdf
 .. _Dahl, 2003: https://pdfs.semanticscholar.org/cfbe/dd12e5040c76e7c9981b19e6e333d6111656.pdf
+.. _Dahl, 2005: https://pdfs.semanticscholar.org/f49c/620fa006d2e1e07c71092d9692ba5d71f14f.pdf
 
 In Progress
 -----------
