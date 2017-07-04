@@ -41,7 +41,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 	int N = dataset.size();
 
-	int number_mh_steps = 20; // was 20
+	int number_mh_steps = 40; // was 20
 
 	fout << "Add data to membership matrix" << endl;
 	for (int i = 0; i < N; ++i) {

@@ -7,27 +7,23 @@
 #include <np_update_cluster_population.h>
 #include <statistics/dirichlet.h>
 
-struct statistics_t {
-	// number of new clusters
-	int split_attempts;
-	int split_cluster_events_accept;
-	int split_cluster_events_reject;
-	int split_target_likelihood_zero;
-	int split_source_likelihood_zero;
-	int split_likelihood_both_zero;
-	int split_likelihood_both_nonzero;
-	int split_likelihood_both_nonzero_accept;
-	int split_likelihood_both_nonzero_reject;
+typedef enum { simple_random_split, sams_prior, sams_random_walk, random_mixing } split_method_t;
 
-	int merge_attempts;
-	int merge_cluster_events_accept;
-	int merge_cluster_events_reject;
-	int merge_target_likelihood_zero;
-	int merge_source_likelihood_zero;
-	int merge_likelihood_both_zero;
-	int merge_likelihood_both_nonzero;
-	int merge_likelihood_both_nonzero_accept;
-	int merge_likelihood_both_nonzero_reject;
+typedef struct step {
+	int attempts;
+	int cluster_events_accept;
+	int cluster_events_reject;
+	int target_likelihood_zero;
+	int source_likelihood_zero;
+	int likelihood_both_zero;
+	int likelihood_both_nonzero;
+	int likelihood_both_nonzero_accept;
+	int likelihood_both_nonzero_reject;
+} step_t;
+
+struct statistics_t {
+	step_t split;
+	step_t merge;
 };
 
 /**
@@ -48,6 +44,9 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 		 */
 		dirichlet_process & _nonparametrics;
 
+		//! Store pointer to membership matrix locally
+		membertrix * _cluster_matrix;
+
 		/*!
 		 * The same value as _nonparametrics.getSuffies().alpha. Will be set in the constructor.
 		 */
@@ -58,9 +57,15 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 
 		// statistics
 		statistics_t _statistics;
-		
-		bool split(membertrix & cluster_matrix, data_ids_t data_ids, std::vector<cluster_id_t> & prev_clusters);
-		bool merge(membertrix & cluster_matrix, data_ids_t data_ids, std::vector<cluster_id_t> & prev_clusters);
+
+		void propose_split(data_ids_t & move, data_ids_t & remain, data_id_t data_i, data_id_t data_j, 
+				cluster_id_t current_cluster_id, cluster_t & new_cluster, split_method_t split_method);
+
+		// split a single cluster
+		bool split(data_ids_t data_ids, cluster_id_t current_cluster);
+
+		// merge the given clusters
+		bool merge(data_ids_t data_ids, std::vector<cluster_id_t> & current_clusters);
 	public:
 		/*!
 		 * Construct update method for cluster population.

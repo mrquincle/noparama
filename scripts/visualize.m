@@ -6,7 +6,7 @@ cmap = colormap;
 %dirname = ['../output/20170215_13:10'];
 dirname = ['../output/LATEST'];
 
-plot_gaussians=false;
+plot_gaussians=true;
 
 fname = [dirname '/results.txt']
 load(fname)
