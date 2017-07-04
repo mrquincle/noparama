@@ -133,6 +133,31 @@ void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, da
 
 }
 
+void JainNealAlgorithm::checkLikelihoods(double lsrc, double ldest, step_t statistics_step, double &lratio, bool &accept, bool &overwrite) {
+	overwrite = false;
+	if (ldest == 0 && lsrc == 0) {
+		fout << "Both likelihood of existing and new cluster is zero. Reject it." << endl;
+		overwrite = true;
+		accept = false;
+		statistics_step.likelihood_both_zero++;
+	} else if (lsrc == 0) {
+		fout << "Likelihood of source cluster is zero. Accept new cluster." << endl;
+		overwrite = true;
+		accept = true;
+		statistics_step.source_likelihood_zero++;
+	} else if (ldest == 0) {
+		fout << "Likelihood of target cluster is " << ldest << ". Reject it in all cases." << endl;
+		fout << "Just for the record, likelihood of source is: " << lsrc << endl;
+		overwrite = true;
+		accept = false;
+		statistics_step.target_likelihood_zero++;
+	} else {
+		lratio = ldest / lsrc; 
+		fout << "Likelihood ratio is something useful " << lratio << endl;
+		statistics_step.likelihood_both_nonzero++;
+	}
+}
+
 bool JainNealAlgorithm::split(
 		data_ids_t data_ids,
 		cluster_id_t current_cluster_id
@@ -152,7 +177,7 @@ bool JainNealAlgorithm::split(
 	Suffies *suffies = _nonparametrics.sample_base(_generator);
 	cluster_t *new_cluster = new cluster_t(*suffies);
 
-	propose_split(move, remain, data_ids[0], data_ids[1], current_cluster_id, *new_cluster, simple_random_split);
+	propose_split(move, remain, data_ids[0], data_ids[1], current_cluster_id, *new_cluster, sams_prior);
 
 	int nc0 = move.size();
 	int nc1 = remain.size();
@@ -179,28 +204,10 @@ bool JainNealAlgorithm::split(
 	double l21; 
 	bool overwrite = false;
 
-	if (l2 == 0 && l1 == 0) {
-		fout << "Both likelihood of existing and new cluster is zero. Reject it." << endl;
-		overwrite = true;
-		accept = false;
-		_statistics.split.likelihood_both_zero++;
-	} else if (l1 == 0) {
-		fout << "Likelihood of source cluster is zero. Accept new cluster." << endl;
-		overwrite = true;
-		accept = true;
-		_statistics.split.source_likelihood_zero++;
-	} else if (l2 == 0) {
-		fout << "Likelihood of target cluster is " << l2 << ". Reject it in all cases." << endl;
-		fout << "Just for the record, likelihood of source is: " << l1 << endl;
-		overwrite = true;
-		accept = false;
-		_statistics.split.target_likelihood_zero++;
-	} else {
-		l21 = l2 / l1; 
-		fout << "Likelihood ratio is something useful " << l21 << endl;
-		_statistics.split.likelihood_both_nonzero++;
-	}
+	// handle weird corner cases
+	checkLikelihoods(l1, l2, _statistics.split, l21, accept, overwrite);
 
+	// normal MH step
 	if (!overwrite) {
 		double a_split = q12 * p21 * l21; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
 		fout << "Acceptance for split: " << a_split << endl;
@@ -261,10 +268,6 @@ bool JainNealAlgorithm::merge(
 	double q21 = pow(0.5, nc - 2);
 	fout << "The ratio to be considered for Metropolis-Hastings without the likelihood ratio is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
 
-	// calculate likelihoods
-	// if we would have stored the likelihoods somewhere of the original clusters we might have reused them
-	// now we have to calculate them from scratch
-
 	// likelihood of data in cluster 0 before merge
 	auto cluster0 = _cluster_matrix->getCluster(current_clusters[0]);
 	_likelihood.init(cluster0->getSuffies());
@@ -280,26 +283,7 @@ bool JainNealAlgorithm::merge(
 
 	double l12;
 	bool overwrite = false;
-	if (l1_0 == 0 && l2_0 == 0) {
-		// likelihood is zero before and after merge... we should just walk...
-		overwrite = true;
-		accept = false;
-		_statistics.merge.likelihood_both_zero++;
-	} else if (l2_0 == 0) {
-		// just accept, source is 0, nothing to loose
-		overwrite = true;
-		accept = true;
-		_statistics.merge.source_likelihood_zero++;
-	} else if (l1_0 == 0) {
-		// just reject
-		overwrite = true;
-		accept = false;
-		_statistics.merge.target_likelihood_zero++;
-	} else {
-		l12 = l1_0 / l2_0;
-		fout << "Likelihood ratio becomes: " << l12 << endl;
-		_statistics.merge.likelihood_both_nonzero++;
-	}
+	checkLikelihoods(l2_0, l1_0, _statistics.merge, l12, accept, overwrite);
 
 	if (!overwrite) {
 		double a_merge = q21 * p12 * l12; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
@@ -319,7 +303,6 @@ bool JainNealAlgorithm::merge(
 	}
 
 	if (accept) {
-		fout << "--------------------------------------------------------------------------------------------" << endl;
 		fout << "Accept merge!" << endl;
 		// actually perform the move: all items from i go to j
 		for (auto data: data_ids0) {
@@ -330,7 +313,6 @@ bool JainNealAlgorithm::merge(
 	} else {
 		fout << "Reject merge!" << endl;
 	}
-	// TODO: anything that needs to be re-established on rejection?
 	return accept;
 }
 

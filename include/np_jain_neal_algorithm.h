@@ -58,6 +58,8 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 		// statistics
 		statistics_t _statistics;
 
+		void checkLikelihoods(double l1, double l2, step_t statistics_step, double &l21, bool &accept, bool &overwrite);
+
 		void propose_split(data_ids_t & move, data_ids_t & remain, data_id_t data_i, data_id_t data_j, 
 				cluster_id_t current_cluster_id, cluster_t & new_cluster, split_method_t split_method);
 
