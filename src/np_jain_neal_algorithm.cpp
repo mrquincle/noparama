@@ -11,6 +11,8 @@ using namespace std;
 
 enum { simple_random_split, sams_prior, sams_random_walk };
 
+#define JAIN_NEAL_Q_CALCULATION
+
 JainNealAlgorithm::JainNealAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
@@ -51,8 +53,8 @@ bool JainNealAlgorithm::split(
 	data_ids_t data_ids2_0 = { data_ids[0] };
 	data_ids_t data_ids2_1 = { data_ids[1] };
 
-	int split_method = sams_prior;
-//	int split_method = simple_random_split;
+//	int split_method = sams_prior;
+	int split_method = simple_random_split;
 
 	// shuffle the data items
 	algebra::random_order(data_ids1.begin(), data_ids1.end());
@@ -122,7 +124,7 @@ bool JainNealAlgorithm::split(
 					if (toss <= 0.5) {
 						// move these points
 						data_ids2_0.push_back(data_id);
-
+					} else {
 						data_ids2_1.push_back(data_id);
 					}
 					break;
@@ -181,9 +183,19 @@ bool JainNealAlgorithm::split(
 
 	// note, you'll need g++-7 and C++17 to obtain special_math function beta.
 	double p21 = _alpha * beta(nc0, nc1);
-	double q12 = pow(2, nc - 2);
+	// q12 is quite large for a split move
+	double q12;
+#ifdef JAIN_NEAL_Q_CALCULATION
+	q12 = pow(2, nc - 2);
+#else
+	// q12 is much smaller, but this takes into account n_i and n_j. I's not equally likely to sample (.. .. | .. .. ..) 
+	// as to sample (.. | .. .. .. ..) isn't it?
+	int f1 = 2;
+	if (nc0 == nc1) f1 = 1;
+	q12 = 1 / (f1 * (nc0*nc1)/( 6.0 * (nc0+nc1-1)*(nc0+nc1)*(nc0+nc1+1)  ) );
+#endif
 
-	fout << "The ratio to be considered for Metropolis-Hastings without the likelihood ratio is " << q12 << " * " << p21 << " = " << q12 * p21 << endl;
+	fout << "The ratio to be considered for a Metropolis-Hastings split " << nc0 << ", " << nc1 << " without the likelihood ratio is " << q12 << " * " << p21 << " = " << q12 * p21 << endl;
 
 	// only consider the data points that move to the new one, but at the old cluster
 	dataset_t data0;
@@ -221,11 +233,12 @@ bool JainNealAlgorithm::split(
 		_statistics.split_likelihood_both_nonzero++;
 	}
 
-	// if the point we randomly picked is the only one under consideration, overwrite everything and reject
-	if (data_ids2_0.size() < 3) {
+	/*
+	// if the point we randomly picked is the only one under consideration, overwrite everything and reject it
+	if (data_ids2_0.size() <= 1) {
 		overwrite = true;
 		accept = false;
-	}
+	} */
 
 	if (!overwrite) {
 		double a_split = q12 * p21 * l21; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
@@ -237,8 +250,10 @@ bool JainNealAlgorithm::split(
 
 		if (a_split < u) {
 			_statistics.split_likelihood_both_nonzero_reject++;
+			//cout << "Reject: clusters sizes " << data_ids2_0.size() << " and " << data_ids2_1.size() << endl;
 			accept = false;
 		} else {
+			//cout << "Accept: clusters sizes " << data_ids2_0.size() << " and " << data_ids2_1.size() << endl;
 			_statistics.split_likelihood_both_nonzero_accept++;
 			accept = true;
 		}
@@ -296,8 +311,14 @@ bool JainNealAlgorithm::merge(
 
 	// check if type is correct (no rounding off to ints by accident)
 	double p12 = 1.0/(_alpha * beta(nc0, nc1));
-	double q21 = pow(0.5, nc - 2);
-
+	double q21;
+#ifdef JAIN_NEAL_Q_CALCULATION
+	q21 = pow(0.5, nc - 2);
+#else
+	int f1 = 2;
+	if (nc0 == nc1) f1 = 1;
+	q21 = f1 * (nc0*nc1)/( 6.0 * (nc0+nc1-1)*(nc0+nc1)*(nc0+nc1+1)  );
+#endif
 	fout << "The ratio to be considered for Metropolis-Hastings without the likelihood ratio is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
 
 	// calculate likelihoods

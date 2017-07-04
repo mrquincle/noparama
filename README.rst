@@ -141,24 +141,31 @@ CK
 Here we do not have the property anymore that the update is atomic! Setting something to 1 or 0 in the assignment 
 matrix, needs also an update in the set structure.
 
-References
+Literature
 ----------
+
+Currently implemented are algorithms 2 and 8 by Neal, the split-merge sampler with the simple random split procedure
+by Jain and Neal, the nonconjugate SAMS sampler by Dahl. 
 
 1. Markov chain sampling methods for Dirichlet process mixture models (`Neal, 2000`_).
 2. A split-merge Markov chain Monte Carlo procedure for the Dirichlet process mixture model (`Jain, Neal, 2004`_).
 3. An improved merge-split sampler for conjugate Dirichlet process mixture models (`Dahl, 2003`_).
 4. Sequentially-allocated merge-split sampler for conjugate and nonconjugate Dirichlet process mixture models (`Dahl, 2005`_).
+5. A Smart-Dumb/Dumb-Smart Algorithm for Efficient Split-Merge MCMC (`Wang, Russell, 2015`_).
 
 .. _Neal, 2000: https://pdfs.semanticscholar.org/de79/8ab2f2e7ca312c12ba34a0d9c05cff9fbf3c.pdf
 .. _Jain, Neal, 2004: https://pdfs.semanticscholar.org/6305/dcc03c8378e371e73b0a68ff29f1167a65f0.pdf
 .. _Dahl, 2003: https://pdfs.semanticscholar.org/cfbe/dd12e5040c76e7c9981b19e6e333d6111656.pdf
 .. _Dahl, 2005: https://pdfs.semanticscholar.org/f49c/620fa006d2e1e07c71092d9692ba5d71f14f.pdf
+.. _Wang, Russell, 2015: https://pdfs.semanticscholar.org/c444/ee208269dcfe6c96ede88525893549c39add.pdf
 
 In Progress
 -----------
    
 This is a work-in-progress. This means it normally can be compiled and should be functionality complete.
 However, don't use it yet.
+
+Especially the split-merge samplers are not doing what I want them to be doing... 
 
 :Authors:
     Anne van Rossum

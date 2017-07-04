@@ -41,7 +41,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 	int N = dataset.size();
 
-	int number_mh_steps = 20;
+	int number_mh_steps = 20; // was 20
 
 	fout << "Add data to membership matrix" << endl;
 	for (int i = 0; i < N; ++i) {
@@ -75,6 +75,10 @@ void MCMC::run(dataset_t & dataset, int T) {
 	fout << "Removed " << removed << " empty clusters" << endl;
 	foutvar(7) << "After cleanup we have " << _membertrix.count() << " assigned data items (should be the same)" << endl;
 
+	// just only pick a few
+	int M = N;
+	if (M > N) M = N;
+
 	// update clusters
 	for (int t = 0; t < T; ++t) {
 		
@@ -95,7 +99,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 		}
 
 		fout << "Create subset of size " << _subset_count << endl;
-		for (int i = 0; i < N; ++i) {
+		for (int i = 0; i < M; ++i) {
 			// create subset vector of size _subset_count
 			std::vector<int> subset(_subset_count);
 			std::set<int> uniq;
