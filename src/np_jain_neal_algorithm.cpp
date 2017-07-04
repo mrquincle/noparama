@@ -11,8 +11,6 @@ using namespace std;
 
 enum { simple_random_split, sams_prior, sams_random_walk };
 
-#define JAIN_NEAL_Q_CALCULATION
-
 JainNealAlgorithm::JainNealAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
@@ -185,15 +183,7 @@ bool JainNealAlgorithm::split(
 	double p21 = _alpha * beta(nc0, nc1);
 	// q12 is quite large for a split move
 	double q12;
-#ifdef JAIN_NEAL_Q_CALCULATION
 	q12 = pow(2, nc - 2);
-#else
-	// q12 is much smaller, but this takes into account n_i and n_j. I's not equally likely to sample (.. .. | .. .. ..) 
-	// as to sample (.. | .. .. .. ..) isn't it?
-	int f1 = 2;
-	if (nc0 == nc1) f1 = 1;
-	q12 = 1 / (f1 * (nc0*nc1)/( 6.0 * (nc0+nc1-1)*(nc0+nc1)*(nc0+nc1+1)  ) );
-#endif
 
 	fout << "The ratio to be considered for a Metropolis-Hastings split " << nc0 << ", " << nc1 << " without the likelihood ratio is " << q12 << " * " << p21 << " = " << q12 * p21 << endl;
 
@@ -312,13 +302,7 @@ bool JainNealAlgorithm::merge(
 	// check if type is correct (no rounding off to ints by accident)
 	double p12 = 1.0/(_alpha * beta(nc0, nc1));
 	double q21;
-#ifdef JAIN_NEAL_Q_CALCULATION
 	q21 = pow(0.5, nc - 2);
-#else
-	int f1 = 2;
-	if (nc0 == nc1) f1 = 1;
-	q21 = f1 * (nc0*nc1)/( 6.0 * (nc0+nc1-1)*(nc0+nc1)*(nc0+nc1+1)  );
-#endif
 	fout << "The ratio to be considered for Metropolis-Hastings without the likelihood ratio is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
 
 	// calculate likelihoods
