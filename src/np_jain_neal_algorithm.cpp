@@ -31,6 +31,22 @@ JainNealAlgorithm::JainNealAlgorithm(
 		
 }
 
+double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1) {
+	double result = _alpha * beta(nc0, nc1);
+	if (split)
+		return result;
+	else
+		return 1.0 / result;
+}
+
+double JainNealAlgorithm::ratioProposal(bool split, int nc) {
+	double result = pow(2, nc - 2);
+	if (split) 
+		return 1.0 / result;
+	else
+		return result;
+}
+
 void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, data_id_t data_i, data_id_t data_j, 
 		cluster_id_t current_cluster_id, cluster_t & new_cluster, split_method_t split_method) {
 
@@ -95,19 +111,19 @@ void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, da
 					_likelihood.init(new_cluster.getSuffies());
 					data_t * datum = _cluster_matrix->getDatum(data_id);
 					//fout << "Consider datum: " << data_id << ": " << *datum << endl;
-					double l2_0new = _likelihood.probability(*datum) * move.size();
+					double ldest = _likelihood.probability(*datum) * move.size();
 
-					//fout << "It has a likelihood at the new cluster of " << l2_0new << endl;
+					//fout << "It has a likelihood at the new cluster of " << ldest << endl;
 					_likelihood.init(current_cluster->getSuffies());
 
-					double l2_1 = _likelihood.probability(*datum) * remain.size();
-					//fout << "It has a likelihood at the existing cluster of " << l2_1 << endl;
+					double lsrc = _likelihood.probability(*datum) * remain.size();
+					//fout << "It has a likelihood at the existing cluster of " << lsrc << endl;
 
 					double frac;
-					if (l2_0new + l2_1 == 0) {
+					if (ldest + lsrc == 0) {
 						frac = 1/2;
 					} else {
-						frac = l2_0new / (l2_0new + l2_1);
+						frac = ldest / (ldest + lsrc);
 					}
 					//cout << "frac: " << frac << endl;
 					double u = _distribution(_generator);
@@ -130,7 +146,6 @@ void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, da
 				}
 		}
 	}
-
 }
 
 void JainNealAlgorithm::checkLikelihoods(double lsrc, double ldest, step_t statistics_step, double &lratio, bool &accept, bool &overwrite) {
@@ -184,8 +199,8 @@ bool JainNealAlgorithm::split(
 	int nc = nc0 + nc1; 
 	fout << "Cluster is size " << nc << " and after split would become size " << nc0 << " and " << nc1 << endl;
 
-	double p21 = _alpha * beta(nc0, nc1);
-	double q12 = pow(2, nc - 2);
+	double p21 = ratioStateProb(true, nc0, nc1);
+	double q12 = ratioProposal(true, nc);
 
 	fout << "The q(.|.)p(.) ratio for the MH split is " << q12 << " * " << p21 << " = " << q12 * p21 << endl;
 
@@ -264,8 +279,8 @@ bool JainNealAlgorithm::merge(
 	fout << "Clusters are size " << nc0 << " and " << nc1 << " and after merge become " << nc << endl;
 
 	// check if type is correct (no rounding off to ints by accident)
-	double p12 = 1.0/(_alpha * beta(nc0, nc1));
-	double q21 = pow(0.5, nc - 2);
+	double p12 = ratioStateProb(false, nc0, nc1);
+	double q21 = ratioProposal(false, nc);
 	fout << "The ratio to be considered for Metropolis-Hastings without the likelihood ratio is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
 
 	// likelihood of data in cluster 0 before merge
