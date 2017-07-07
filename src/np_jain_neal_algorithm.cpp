@@ -179,6 +179,7 @@ bool JainNealAlgorithm::split(
 		) {
 
 	data_ids_t move, remain;
+	dataset_t data_to_move;
 	int nc0, nc1, nc;
 	double p21, q12;
 	double l1, l2, l21; 
@@ -206,7 +207,6 @@ bool JainNealAlgorithm::split(
 	fout << "The q(.|.)p(.) ratio for the MH split is " << q12 << " * " << p21 << " = " << q12 * p21 << endl;
 
 	// only consider the data points that move to the new one, but at the old cluster
-	dataset_t data_to_move;
 	_cluster_matrix->getData(move, data_to_move);
 
 	// likelihood at old cluster
@@ -261,6 +261,7 @@ bool JainNealAlgorithm::merge(
 		) {
 
 	data_ids_t data_ids0, data_ids1; 
+	dataset_t *data_to_move;
 	int nc0, nc1, nc;
 	double p12, q21;
 	double l1_0, l2_0, l12;
@@ -284,14 +285,14 @@ bool JainNealAlgorithm::merge(
 	// likelihood of data in cluster 0 before merge
 	auto cluster0 = _cluster_matrix->getCluster(current_clusters[0]);
 	_likelihood.init(cluster0->getSuffies());
-	dataset_t * data0 = _cluster_matrix->getData(current_clusters[0]);
-	l2_0 = _likelihood.probability(*data0);
+	data_to_move = _cluster_matrix->getData(current_clusters[0]);
+	l2_0 = _likelihood.probability(*data_to_move);
 	fout << "Likelihood of data in cluster 0 before merge: l2_0 = " << l2_0 << endl;
 
 	// likelihood of data if moved to cluster 1 
 	auto cluster1 = _cluster_matrix->getCluster(current_clusters[1]);
 	_likelihood.init(cluster1->getSuffies());
-	l1_0 = _likelihood.probability(*data0);
+	l1_0 = _likelihood.probability(*data_to_move);
 	fout << "Likelihood of same data in case of moving them to cluster 1 (after merge): l1_0 = " << l1_0 << endl;
 
 	checkLikelihoods(l2_0, l1_0, _statistics.merge, l12, accept, overwrite);

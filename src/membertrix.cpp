@@ -262,7 +262,6 @@ void membertrix::getData(cluster_id_t cluster_id, dataset_t & dataset) const {
 }
 
 void membertrix::getData(data_ids_t data_ids, dataset_t & dataset) const {
-
 	for (auto data_id: data_ids) {
 		auto data_object = _data_objects [ data_id ];
 		dataset.push_back(data_object);
