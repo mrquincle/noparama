@@ -4,3 +4,4 @@ doc/html
 test/CMake*
 *.swp
 /output
+/datasets
