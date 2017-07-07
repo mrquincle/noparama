@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <pretty_print.hpp>
 #include <dim1algebra.hpp>
-#define __STDCPP_WANT_MATH_SPEC_FUNCS__ 1
 #include <cmath>
 
 using namespace std;
@@ -25,10 +24,11 @@ JainNealAlgorithm::JainNealAlgorithm(
 	_verbosity = Debug;
 	_verbosity = Warning;
 	
-	_statistics = (statistics_t){0};
+	_statistics = (statistics_t){{0}};
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
-		
+
+	_split_method = sams_prior;
 }
 
 double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1) {
@@ -192,7 +192,7 @@ bool JainNealAlgorithm::split(
 	Suffies *suffies = _nonparametrics.sample_base(_generator);
 	cluster_t *new_cluster = new cluster_t(*suffies);
 
-	propose_split(move, remain, data_ids[0], data_ids[1], current_cluster_id, *new_cluster, sams_prior);
+	propose_split(move, remain, data_ids[0], data_ids[1], current_cluster_id, *new_cluster, _split_method);
 
 	int nc0 = move.size();
 	int nc1 = remain.size();
@@ -261,43 +261,42 @@ bool JainNealAlgorithm::merge(
 		data_ids_t data_ids,
 		std::vector<cluster_id_t> & current_clusters
 		) {
-	bool accept;
+
+	data_ids_t data_ids0; 
+	data_ids_t data_ids1; 
+	int nc0, nc1, nc;
+	double p12, q21;
+	double l1_0, l2_0, l12;
+	bool accept, overwrite = false;
 
 	_statistics.merge.attempts++;
 
 	// get assignments (just ids, not the data itself)
-	data_ids_t data_ids0; 
-	data_ids0.clear();
 	_cluster_matrix->getAssignments(current_clusters[0], data_ids0);
-	data_ids_t data_ids1; 
-	data_ids1.clear();
 	_cluster_matrix->getAssignments(current_clusters[1], data_ids1);
 
-	int nc0 = data_ids0.size();
-	int nc1 = data_ids1.size();
-	int nc = nc0 + nc1;
+	nc0 = data_ids0.size();
+	nc1 = data_ids1.size();
+	nc = nc0 + nc1;
 	fout << "Clusters are size " << nc0 << " and " << nc1 << " and after merge become " << nc << endl;
 
-	// check if type is correct (no rounding off to ints by accident)
-	double p12 = ratioStateProb(false, nc0, nc1);
-	double q21 = ratioProposal(false, nc);
-	fout << "The ratio to be considered for Metropolis-Hastings without the likelihood ratio is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
+	p12 = ratioStateProb(false, nc0, nc1);
+	q21 = ratioProposal(false, nc);
+	fout << "The q(.|.)p(.) ratio for the MH split is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
 
 	// likelihood of data in cluster 0 before merge
 	auto cluster0 = _cluster_matrix->getCluster(current_clusters[0]);
 	_likelihood.init(cluster0->getSuffies());
 	dataset_t * data0 = _cluster_matrix->getData(current_clusters[0]);
-	double l2_0 = _likelihood.probability(*data0);
+	l2_0 = _likelihood.probability(*data0);
 	fout << "Likelihood of data in cluster 0 before merge: l2_0 = " << l2_0 << endl;
 
 	// likelihood of data if moved to cluster 1 
 	auto cluster1 = _cluster_matrix->getCluster(current_clusters[1]);
 	_likelihood.init(cluster1->getSuffies());
-	double l1_0 = _likelihood.probability(*data0);
+	l1_0 = _likelihood.probability(*data0);
 	fout << "Likelihood of same data in case of moving them to cluster 1 (after merge): l1_0 = " << l1_0 << endl;
 
-	double l12;
-	bool overwrite = false;
 	checkLikelihoods(l2_0, l1_0, _statistics.merge, l12, accept, overwrite);
 
 	if (!overwrite) {

@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
 #endif
 	// create MCMC object
 	fout << "Set up MCMC" << endl;
-	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population, subset_count);
+	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population, subset_count, *likelihood);
 
 	fout << "Run MCMC for " << T << " steps" << endl;
 	mcmc.run(dataset, T);

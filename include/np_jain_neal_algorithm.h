@@ -37,7 +37,10 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 
 		//! The likelihood 
 		distribution_t & _likelihood;
-	
+
+		//! Splitting method
+		split_method_t _split_method;
+
 		/*! 
 		 * The dirichlet process, stored by reference.
 		 * If not stored by reference, the constructor would make a copy, loosing all information on the derived class.

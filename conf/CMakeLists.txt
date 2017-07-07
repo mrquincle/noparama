@@ -35,9 +35,10 @@ include_directories ( "${Eigen3_INCLUDE_DIRS}" )
 #find_package( Boost REQUIRED COMPONENTS random )
 #include_directories( ${Boost_INCLUDE_DIRS} )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-int-in-bool-context")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-int-in-bool-context -Wno-c++11-extensions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __STDCPP_WANT_MATH_SPEC_FUNCS__=1")
 
 include_directories ( "include" )
 include_directories ( "include/helper" )
@@ -68,3 +69,4 @@ add_subdirectory (test)
 # Let's also create a json file with information about header files for YouCompleteMe
 include(compile_header_commands)
 
+set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )

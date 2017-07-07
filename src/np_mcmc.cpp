@@ -24,16 +24,20 @@ MCMC::MCMC(
 		InitClusters & init_clusters, 
 		UpdateClusters & update_clusters, 
 		UpdateClusterPopulation & update_cluster_population,
-		int subset_count
+		int subset_count,
+		distribution_t & likelihood
 	):
 	_generator(generator),
 	_init_clusters(init_clusters), 
 	_update_clusters(update_clusters), 
-	_update_cluster_population(update_cluster_population)
+	_update_cluster_population(update_cluster_population),
+	_likelihood(likelihood)
 {
 	_verbosity = Notice;
 
 	_subset_count = subset_count;
+
+	_max_likelihood = 0.0;
 }
 
 void MCMC::run(dataset_t & dataset, int T) {
@@ -79,10 +83,13 @@ void MCMC::run(dataset_t & dataset, int T) {
 	int M = N;
 	if (M > N) M = N;
 
+	int cycle_print = 100;
+	int cycle_max_likelihood = 1;
+
 	// update clusters
 	for (int t = 0; t < T; ++t) {
 		
-		if (t % 100 == 0) { 
+		if (t % cycle_print == 0) { 
 			foutvar(Notice) << "Metropolis Hastings update " << t << endl; 
 			_membertrix.relabel();
 		}
@@ -120,6 +127,10 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 		// update cluster parameters
 		_update_clusters.update(_membertrix, number_mh_steps);
+
+		if (t % cycle_max_likelihood == 0) {
+			considerMaxLikelihood();
+		}
 	}
 
 }
@@ -127,3 +138,23 @@ void MCMC::run(dataset_t & dataset, int T) {
 const membertrix & MCMC::getMembershipMatrix() const {
 	return _membertrix;
 }
+
+void MCMC::considerMaxLikelihood() {
+	const clusters_t &clusters = _membertrix.getClusters();
+	double current_likelihood = 1.0;
+	for (auto cluster_pair: clusters) {
+		auto const &key = cluster_pair.first;
+		auto const &cluster = cluster_pair.second;
+		dataset_t *dataset = _membertrix.getData(key);
+		_likelihood.init(cluster->getSuffies());
+		current_likelihood += _likelihood.probability(*dataset) ;
+	}
+
+	if (current_likelihood > _max_likelihood) {
+		_max_likelihood = current_likelihood;
+		_max_likelihood_membertrix = _membertrix;
+	}
+
+	foutvar(Notice) << "Likelihood now: " << current_likelihood << endl;
+}
+

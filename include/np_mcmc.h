@@ -41,6 +41,24 @@ class MCMC {
 
 		//! Number of simultaneous data points under consideration
 		int _subset_count;
+
+		//! Store backup of membership matrix
+		membertrix _max_likelihood_membertrix;
+
+		//! Store likelihood of back
+		double _max_likelihood;
+
+		//! The likelihood distribution
+		distribution_t & _likelihood;
+	protected:
+		/*! 
+		 * Calculate maximum likelihood of current assignments
+		 *
+		 * @side[out] _max_likelihood_membertrix The max likelihood membership matrix up to now
+		 * @side[out] _max_likelihood            The max likelihood up to now
+		 */
+		void considerMaxLikelihood();
+
 	public:
 		/*!
 		 * Constructor for MCMC.
@@ -55,7 +73,8 @@ class MCMC {
 				InitClusters & init_clusters, 
 				UpdateClusters & update_clusters, 
 				UpdateClusterPopulation & update_cluster_population,
-				int subset_count
+				int subset_count,
+				distribution_t & likelihood
 			);
 
 		/*!
