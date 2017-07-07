@@ -177,13 +177,14 @@ bool JainNealAlgorithm::split(
 		data_ids_t data_ids,
 		cluster_id_t current_cluster_id
 		) {
-	bool accept;
-	//_verbosity = Warning;
+
+	data_ids_t move, remain;
+	int nc0, nc1, nc;
+	double p21, q12;
+	double l1, l2, l21; 
+	bool accept, overwrite = false;
 
 	_statistics.split.attempts++;
-	// assign the picked items to separate clusters
-	data_ids_t move;
-	data_ids_t remain;
 	
 	// current cluster
 	auto current_cluster = _cluster_matrix->getCluster(current_cluster_id);
@@ -194,13 +195,13 @@ bool JainNealAlgorithm::split(
 
 	propose_split(move, remain, data_ids[0], data_ids[1], current_cluster_id, *new_cluster, _split_method);
 
-	int nc0 = move.size();
-	int nc1 = remain.size();
-	int nc = nc0 + nc1; 
+	nc0 = move.size();
+	nc1 = remain.size();
+	nc = nc0 + nc1; 
 	fout << "Cluster is size " << nc << " and after split would become size " << nc0 << " and " << nc1 << endl;
 
-	double p21 = ratioStateProb(true, nc0, nc1);
-	double q12 = ratioProposal(true, nc);
+	p21 = ratioStateProb(true, nc0, nc1);
+	q12 = ratioProposal(true, nc);
 
 	fout << "The q(.|.)p(.) ratio for the MH split is " << q12 << " * " << p21 << " = " << q12 * p21 << endl;
 
@@ -210,14 +211,11 @@ bool JainNealAlgorithm::split(
 
 	// likelihood at old cluster
 	_likelihood.init(current_cluster->getSuffies());
-	double l1 = _likelihood.probability(data_to_move);
+	l1 = _likelihood.probability(data_to_move);
 
 	// likelihood at new cluster 
 	_likelihood.init(new_cluster->getSuffies());
-	double l2 = _likelihood.probability(data_to_move);
-
-	double l21; 
-	bool overwrite = false;
+	l2 = _likelihood.probability(data_to_move);
 
 	// handle weird corner cases
 	checkLikelihoods(l1, l2, _statistics.split, l21, accept, overwrite);
@@ -262,8 +260,7 @@ bool JainNealAlgorithm::merge(
 		std::vector<cluster_id_t> & current_clusters
 		) {
 
-	data_ids_t data_ids0; 
-	data_ids_t data_ids1; 
+	data_ids_t data_ids0, data_ids1; 
 	int nc0, nc1, nc;
 	double p12, q21;
 	double l1_0, l2_0, l12;
