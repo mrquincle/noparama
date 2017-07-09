@@ -27,10 +27,10 @@ struct statistics_t {
 };
 
 /**
- * This class JainNealAlgorithm updates the cluster population assuming a dirichlet process as nonparametric prior.
+ * This class TriadicAlgorithm updates the cluster population assuming a dirichlet process as nonparametric prior.
  *
  */
-class JainNealAlgorithm: public UpdateClusterPopulation {
+class TriadicAlgorithm: public UpdateClusterPopulation {
 	private:
 		//! Random generator to sample values between 0 and 1 for the Metropolis Hasting step.
 		std::default_random_engine _generator;
@@ -55,26 +55,31 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 		 */
 		double _alpha;
 
+		double _beta;
+
 		// verbosity
 		char _verbosity;
 
 		// statistics
 		statistics_t _statistics;
 
-		double ratioStateProb(bool split, int nc0, int nc1);
+		double ratioStateProb(bool split, const std::vector<int> &more, const std::vector<int> &less);
 
-		double ratioProposal(bool split, int nc);
+		double ratioProposal(bool split, int N, int C);
 
-		void checkLikelihoods(double l1, double l2, step_t statistics_step, double &l21, bool &accept, bool &overwrite);
+		void checkLikelihoods(double lsrc, double ldest, step_t statistics_step, bool &accept, bool &overwrite);
 
-		void propose_split(data_ids_t & move, data_ids_t & remain, data_id_t data_i, data_id_t data_j, 
-				cluster_id_t current_cluster_id, cluster_t & new_cluster, split_method_t split_method);
+		void propose_merge(std::vector<data_ids_t> &pdata, const data_ids_t &data_ids, 
+				cluster_ids_t &cluster_ids, split_method_t split_method);
+
+		void propose_split(std::vector<data_ids_t> &pdata, const data_ids_t &data_ids, 
+				cluster_ids_t &cluster_ids, cluster_t *new_cluster, split_method_t split_method);
 
 		// split a single cluster
-		bool split(data_ids_t data_ids, cluster_id_t current_cluster);
+		bool split(const data_ids_t & data_ids, cluster_ids_t & cluster_ids);
 
 		// merge the given clusters
-		bool merge(data_ids_t data_ids, std::vector<cluster_id_t> & current_clusters);
+		bool merge(const data_ids_t & data_ids, cluster_ids_t & clusters_ids);
 	public:
 		/*!
 		 * Construct update method for cluster population.
@@ -83,7 +88,7 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 		 * @param[in] likelihood                 Likelihood function to be used in update()
 		 * @param[in] nonparametrics             Sufficient statistics of the nonparametric prior (e.g. Dirichlet)
 		 */
-		JainNealAlgorithm(
+		TriadicAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
 			dirichlet_process & nonparametrics

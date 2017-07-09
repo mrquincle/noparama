@@ -2064,6 +2064,38 @@ random_weighted_pick(ForwardIterator first, ForwardIterator last, RandomGenerato
 	return index;
 }
 
+template<typename ForwardIterator, typename RandomGenerator>
+size_t
+random_weighted_pick(ForwardIterator first, ForwardIterator last)
+{
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	return random_weighted_pick(first, last, gen);
+}
+
+template<typename ForwardIterator, typename RandomGenerator>
+size_t
+duplicate_pick(ForwardIterator first, ForwardIterator last, RandomGenerator & gen)
+{
+	// concept requirements
+	__attribute__((unused)) typedef typename std::iterator_traits<ForwardIterator>::value_type ValueType;
+	__attribute__((unused)) typedef typename std::iterator_traits<ForwardIterator>::difference_type DiffType;
+
+	__glibcxx_function_requires(_ForwardIteratorConcept<ForwardIterator>);
+	__glibcxx_requires_valid_range(first, last);
+
+	size_t index = 0;
+
+	std::set<ValueType> set;
+	for (ForwardIterator i = first; i != last; ++i) {
+		set.insert(*i);
+		index = std::distance(first, i);
+		if (set.size() != index + 1) {
+			break;
+		}
+	}
+	return index;
+}
 
 /***********************************************************************************************************************
  * Subset manipulations

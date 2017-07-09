@@ -147,7 +147,7 @@ void MCMC::considerMaxLikelihood() {
 		auto const &cluster = cluster_pair.second;
 		dataset_t *dataset = _membertrix.getData(key);
 		_likelihood.init(cluster->getSuffies());
-		current_likelihood += _likelihood.probability(*dataset) ;
+		current_likelihood *= _likelihood.probability(*dataset) ;
 	}
 
 	if (current_likelihood > _max_likelihood) {

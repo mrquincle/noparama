@@ -40,7 +40,7 @@ NealAlgorithm8::NealAlgorithm8(
  */
 void NealAlgorithm8::update(
 			membertrix & cluster_matrix,
-			std::vector<data_id_t> data_ids
+			const data_ids_t & data_ids
 		) {
 	
 	assert (data_ids.size() == 1);

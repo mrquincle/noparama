@@ -62,7 +62,7 @@ class distribution_t {
 			return 0;
 		};
 		
-		virtual double probability(data_t & data) const {
+		virtual double probability(data_t & datum) const {
 			std::cout << "Distribution: " << distribution_type_str[_distribution_type] << std::endl;
 			assert(PROBABILITY_FOR_DATAPOINT_SHOULD_BE_IMPLEMENTED==0);
 			return 0;

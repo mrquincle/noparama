@@ -62,7 +62,7 @@ class NealAlgorithm8: public UpdateClusterPopulation {
 		 */
 		void update(
 			membertrix & cluster_matrix,
-			std::vector<data_id_t> data_ids
+			const data_ids_t & data_ids
 		);
 
 		/*!

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <membertrix.h>
+#include <np_data.h>
 
 /**
  * This class UpdateClusterPopulation deletes, adds, and adjusts clusters. This in contrast with UpdateCluster which 
@@ -30,15 +31,11 @@ class UpdateClusterPopulation {
 		 */
 		virtual void update(
 				membertrix & cluster_matrix,
-				std::vector<data_id_t> data_ids
-			) {
-			std::cout << "Update function not yet implemented" << std::endl;
-		}
+				const data_ids_t & data_ids
+			) = 0;
 		
 		/*!
 		 * MCMC statistics. How many times are steps rejected, etc.
 		 */
-		virtual void printStatistics() {
-			std::cout << "Statistics function not yet implemented" << std::endl;
-		}
+		virtual void printStatistics() = 0; 
 };

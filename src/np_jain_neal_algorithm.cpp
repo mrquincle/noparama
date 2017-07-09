@@ -40,11 +40,14 @@ double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1) {
 }
 
 double JainNealAlgorithm::ratioProposal(bool split, int nc) {
+	if (_split_method == sams_prior) {
+		return 1.0;
+	}
 	double result = pow(2, nc - 2);
 	if (split) 
-		return 1.0 / result;
-	else
 		return result;
+	else
+		return 1.0 / result;
 }
 
 void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, data_id_t data_i, data_id_t data_j, 
@@ -182,7 +185,7 @@ bool JainNealAlgorithm::split(
 	dataset_t data_to_move;
 	int nc0, nc1, nc;
 	double p21, q12;
-	double l1, l2, l21; 
+	double lsrc, ldest, lratio; 
 	bool accept, overwrite = false;
 
 	_statistics.split.attempts++;
@@ -209,20 +212,20 @@ bool JainNealAlgorithm::split(
 	// only consider the data points that move to the new one, but at the old cluster
 	_cluster_matrix->getData(move, data_to_move);
 
-	// likelihood at old cluster
+	// likelihood if data potentially to be moved would also remain at current cluster
 	_likelihood.init(current_cluster->getSuffies());
-	l1 = _likelihood.probability(data_to_move);
+	lsrc = _likelihood.probability(data_to_move);
 
-	// likelihood at new cluster 
+	// likelihood if data would move to new cluster
 	_likelihood.init(new_cluster->getSuffies());
-	l2 = _likelihood.probability(data_to_move);
+	ldest = _likelihood.probability(data_to_move);
 
 	// handle weird corner cases
-	checkLikelihoods(l1, l2, _statistics.split, l21, accept, overwrite);
+	checkLikelihoods(lsrc, ldest, _statistics.split, lratio, accept, overwrite);
 
 	// normal MH step
 	if (!overwrite) {
-		double a_split = q12 * p21 * l21; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
+		double a_split = q12 * p21 * lratio; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
 		fout << "Acceptance for split: " << a_split << endl;
 
 		// sample uniform random variable
@@ -264,7 +267,8 @@ bool JainNealAlgorithm::merge(
 	dataset_t *data_to_move;
 	int nc0, nc1, nc;
 	double p12, q21;
-	double l1_0, l2_0, l12;
+//	double l1_0, l2_0, l12;
+	double lsrc, ldest, lratio;
 	bool accept, overwrite = false;
 
 	_statistics.merge.attempts++;
@@ -281,24 +285,26 @@ bool JainNealAlgorithm::merge(
 	p12 = ratioStateProb(false, nc0, nc1);
 	q21 = ratioProposal(false, nc);
 	fout << "The q(.|.)p(.) ratio for the MH split is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
+	
+	// data to move sits in cluster 0
+	data_to_move = _cluster_matrix->getData(current_clusters[0]);
 
 	// likelihood of data in cluster 0 before merge
 	auto cluster0 = _cluster_matrix->getCluster(current_clusters[0]);
 	_likelihood.init(cluster0->getSuffies());
-	data_to_move = _cluster_matrix->getData(current_clusters[0]);
-	l2_0 = _likelihood.probability(*data_to_move);
-	fout << "Likelihood of data in cluster 0 before merge: l2_0 = " << l2_0 << endl;
+	lsrc = _likelihood.probability(*data_to_move);
+//	fout << "Likelihood of data in cluster 0 before merge: l2_0 = " << l2_0 << endl;
 
 	// likelihood of data if moved to cluster 1 
 	auto cluster1 = _cluster_matrix->getCluster(current_clusters[1]);
 	_likelihood.init(cluster1->getSuffies());
-	l1_0 = _likelihood.probability(*data_to_move);
-	fout << "Likelihood of same data in case of moving them to cluster 1 (after merge): l1_0 = " << l1_0 << endl;
+	ldest = _likelihood.probability(*data_to_move);
+//	fout << "Likelihood of same data in case of moving them to cluster 1 (after merge): l1_0 = " << l1_0 << endl;
 
-	checkLikelihoods(l2_0, l1_0, _statistics.merge, l12, accept, overwrite);
+	checkLikelihoods(lsrc, ldest, _statistics.merge, lratio, accept, overwrite);
 
 	if (!overwrite) {
-		double a_merge = q21 * p12 * l12; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
+		double a_merge = q21 * p12 * lratio; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
 		fout << "Acceptance for merge: " << a_merge << endl;
 
 		// sample uniform random variable
@@ -343,7 +349,7 @@ bool JainNealAlgorithm::merge(
  */
 void JainNealAlgorithm::update(
 			membertrix & cluster_matrix,
-			data_ids_t data_ids
+			const data_ids_t & data_ids
 		) {
 	// there should be exactly two data points sampled
 	assert (data_ids.size() == 2);

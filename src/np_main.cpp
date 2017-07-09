@@ -19,12 +19,14 @@
 #include <statistics/normalinvwishart.h>
 #include <statistics/normalinvgamma.h>
 
-#define ALGORITHM 9
+#define ALGORITHM 10
 
 #if ALGORITHM==8
 #include <np_neal_algorithm8.h>
-#else
+#elif ALGORITHM==9
 #include <np_jain_neal_algorithm.h>
+#else
+#include <np_triadic_algorithm.h>
 #endif
 
 #include <pretty_print.hpp>
@@ -213,11 +215,16 @@ int main(int argc, char *argv[]) {
 	fout << "We will be using algorithm 8 by Neal" << endl;
 	NealAlgorithm8 update_cluster_population(generator, *likelihood, hyper);
 	subset_count = 1;
-#else
+#elif ALGORITHM==9
 	fout << "We will be using the Jain-Neal algorithm" << endl;
 	JainNealAlgorithm update_cluster_population(generator, *likelihood, hyper);
 	subset_count = 2;
+#else
+	fout << "We will be using the Triadic algorithm" << endl;
+	TriadicAlgorithm update_cluster_population(generator, *likelihood, hyper);
+	subset_count = 3;
 #endif
+
 	// create MCMC object
 	fout << "Set up MCMC" << endl;
 	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population, subset_count, *likelihood);

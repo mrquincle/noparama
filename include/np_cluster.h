@@ -11,6 +11,11 @@ class cluster_t;
 typedef int cluster_id_t;
 
 /*!
+ * A set of cluster ids, not the clusters themselves.
+ */
+typedef std::vector<cluster_id_t> cluster_ids_t;
+
+/*!
  * A cluster is represented by a cluster_t structure and contains parameters in the form of sufficient statistics.
  *
  * There are no dependencies between clusters assumed (hence no references to other clusters or hierarchy).

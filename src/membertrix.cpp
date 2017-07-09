@@ -237,7 +237,7 @@ dataset_t* membertrix::getData() {
 	return &_data_objects;
 }
 
-dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
+dataset_t* membertrix::getData(const cluster_id_t cluster_id) const {
 #if SEPARATE_STRUCTURE==1
 	return _clusters_dataset.at(cluster_id);
 #else
@@ -246,7 +246,7 @@ dataset_t* membertrix::getData(cluster_id_t cluster_id) const {
 #endif
 }
 
-void membertrix::getData(cluster_id_t cluster_id, dataset_t & dataset) const {
+void membertrix::getData(const cluster_id_t cluster_id, dataset_t & dataset) const {
 #if SEPARATE_STRUCTURE==1
 	assert(false); // shouldn't be used, use getData(cluster_id) instead
 #else
@@ -261,7 +261,7 @@ void membertrix::getData(cluster_id_t cluster_id, dataset_t & dataset) const {
 #endif
 }
 
-void membertrix::getData(data_ids_t data_ids, dataset_t & dataset) const {
+void membertrix::getData(const data_ids_t data_ids, dataset_t & dataset) const {
 	for (auto data_id: data_ids) {
 		auto data_object = _data_objects [ data_id ];
 		dataset.push_back(data_object);

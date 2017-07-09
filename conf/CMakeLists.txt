@@ -37,7 +37,7 @@ include_directories ( "${Eigen3_INCLUDE_DIRS}" )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-int-in-bool-context -Wno-c++11-extensions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-int-in-bool-context")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __STDCPP_WANT_MATH_SPEC_FUNCS__=1")
 
 include_directories ( "include" )
@@ -50,7 +50,8 @@ set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mc
     src/clustering_performance.cpp \\
     src/np_update_clusters.cpp \\
     src/np_neal_algorithm8.cpp \\
-    src/np_jain_neal_algorithm.cpp 
+    src/np_jain_neal_algorithm.cpp \\
+    src/np_triadic_algorithm.cpp 
     )
 
 # CMAKE_BINARY_DIR is the top of the build-directory
