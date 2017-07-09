@@ -10,6 +10,8 @@ using namespace std;
 
 // note, you'll need g++-7 and C++17 to obtain special_math function beta.
 
+#define USE_LOGARITHM
+
 JainNealAlgorithm::JainNealAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
@@ -32,14 +34,28 @@ JainNealAlgorithm::JainNealAlgorithm(
 }
 
 double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1) {
+#ifdef USE_LOGARITHM
+	double result = std::log(_alpha) + lgamma(nc0) + lgamma(nc1) - lgamma(nc0 + nc1);
+	if (split)
+		return result;
+	else
+		return -result;
+#else
 	double result = _alpha * beta(nc0, nc1);
 	if (split)
 		return result;
 	else
 		return 1.0 / result;
+#endif
 }
 
 double JainNealAlgorithm::ratioProposal(bool split, int nc) {
+#ifdef USE_LOGARITHM
+	if (_split_method == sams_prior) {
+		return 0.0;
+	}
+	assert(false);
+#else
 	if (_split_method == sams_prior) {
 		return 1.0;
 	}
@@ -48,6 +64,7 @@ double JainNealAlgorithm::ratioProposal(bool split, int nc) {
 		return result;
 	else
 		return 1.0 / result;
+#endif
 }
 
 void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, data_id_t data_i, data_id_t data_j, 
@@ -185,7 +202,10 @@ bool JainNealAlgorithm::split(
 	dataset_t data_to_move;
 	int nc0, nc1, nc;
 	double p21, q12;
-	double lsrc, ldest, lratio; 
+#ifdef USE_LOGARITHM
+	double lsrc, ldest; 
+#endif
+	double lratio;
 	bool accept, overwrite = false;
 
 	_statistics.split.attempts++;
@@ -214,18 +234,33 @@ bool JainNealAlgorithm::split(
 
 	// likelihood if data potentially to be moved would also remain at current cluster
 	_likelihood.init(current_cluster->getSuffies());
+#ifdef USE_LOGARITHM
+	lsrc = _likelihood.logprobability(data_to_move);
+#else
 	lsrc = _likelihood.probability(data_to_move);
+#endif
 
 	// likelihood if data would move to new cluster
 	_likelihood.init(new_cluster->getSuffies());
+#ifdef USE_LOGARITHM
+	ldest = _likelihood.logprobability(data_to_move);
+#else
 	ldest = _likelihood.probability(data_to_move);
+#endif
 
+#ifdef USE_LOGARITHM
+	lratio = ldest - lsrc;
+#else
 	// handle weird corner cases
 	checkLikelihoods(lsrc, ldest, _statistics.split, lratio, accept, overwrite);
-
+#endif
 	// normal MH step
 	if (!overwrite) {
-		double a_split = q12 * p21 * lratio; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
+#ifdef USE_LOGARITHM
+		double a_split = std::exp(q12 + p21 + lratio);
+#else
+		double a_split = q12 * p21 * lratio;
+#endif
 		fout << "Acceptance for split: " << a_split << endl;
 
 		// sample uniform random variable
@@ -267,8 +302,10 @@ bool JainNealAlgorithm::merge(
 	dataset_t *data_to_move;
 	int nc0, nc1, nc;
 	double p12, q21;
-//	double l1_0, l2_0, l12;
-	double lsrc, ldest, lratio;
+#ifdef USE_LOGARITHM
+	double lsrc, ldest;
+#endif
+	double lratio;
 	bool accept, overwrite = false;
 
 	_statistics.merge.attempts++;
@@ -292,19 +329,35 @@ bool JainNealAlgorithm::merge(
 	// likelihood of data in cluster 0 before merge
 	auto cluster0 = _cluster_matrix->getCluster(current_clusters[0]);
 	_likelihood.init(cluster0->getSuffies());
+#ifdef USE_LOGARITHM
+	lsrc = _likelihood.logprobability(*data_to_move);
+#else
 	lsrc = _likelihood.probability(*data_to_move);
+#endif
 //	fout << "Likelihood of data in cluster 0 before merge: l2_0 = " << l2_0 << endl;
 
 	// likelihood of data if moved to cluster 1 
 	auto cluster1 = _cluster_matrix->getCluster(current_clusters[1]);
 	_likelihood.init(cluster1->getSuffies());
+#ifdef USE_LOGARITHM
+	ldest = _likelihood.logprobability(*data_to_move);
+#else
 	ldest = _likelihood.probability(*data_to_move);
+#endif
 //	fout << "Likelihood of same data in case of moving them to cluster 1 (after merge): l1_0 = " << l1_0 << endl;
 
+#ifdef USE_LOGARITHM
+	lratio = ldest - lsrc;
+#else
 	checkLikelihoods(lsrc, ldest, _statistics.merge, lratio, accept, overwrite);
+#endif
 
 	if (!overwrite) {
-		double a_merge = q21 * p12 * lratio; // or actually min(1, ...) but we compare with u ~ U(0,1) anyway
+#ifdef USE_LOGARITHM
+		double a_merge = std::exp(q21 + p12 + lratio); 
+#else
+		double a_merge = q21 * p12 * lratio; 
+#endif
 		fout << "Acceptance for merge: " << a_merge << endl;
 
 		// sample uniform random variable

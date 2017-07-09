@@ -96,4 +96,8 @@ class scalarnoise_multivariate_normal_distribution: public distribution_t {
 		double probability(data_t & data) const;
 		
 		double probability(dataset_t & dataset) const;
+		
+		double logprobability(data_t & data) const;
+		
+		double logprobability(dataset_t & dataset) const;
 };

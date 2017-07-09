@@ -10,6 +10,7 @@
 typedef enum { simple_random_split, sams_prior, sams_random_walk, random_mixing } split_method_t;
 
 typedef struct step {
+	std::string type;
 	int attempts;
 	int cluster_events_accept;
 	int cluster_events_reject;
@@ -22,8 +23,7 @@ typedef struct step {
 } step_t;
 
 struct statistics_t {
-	step_t split;
-	step_t merge;
+	step_t step[4];
 };
 
 /**
@@ -67,7 +67,7 @@ class TriadicAlgorithm: public UpdateClusterPopulation {
 
 		double ratioProposal(bool split, int N, int C);
 
-		void checkLikelihoods(double lsrc, double ldest, step_t statistics_step, bool &accept, bool &overwrite);
+		void checkLikelihoods(double lsrc, double ldest, bool &accept, bool &overwrite);
 
 		void propose_merge(std::vector<data_ids_t> &pdata, const data_ids_t &data_ids, 
 				cluster_ids_t &cluster_ids, split_method_t split_method);

@@ -135,28 +135,40 @@ class membertrix {
 		 *
 		 * @param[in] cluster_id       An index to a cluster object
 		 * @param[in] data_id          An index to a data point
+		 * @return                     Error if data item does not exist (for example)
 		 */
 		np_error_t assign(cluster_id_t cluster_id, data_id_t data_id);
 		
 		/*!
 		 * Retract a previously assigned data-cluster pair (through assign). If the cluster does not have any data
-		 * points left, also the object will be deallocated.
+		 * points left, also the object will be deallocated depending on auto_remove setting.
 		 *
 		 * @param[in] cluster_id       An index to a cluster object
 		 * @param[in] data_id          An index to a data point
+		 * @param[in] auto_remove      Automatically deallocate cluster object if there is no data assigned anymore
 		 */
-		np_error_t retract(cluster_id_t cluster_id, data_id_t data_id);
+		np_error_t retract(cluster_id_t cluster_id, data_id_t data_id, bool auto_remove = true);
 
 		/*!
 		 * Retract a previously assigned data-cluster pair (through assign) where the search for this particular 
 		 * cluster is left to getClusterId(data_id). If the cluster does not have any data points left, also the object 
-		 * will be deallocated. This has the same effect as:
+		 * will be deallocated (depending on auto_remove flag). This has the same effect as:
 		 * 
 		 *   retract(getClusterId(data_id), data_id);
 		 *
 		 * @param[in] data_id          An index to a data point
+		 * @param[in] auto_remove      Automatically deallocate cluster object if there is no data assigned anymore
 		 */
-		np_error_t retract(data_id_t data_id);
+		np_error_t retract(data_id_t data_id, bool auto_remove = true);
+
+		/*!
+		 * Remove a cluster (should be empty). This function should be called if auto_remove is set to false in the
+		 * retract() functions. If auto_remove is set to true (default) there is no need to call remove().
+		 *
+		 * @param[in] cluster_id       Index to cluster to be removed
+		 * @return                     Error if cluster is still non-empty for example
+		 */
+		np_error_t remove(cluster_id_t cluster_id);
 
 		/*!
 		 * If the data item is assigned to any cluster this function will return true. In all other cases it returns
@@ -171,9 +183,8 @@ class membertrix {
 		 * Get all assignments to given cluster.
 		 *
 		 * @param[in] cluster_id       An index to a cluster object
-		 * @return                     Set of data ids.
+		 * @param[out] data_ids        Set of data ids
 		 */
-//		data_ids_t* getAssignments(cluster_id_t cluster_id) const;
 		void getAssignments(cluster_id_t cluster_id, data_ids_t & data_ids) const;
 
 		/*!

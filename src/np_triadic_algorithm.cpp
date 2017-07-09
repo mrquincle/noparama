@@ -24,14 +24,18 @@ TriadicAlgorithm::TriadicAlgorithm(
 	_verbosity = Debug;
 	_verbosity = Warning;
 	
-	_statistics = (statistics_t){{0}};
+	_statistics.step[0].type = "merge from 2 to 1";
+	_statistics.step[1].type = "split from 1 to 2";
+	_statistics.step[2].type = "merge from 3 to 2";
+	_statistics.step[3].type = "split from 2 to 3";
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 
 	_beta = 0.5;
+	_beta = 1;
 
 	_split_method = sams_prior;
-	_split_method = simple_random_split;
+//	_split_method = simple_random_split;
 }
 
 double TriadicAlgorithm::ratioStateProb(bool split, const std::vector<int> & more, const std::vector<int> & less) {
@@ -42,11 +46,12 @@ double TriadicAlgorithm::ratioStateProb(bool split, const std::vector<int> & mor
 	for (int i = 0; i < (int)less.size(); ++i) {
 		logfraction -= lgamma(less[i]);
 	}
-	double result = _alpha * std::exp(logfraction);
-	if (split)
+	double result = std::log(_alpha) + logfraction;
+	if (split) { 
 		return result;
-	else
-		return 1.0 / result;
+	} else {
+		return -result;
+	}
 }
 
 /**
@@ -55,23 +60,29 @@ double TriadicAlgorithm::ratioStateProb(bool split, const std::vector<int> & mor
  */
 double TriadicAlgorithm::ratioProposal(bool split, int N, int C) {
 	if (_split_method == sams_prior) {
-		return 1.0;
+		return .0;
 	}
-	double f = C / (C - 1.0);
 	//double result = pow(3, nc - 3) * pow(2, 2 - nc);
 	// we can generalize to  (c/(c-1))^(n-c+1)/c
-	double result = pow(f, N - C + 1) / C;
-	if (split) 
+	//double f = C / (C - 1.0);
+	//double result = pow(f, N - C + 1) / C;
+	//double result = (N - C + 1 ) * std::log(f) - std::log(C);
+	//double result = (N - C + 1 ) * ( std::log(C) - std::log( C-1 ) ) - std::log(C);
+	double result = (C - N - 1) * std::log(C - 1) - (C - N) * std::log(C);
+	if (split) { 
 		return result;
-	else
-		return 1.0 / result;
+	} else {
+		return -result;
+	}
 }
 
-// always merge first Q
+/**
+ * The last item in data_picks[] corresponds with the last cluster id in cluster_ids[] and this cluster will be
+ * empty after this function.
+ */
 void TriadicAlgorithm::propose_merge(std::vector<data_ids_t> &pdata, const data_ids_t &data_picks,
 		cluster_ids_t &cluster_ids, split_method_t split_method) {
 	
-	//int D = data_picks.size();
 	int C = cluster_ids.size();
 	int Q = C - 1;
 	std::vector<cluster_t*> cluster(Q);
@@ -97,10 +108,14 @@ void TriadicAlgorithm::propose_merge(std::vector<data_ids_t> &pdata, const data_
 	// assign all data points
 	for (int i = 0; i < (int)data_ids.size(); ++i) {
 		int data_id = data_ids[i];
+		bool skip = false;
 		for (int i = 0; i < Q; ++i) {
-			if (data_picks[i] == data_id) 
-				continue;
+			if (data_picks[i] == data_id) {
+				skip = true;
+				break;
+			}
 		}
+		if (skip) continue;
 
 		switch (split_method) {
 			case random_mixing:
@@ -134,17 +149,25 @@ void TriadicAlgorithm::propose_merge(std::vector<data_ids_t> &pdata, const data_
 	}
 }
 
+// we are gonna assume that the duplicates are at the end of the data_picks and cluster_ids vectors
 void TriadicAlgorithm::propose_split(std::vector<data_ids_t> &pdata, const data_ids_t &data_picks, 
 		cluster_ids_t &cluster_ids, cluster_t *new_cluster, split_method_t split_method) {
 
-	int D = data_picks.size();
-	int C = cluster_ids.size();
-	int Q = C + 1;
+	int C, Q, D1, D2;
+	C = cluster_ids.size() - 1;
+	Q = C + 1;
+	D1 = data_picks.size();
+	D2 = pdata.size();
+	
+	assert (D1 == Q);
+	assert (D2 == Q);
+
 	std::vector<cluster_t*> cluster(Q);
 	data_ids_t data_ids;
 
 	// assign uniformly sampled data points to separate clusters
-	for (int i = 0; i < D; ++i) {
+	for (int i = 0; i < Q; ++i) {
+		fout << "Assign " << data_picks[i] << " to " << i << endl;
 		pdata[i].push_back(data_picks[i]);
 	}
 	
@@ -162,15 +185,19 @@ void TriadicAlgorithm::propose_split(std::vector<data_ids_t> &pdata, const data_
 	// shuffle the data items
 	algebra::random_order(data_ids.begin(), data_ids.end());
 
-	std::vector<double> ldata(D, 1.0);
+	std::vector<double> ldata(Q, 1.0);
 
 	// assign all data points
 	for (int i = 0; i < (int)data_ids.size(); ++i) {
 		int data_id = data_ids[i];
-		for (int i = 0; i < D; ++i) {
-			if (data_picks[i] == data_id) 
-				continue;
+		bool skip = false;
+		for (int i = 0; i < Q; ++i) {
+			if (data_picks[i] == data_id) {
+				skip = true;
+				break;
+			}
 		}
+		if (skip) continue;
 
 		switch (split_method) {
 			case random_mixing:
@@ -202,38 +229,52 @@ void TriadicAlgorithm::propose_split(std::vector<data_ids_t> &pdata, const data_
 				}
 		}
 	}
+	for (int i = 0; i < Q; i++) {
+		assert (_cluster_matrix->count(cluster_ids[i]) > 0);
+	}
+	D2 = pdata.size();
+	assert (D2 == Q);
 }
 
-void TriadicAlgorithm::checkLikelihoods(double lsrc, double ldest, step_t statistics_step, bool &accept, bool &overwrite) {
+void TriadicAlgorithm::checkLikelihoods(double lsrc, double ldest, bool &accept, bool &overwrite) {
 	if (ldest == 0 && lsrc == 0) {
-		fout << "Both likelihood of existing and new cluster is zero. Reject it." << endl;
 		overwrite = true;
+		if (accept) {
+			fout << "Both likelihood of existing and new cluster is zero. Reject it." << endl;
+		}
 		accept = accept && false;
-		statistics_step.likelihood_both_zero++;
 	} else if (lsrc == 0) {
-		fout << "Likelihood of source cluster is zero. Accept new cluster." << endl;
 		overwrite = true;
 		accept = accept && true;
-		statistics_step.source_likelihood_zero++;
+		if (accept) {
+			fout << "Likelihood of source cluster is zero. Accept new cluster." << endl;
+		}
 	} else if (ldest == 0) {
-		fout << "Likelihood of target cluster is " << ldest << ". Reject it in all cases." << endl;
-		fout << "Just for the record, likelihood of source is: " << lsrc << endl;
 		overwrite = true;
+		if (accept) {
+			fout << "Likelihood of target cluster is " << ldest << ". Reject it in all cases." << endl;
+			fout << "Just for the record, likelihood of source is: " << lsrc << endl;
+		}
 		accept = accept && false;
-		statistics_step.target_likelihood_zero++;
-	} else {
-		statistics_step.likelihood_both_nonzero++;
-	}
+	} 
 }
 
 bool TriadicAlgorithm::split(
 		const data_ids_t & data_picks,
 		cluster_ids_t & cluster_ids
 		) {
-	
-	int C = cluster_ids.size();
-	int Q = C + 1;
-	assert (Q == (int)data_picks.size());
+
+	int D, C, Q, S;
+	D = data_picks.size();
+	C = cluster_ids.size() - 1;
+	Q = C + 1;
+	S = (C - 1) * 2 + 1;
+	fout << "Data picks: " << data_picks << endl;
+	fout << "Clusters: " << cluster_ids << endl;
+	assert (Q == D);
+
+	step_t & statistics_step = _statistics.step[S];
+	statistics_step.attempts++;
 
 	// dimension of dataX is C, pdataX is Q, ldataX is set both to Q, cluster as well
 	// data can be obtained as pointers, pdata has to be constructed by copying elements
@@ -244,11 +285,9 @@ bool TriadicAlgorithm::split(
 	std::vector<int> ndata(C), npdata(Q);
 	std::vector<double> ldata(Q), lpdata(Q);
 	int N = 0;
-	double rP, rQ, rL = 1.0;
+	double rP, rQ, rL = 0.0;
 	bool accept = true, overwrite = false;
 
-	_statistics.split.attempts++;
-	
 	for (int i = 0; i < C; i++) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
 		_cluster_matrix->getAssignments(cluster_ids[i], data_ids[i]);
@@ -270,52 +309,76 @@ bool TriadicAlgorithm::split(
 		npdata[i] = pdata_ids[i].size();
 	}
 
-	fout << "Clusters sizes: from " << ndata << " to " << npdata << endl;
+	fout << "Cluster sizes: from " << cluster_ids << ": " << ndata << " to " << npdata << endl;
 
 	rP = ratioStateProb(true, npdata, ndata);
 	rQ = ratioProposal(true, N, C + 1);
 
-	fout << "The q(.|.)p(.) ratio for the MH split is " << rQ << " * " << rP << " = " << rQ * rP << endl;
+	fout << "The q(.|.)p(.) ratio for the MH split is " << rQ << " + " << rP << " = " << rQ + rP << endl;
 	
 	// before split
 	for (int i = 0; i < C; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
 		_likelihood.init(cluster[i]->getSuffies());
 		data[i] = _cluster_matrix->getData(cluster_ids[i]);
-		ldata[i] = _likelihood.probability(*data[i]);
+		ldata[i] = _likelihood.logprobability(*data[i]);
+		double tmp = _likelihood.probability(*data[i]);
+		fout << "Cluster " << cluster_ids[i] << ": " << ldata[i] << " or prob: " << tmp << endl;
 	}
-	ldata[C] = 1.0;
+	ldata[C] = 0.0;
 
 	// after split
 	for (int i = 0; i < C; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
 		_likelihood.init(cluster[i]->getSuffies());
 		_cluster_matrix->getData(pdata_ids[i], pdata[i]);
-		lpdata[i] = _likelihood.probability(pdata[i]);
+		lpdata[i] = _likelihood.logprobability(pdata[i]);
+		double tmp = _likelihood.probability(pdata[i]);
+		fout << "Cluster " << cluster_ids[i] << ": " << lpdata[i] << " or prob: " << tmp << endl;
 	}
 	_likelihood.init(cluster[C]->getSuffies());
 	_cluster_matrix->getData(pdata_ids[C], pdata[C]);
-	lpdata[C] = _likelihood.probability(pdata[C]);
+	lpdata[C] = _likelihood.logprobability(pdata[C]);
 
-	for (int i = 0; i < C; ++i) {
-		checkLikelihoods(ldata[i], lpdata[i], _statistics.split, accept, overwrite);
+	double tmp = _likelihood.probability(pdata[C]);
+	fout << "Cluster new " << ": " << lpdata[C] << " or prob: " << tmp << endl;
+
+	double rLd = 0.0, rLdp = 0.0;
+	for (int i = 0; i < Q; ++i) {
+		rLd += ldata[i];
+		rLdp += lpdata[i];
 	}
+		
+	rL = rLdp - rLd;
+	fout << "Likelihood goes from: " << rLd << " to " << rLdp << ", diff " << rL << endl;
+
+	/*
+	for (int i = 0; i < C; ++i) {
+		checkLikelihoods(ldata[i], lpdata[i], accept, overwrite);
+	}
+
+	if (overwrite) {
+		if (accept) {
+			statistics_step.source_likelihood_zero++;
+		} else {
+			statistics_step.target_likelihood_zero++;
+		}
+	} else {
+	} */
+	statistics_step.likelihood_both_nonzero++;
 
 	// normal MH step
 	if (!overwrite) {
-		for (int i = 0; i < C; ++i) {
-			rL *= lpdata[i] / ldata[i];
-		}
-		double a_split = rQ * rP * rL;
-		fout << "Acceptance for split: " << a_split << endl;
+		double a_split = std::exp(rQ + rP + rL);
+		fout << "Acceptance for split: " << rQ + rP + rL << " becomes a = " << a_split << endl;
 
 		double u = _distribution(_generator);
 
 		if (a_split < u) {
-			_statistics.split.likelihood_both_nonzero_reject++;
+			statistics_step.likelihood_both_nonzero_reject++;
 			accept = false;
 		} else {
-			_statistics.split.likelihood_both_nonzero_accept++;
+			statistics_step.likelihood_both_nonzero_accept++;
 			accept = true;
 		}
 	}
@@ -323,17 +386,24 @@ bool TriadicAlgorithm::split(
 	if (accept) {
 		fout << "Accept split!" << endl;
 		cluster_id_t new_cluster_id = _cluster_matrix->addCluster(cluster[C]);
-		cluster_ids.push_back(new_cluster_id);
+		cluster_ids[C] = new_cluster_id;
 		// assign or reassign (even to same cluster data points)
 		for (int i = 0; i < Q; ++i) {
 			for (auto data_id: pdata_ids[i]) {
 				fout << "Retract and reassign data " << data_id << " to cluster " << cluster_ids[i] << endl;
-				_cluster_matrix->retract(data_id);
+				_cluster_matrix->retract(data_id, false);
 				_cluster_matrix->assign(cluster_ids[i], data_id);
 			}
 		}
+		for (int i = 0; i < Q; i++) {
+			assert (_cluster_matrix->count(cluster_ids[i]) > 0);
+		}
+		fout << "Performed split" << endl;
 	} else {
 		fout << "Reject split!" << endl;
+		for (int i = 0; i < C; i++) {
+			assert (_cluster_matrix->count(cluster_ids[i]) > 0);
+		}
 		delete cluster[C];
 	}
 	return accept;
@@ -344,22 +414,26 @@ bool TriadicAlgorithm::merge(
 		cluster_ids_t & cluster_ids
 		) {
 
-	int C = cluster_ids.size();
-	int D = data_picks.size();
+	int C, D, Q, S;
+	C = cluster_ids.size();
+	D = data_picks.size();
+	Q = C - 1;
+	S = (C - 2) * 2;
 
 	assert(C==D);
 
-	std::vector<data_ids_t> data_ids(C), pdata_ids(C-1);
+	std::vector<data_ids_t> data_ids(C), pdata_ids(Q);
 	std::vector<dataset_t*> data(C);
-	std::vector<dataset_t> pdata(C-1);
+	std::vector<dataset_t> pdata(Q);
 	std::vector<cluster_t*> cluster(C);
-	std::vector<int> ndata(C), npdata(C-1);
+	std::vector<int> ndata(C), npdata(Q);
 	std::vector<double> ldata(C), lpdata(C);
 	int N = 0;
-	double rP, rQ, rL = 1.0;
+	double rP, rQ, rL = .0;
 	bool accept = true, overwrite = false;
-
-	_statistics.merge.attempts++;
+	
+	step_t & statistics_step = _statistics.step[S];
+	statistics_step.attempts++;
 
 	for (int i = 0; i < C; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
@@ -373,69 +447,91 @@ bool TriadicAlgorithm::merge(
 
 	propose_merge(pdata_ids, data_picks, cluster_ids, _split_method);
 	
-	for (int i = 0; i < (C - 1); ++i) {
+	for (int i = 0; i < Q; ++i) {
 		npdata[i] = pdata_ids[i].size();
 	}
 	
-	fout << "Clusters sizes: from " << ndata << " to " << npdata << endl;
+	fout << "Cluster sizes: from " << cluster_ids << ": " << ndata << " to " << npdata << endl;
 
 	rP = ratioStateProb(false, npdata, ndata);
 	rQ = ratioProposal(false, N, C);
 
-	fout << "The q(.|.)p(.) ratio for the MH merge is " << rQ << " * " << rP << " = " << rQ * rP << endl;
+	fout << "The q(.|.)p(.) ratio for the MH merge is " << rQ << " + " << rP << " = " << rQ + rP << endl;
 
 	// before merge
 	for (int i = 0; i < C; ++i) {
 		data[i] = _cluster_matrix->getData(cluster_ids[i]);
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
 		_likelihood.init(cluster[i]->getSuffies());
-		ldata[i] = _likelihood.probability(*data[i]);
+		ldata[i] = _likelihood.logprobability(*data[i]);
 	}
 	
 	// after merge
-	for (int i = 0; i < C - 1; ++i) {
+	for (int i = 0; i < Q; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
 		_likelihood.init(cluster[i]->getSuffies());
 		_cluster_matrix->getData(pdata_ids[i], pdata[i]);
-		lpdata[i] = _likelihood.probability(pdata[i]);
+		lpdata[i] = _likelihood.logprobability(pdata[i]);
 	}
-	lpdata[C-1] = 1.0;
+	lpdata[C-1] = 0.0;
 
 	for (int i = 0; i < C; ++i) {
-		checkLikelihoods(ldata[i], lpdata[i], _statistics.merge, accept, overwrite);
+		rL += lpdata[i] - ldata[i];
 	}
 
-	if (!overwrite) {
-		for (int i = 0; i < C; ++i) {
-			rL *= lpdata[i] / ldata[i];
-		}
+	/*
+	for (int i = 0; i < C; ++i) {
+		checkLikelihoods(ldata[i], lpdata[i], accept, overwrite);
+	}
 
-		double a_merge = rQ * rP * rL;
-		fout << "Acceptance for merge: " << a_merge << endl;
+	if (overwrite) {
+		if (accept) {
+			statistics_step.source_likelihood_zero++;
+		} else {
+			statistics_step.target_likelihood_zero++;
+		}
+	} else {
+		statistics_step.likelihood_both_nonzero++;
+	} */
+	statistics_step.likelihood_both_nonzero++;
+
+	if (!overwrite) {
+		double a_merge = std::exp(rQ + rP + rL);
+		fout << "Acceptance for merge: " << rQ + rP + rL << " becomes a = " << a_merge << endl;
 
 		double u = _distribution(_generator);
 		fout << "Sampled u: " << u << endl;
 
 		if (a_merge < u) {
-			_statistics.merge.likelihood_both_nonzero_reject++;
+			statistics_step.likelihood_both_nonzero_reject++;
 			accept = false;
 		} else {
-			_statistics.merge.likelihood_both_nonzero_accept++;
+			statistics_step.likelihood_both_nonzero_accept++;
 			accept = true;
 		}
 	}
 
 	if (accept) {
 		fout << "Accept merge!" << endl;
-		// actually perform the move: all items from i go to j
-		for (int i = 0; i < C; ++i) {
+		for (int i = 0; i < Q; ++i) {
+			fout << "Reassign cluster " << i << " in clusters_ids[.] array" << endl;
+			fout << "This cluster has id " << cluster_ids[i] << endl;
 			for (auto data_id: pdata_ids[i]) {
 				fout << "Retract and reassign data " << data_id << " to cluster " << cluster_ids[i] << endl;
-				_cluster_matrix->retract(data_id);
+				_cluster_matrix->retract(data_id, false);
 				_cluster_matrix->assign(cluster_ids[i], data_id);
 			}
 		}
-		// TODO: actually delete now empty cluster
+		for (int i = 0; i < Q; i++) {
+			fout << "Check cluster " << cluster_ids[i] << endl;
+			assert (_cluster_matrix->count(cluster_ids[i]) > 0);
+		}
+		fout << "Check cluster " << cluster_ids[Q] << endl;
+		assert (_cluster_matrix->empty(cluster_ids[Q]));
+
+		fout << "Remove cluster " << cluster_ids[Q] << endl;
+		_cluster_matrix->remove(cluster_ids[Q]);
+		fout << "Performed merge" << endl;
 	} else {
 		fout << "Reject merge!" << endl;
 	}
@@ -459,6 +555,10 @@ void TriadicAlgorithm::update(
 			membertrix & cluster_matrix,
 			const data_ids_t & cdata_picks
 		) {
+
+	static int step = 0;
+	fout << "Update step " << ++step << " in Triadic split-merge algorithm" << endl;
+
 	// copy data points (because we will need to be removing points for the dyadic sampler steps)
 	data_ids_t data_picks = cdata_picks;
 
@@ -468,11 +568,8 @@ void TriadicAlgorithm::update(
 	// the data ids should be unique
 	assert (data_picks[0] != data_picks[1]);
 	assert (data_picks[0] != data_picks[2]);
-
+	
 	_cluster_matrix = &cluster_matrix;
-
-	static int step = 0;
-	fout << "Update step " << ++step << " in Triadic split-merge algorithm" << endl;
 
 	// store cluster indices of current observations
 	cluster_ids_t cluster_ids; 
@@ -489,30 +586,36 @@ void TriadicAlgorithm::update(
 	bool jain_neal_split = false;
 	double u = _distribution(_generator);
 	if (uniq_cluster_count == 1) {
-		fout << "We are gonna split this one cluster" << endl;
-
-		// remove one of the data points and corresponding cluster
-		data_picks.pop_back();
-		cluster_ids.pop_back();
-
-		assert(data_picks.size() == 2);
-		assert(cluster_ids.size() == 2);
+		fout << "Dyadic step: split 1 cluster into 2" << endl;
+		
+		// remove one of the data points that points to the same cluster as one of the other data points
+		int index = algebra::duplicate_pick(cluster_ids.begin(), cluster_ids.end(), _generator);
+		data_picks.erase(data_picks.begin() + index);
+		cluster_ids.erase(cluster_ids.begin() + index);
 
 		size_t Ka = _cluster_matrix->getClusterCount();
+		fout << "There are " << Ka << " clusters" << endl;
 
+		/*
+		int index = algebra::duplicate_pick(cluster_ids.begin(), cluster_ids.end(), _generator);
+		fout << "Found first duplicate at " << index << endl;
+		std::iter_swap(cluster_ids.begin() + index, cluster_ids.end() - 1);
+		std::iter_swap(data_picks.begin() + index, data_picks.end() - 1);
+		*/
 		bool accept = split(data_picks, cluster_ids);
-
+	
+		step_t & statistics_step = _statistics.step[1];
 		if (accept) {
 			size_t Kb = _cluster_matrix->getClusterCount();
+			fout << "There are now " << Kb << " clusters" << endl;
 			assert (Kb == Ka + 1);
-
-			_statistics.split.cluster_events_accept++;
+			statistics_step.cluster_events_accept++;
 		} else {
-			_statistics.split.cluster_events_reject++;
+			statistics_step.cluster_events_reject++;
 		}
 		jain_neal_split = true;
 	} else if (u < _beta) {
-		fout << "Merge these two clusters" << endl;
+		fout << "Dyadic step: merge 2 clusters into 1" << endl;
 
 		// remove one of the data points that points to the same cluster as one of the other data points
 		int index = algebra::duplicate_pick(cluster_ids.begin(), cluster_ids.end(), _generator);
@@ -520,22 +623,24 @@ void TriadicAlgorithm::update(
 		cluster_ids.erase(cluster_ids.begin() + index);
 
 		size_t Ka = _cluster_matrix->getClusterCount();
+		fout << "There are " << Ka << " clusters" << endl;
 
 		bool accept = merge(data_picks, cluster_ids);
 
+		step_t & statistics_step = _statistics.step[0];
 		if (accept) {
 			size_t Kb = _cluster_matrix->getClusterCount();
+			fout << "There are now " << Kb << " clusters" << endl;
 			assert (Kb == Ka - 1);
-
-			_statistics.merge.cluster_events_accept++;
+			statistics_step.cluster_events_accept++;
 		} else {
-			_statistics.merge.cluster_events_reject++;
+			statistics_step.cluster_events_reject++;
 		}
 
 		jain_neal_split = true;
 	}
 
-	if (jain_neal_split) {
+	if (!jain_neal_split) {
 		// a single cluster
 		switch (uniq_cluster_count) {
 			case 0: default:
@@ -546,47 +651,61 @@ void TriadicAlgorithm::update(
 				break;
 			case 2: 
 				{
-					fout << "We are gonna split these two clusters" << endl;
+					fout << "Triadic step: split 2 clusters into 3" << endl;
 
 					size_t Ka = _cluster_matrix->getClusterCount();
+					fout << "There are " << Ka << " clusters" << endl;
 
+					// make sure the cluster_ids and data_picks are sorted such that the duplicate cluster id is 
+					// present at the end, for that pick the first duplicate
+					int index = algebra::duplicate_pick(cluster_ids.begin(), cluster_ids.end(), _generator);
+					fout << "Found first duplicate at " << index << endl;
+					std::iter_swap(cluster_ids.begin() + index, cluster_ids.end() - 1);
+					std::iter_swap(data_picks.begin() + index, data_picks.end() - 1);
+					
 					bool accept = split(data_picks, cluster_ids);
 
+					step_t & statistics_step = _statistics.step[3];
 					if (accept) {
 						size_t Kb = _cluster_matrix->getClusterCount();
+						fout << "There are now " << Kb << " clusters" << endl;
 						assert (Kb == Ka + 1);
 
-						_statistics.split.cluster_events_accept++;
+						statistics_step.cluster_events_accept++;
 					} else {
-						_statistics.split.cluster_events_reject++;
+						statistics_step.cluster_events_reject++;
 					}
 					break;
 				}
 			case 3: 
 				{ // merge step
-					fout << "Merge these clusters" << endl;
-
+					fout << "Triadic step: merge 3 clusters into 2" << endl;
+		
 					size_t Ka = _cluster_matrix->getClusterCount();
+					fout << "There are " << Ka << " clusters" << endl;
 
 					bool accept = merge(data_picks, cluster_ids);
 
+					step_t & statistics_step = _statistics.step[2];
 					if (accept) {
 						size_t Kb = _cluster_matrix->getClusterCount();
+						fout << "There are now " << Kb << " clusters" << endl;
 						assert (Kb == Ka - 1);
 
-						_statistics.merge.cluster_events_accept++;
+						statistics_step.cluster_events_accept++;
 					} else {
-						_statistics.merge.cluster_events_reject++;
+						statistics_step.cluster_events_reject++;
 					}
 					break;
 				}
 		} 
 	}
 	// check
-	for (auto data_id: data_picks) {
+	for (auto data_id: cdata_picks) {
 		fout << "Check data id " << data_id << endl;
 		assert(_cluster_matrix->assigned(data_id));
 	}
+	fout << "Completed update step " << step << endl;
 }
 
 void TriadicAlgorithm::printStatistics() {
@@ -595,37 +714,32 @@ void TriadicAlgorithm::printStatistics() {
 
 	fout << endl;
 	fout << "Statistics:" << endl;
-	fout << " # of split attempts: " << _statistics.split.attempts << endl;
-	fout << "   o of accepted split cluster events: " << _statistics.split.cluster_events_accept << endl;
-	fout << "     - of accept 0->? overrides: " << _statistics.split.source_likelihood_zero << endl;
-//	fout << "     - of likelihood ratio 0/0 (accepted anyhow): " << _statistics.split.likelihood_both_zero << endl;
-	fout << "     - of events accepted after consideration: " << _statistics.split.likelihood_both_nonzero_accept << endl;
-	
-	fout << "   o of rejected split cluster events: " << _statistics.split.cluster_events_reject << endl;
-	fout << "   # of reject 0->0 overrides: " << _statistics.split.likelihood_both_zero << endl;
-	fout << "   # of reject ?->0 overrides: " << _statistics.split.target_likelihood_zero << endl;
+	for (int i = 0; i < 4; ++i) {
+		step_t step = _statistics.step[i];
+		// attempts is accepted + rejected correct for merge
+		fout << " # of " << step.type << " attempts: " << step.attempts << endl;
+		fout << "   o of accepted " << step.type << " cluster events: " << step.cluster_events_accept << endl;
+		fout << "     - of accept 0->? overrides: " << step.source_likelihood_zero << endl;
+		fout << "     - of events accepted after consideration: " << step.likelihood_both_nonzero_accept << endl;
 
-	fout << "   # of metropolis-hastings decisions: " << _statistics.split.likelihood_both_nonzero << endl;
-	fout << "     - accepted: " << _statistics.split.likelihood_both_nonzero_accept << endl;
-	fout << "     - rejected: " << _statistics.split.likelihood_both_nonzero_reject << endl;
+		fout << "   o of rejected " << step.type << " cluster events: " << step.cluster_events_reject << endl;
+		fout << "   # of reject ?->0 overrides: " << step.target_likelihood_zero << endl;
 
-	fout << " # of merge attempts: " << _statistics.merge.attempts << endl;
-	fout << "   o of accepted merge cluster events: " << _statistics.merge.cluster_events_accept << endl;
-	fout << "     - of accept 0->? overrides: " << _statistics.merge.source_likelihood_zero << endl;
-//	fout << "     - of likelihood ratio 0/0 (accepted anyhow): " << _statistics.merge.likelihood_both_zero << endl;
-	fout << "     - of events accepted after consideration: " << _statistics.merge.likelihood_both_nonzero_accept << endl;
-	
-	fout << "   o of rejected merge cluster events: " << _statistics.merge.cluster_events_reject << endl;
-	fout << "   # of reject 0->0 overrides: " << _statistics.merge.likelihood_both_zero << endl;
-	fout << "   # of reject ?->0 overrides: " << _statistics.merge.target_likelihood_zero << endl;
+		// below is correct
+		fout << "   # of metropolis-hastings decisions: " << step.likelihood_both_nonzero << endl;
+		fout << "     - accepted: " << step.likelihood_both_nonzero_accept << endl;
+		fout << "     - rejected: " << step.likelihood_both_nonzero_reject << endl;
 
-	fout << "   # of metropolis-hastings decisions: " << _statistics.merge.likelihood_both_nonzero << endl;
-	fout << "     - accepted: " << _statistics.merge.likelihood_both_nonzero_accept << endl;
-	fout << "     - rejected: " << _statistics.merge.likelihood_both_nonzero_reject << endl;
-
+	//	assert (step.attempts == step.cluster_events_accept + step.cluster_events_reject);
+	//	assert (step.likelihood_both_nonzero == step.likelihood_both_nonzero_accept + step.likelihood_both_nonzero_reject);
+	}
 
 	// set back to zero
-	_statistics = (statistics_t){0};
+	_statistics = {};
+	_statistics.step[0].type = "merge from 2 to 1";
+	_statistics.step[1].type = "split from 1 to 2";
+	_statistics.step[2].type = "merge from 3 to 2";
+	_statistics.step[3].type = "split from 2 to 3";
 
 	_verbosity = verbosity;
 } 

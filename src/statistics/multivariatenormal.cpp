@@ -87,6 +87,47 @@ double multivariate_normal_distribution::probability(dataset_t & dataset) const
 	for (int i = 0; i < (int)dataset.size(); ++i) {
 		result *= probability(*dataset[i]);
 	}
-	//result *= dataset.size();
+	return result;
+}
+
+double multivariate_normal_distribution::logprobability(data_t & data) const
+{
+	double* ptr = &data[0];
+	size_t D;
+	if (_regression) {
+		D = data.size() - 1;
+		double yd = data[D]; 
+		Eigen::VectorXd y(1); y << yd;
+		Eigen::Map< Eigen::VectorXd > value(ptr, D);
+		auto y_proj = value.transpose() * _mean;
+		const auto diff = y - y_proj;
+
+		auto inverse = _covar.inverse();
+		assert (inverse.cols() == diff.rows());
+		auto exponent = -0.5 * diff.transpose() * inverse * diff;
+		double det = _covar.determinant();
+		auto constant = std::sqrt( std::pow( 2*M_PI, D ) * det); 
+		return exponent - std::log(constant);
+	} else {
+		D = data.size();
+		Eigen::Map< Eigen::VectorXd > value(ptr, D);
+		const auto diff = value - _mean;
+
+		auto inverse = _covar.inverse();
+		assert (inverse.cols() == diff.rows());
+		auto exponent = -0.5 * diff.transpose() * inverse * diff;
+		double det = _covar.determinant();
+		auto constant = std::sqrt( std::pow( 2*M_PI, D ) * det); 
+		return exponent - std::log(constant);
+	}
+}
+
+double multivariate_normal_distribution::logprobability(dataset_t & dataset) const
+{
+	assert (dataset.size() > 0);
+	double result = 0.0; 
+	for (int i = 0; i < (int)dataset.size(); ++i) {
+		result += logprobability(*dataset[i]);
+	}
 	return result;
 }

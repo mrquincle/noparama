@@ -144,7 +144,7 @@ bool membertrix::exists(cluster_id_t cluster_id) {
 	return (it != _clusters_dataset.end());
 }
 
-np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id) {
+np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id, bool auto_remove) {
 //	fout << "Membership matrix: " << endl << _membership_matrix << endl;
 	if (!_membership_matrix.row(data_id).any()) {
 		return error_assignment_absent;
@@ -169,10 +169,9 @@ np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id) {
 	}
 
 	// if retract is using the iterator over getClusters, this will cause havoc
-	if (empty(cluster_id)) {
-		fout << "Delete cluster: " << cluster_id << " with " << count(cluster_id) << " items" << endl;
-		delete _cluster_objects.at(cluster_id);
-		_cluster_objects.erase(cluster_id);
+	if (auto_remove && empty(cluster_id)) {
+		fout << "Autoremove cluster " << cluster_id << endl;
+		remove(cluster_id);
 	}
 #endif
 
@@ -183,9 +182,26 @@ np_error_t membertrix::retract(cluster_id_t cluster_id, data_id_t data_id) {
 	return error_none;
 }
 
-np_error_t membertrix::retract(data_id_t data_id) {
+np_error_t membertrix::remove(cluster_id_t cluster_id) {
+	if (empty(cluster_id)) {
+		fout << "Delete cluster: " << cluster_id << " with " << count(cluster_id) << " items (should be 0)" << endl;
+		assert (count(cluster_id) == 0);
+		delete _cluster_objects.at(cluster_id);
+		_cluster_objects.erase(cluster_id);
+
+		delete _clusters_dataset.at(cluster_id);
+		_clusters_dataset.erase(cluster_id);
+		assert (!exists(cluster_id));
+	}
+	else {
+		return error_assignment_remaining;
+	}
+	return error_none;
+}
+
+np_error_t membertrix::retract(data_id_t data_id, bool auto_remove) {
 	cluster_id_t cluster_id = getClusterId(data_id);
-	return retract(cluster_id, data_id);
+	return retract(cluster_id, data_id, auto_remove);
 }
 
 cluster_id_t membertrix::getClusterId(data_id_t data_id) const {
@@ -278,7 +294,7 @@ void membertrix::getAssignments(cluster_id_t cluster_id, data_ids_t & data_ids) 
 }
 
 bool membertrix::empty(cluster_id_t cluster_id) {
-	return _clusters_dataset[cluster_id]->size() == 0;
+	return _clusters_dataset.at(cluster_id)->size() == 0;
 }
 
 size_t membertrix::count(cluster_id_t cluster_id) const {

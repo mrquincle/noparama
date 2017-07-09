@@ -5,7 +5,7 @@ scalarnoise_multivariate_normal_distribution::scalarnoise_multivariate_normal_di
 		bool regression): _suffies_result(NULL), _regression(regression) 
 {
 	_suffies_mvn = &suffies;
-	_distribution_type = MultivariateNormal;
+	_distribution_type = ScalarNoise_MultivariateNormal;
 	prepare();
 }
 
@@ -85,6 +85,50 @@ double scalarnoise_multivariate_normal_distribution::probability(dataset_t & dat
 	double result = 1.0; 
 	for (int i = 0; i < (int)dataset.size(); ++i) {
 		result *= probability(*dataset[i]);
+	}
+	return result;
+}
+
+double scalarnoise_multivariate_normal_distribution::logprobability(data_t & data) const
+{
+	double* ptr = &data[0];
+	size_t D;
+	if (_regression) {
+		D = data.size() - 1;
+		double yd = data[D]; 
+		Eigen::VectorXd y(1); y << yd;
+		Eigen::Map< Eigen::VectorXd > value(ptr, D);
+		auto y_proj = value.transpose() * _mean;
+		assert(y_proj.size() == 1);
+		Eigen::VectorXd y_diff = y - y_proj;
+		double diff = y_diff(0);
+
+		double inverse = 1/(_var*_var);
+		double exponent = -0.5 * (diff * diff) * inverse; 
+		auto constant = std::sqrt( 2*M_PI*_var*_var ); 
+		return exponent - std::log(constant);
+	} else {
+		D = data.size();
+		Eigen::Map< Eigen::VectorXd > value(ptr, D);
+		const auto diff = value - _mean;
+
+		Eigen::MatrixXd covar = Eigen::MatrixXd::Identity(D,D).array() * _var;
+
+		auto inverse = covar.inverse();
+		assert (inverse.cols() == diff.rows());
+		auto exponent = -0.5 * diff.transpose() * inverse * diff;
+		double det = covar.determinant();
+		auto constant = std::sqrt( std::pow( 2*M_PI, D ) * det); 
+		return exponent - std::log(constant);
+	}
+}
+
+double scalarnoise_multivariate_normal_distribution::logprobability(dataset_t & dataset) const
+{
+	assert (dataset.size() > 0);
+	double result = 0.0; 
+	for (int i = 0; i < (int)dataset.size(); ++i) {
+		result += logprobability(*dataset[i]);
 	}
 	return result;
 }

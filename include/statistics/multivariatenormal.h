@@ -105,6 +105,10 @@ class multivariate_normal_distribution: public distribution_t {
 		 * @return                     probability (value between 0 and 1)
 		 */
 		double probability(dataset_t & dataset) const;
+		
+		double logprobability(data_t & data) const;
+		
+		double logprobability(dataset_t & dataset) const;
 
 		/**
 		 * Calculate the likelihood of mean and covariance given a series of observations.

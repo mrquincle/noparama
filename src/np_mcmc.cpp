@@ -79,12 +79,12 @@ void MCMC::run(dataset_t & dataset, int T) {
 	fout << "Removed " << removed << " empty clusters" << endl;
 	foutvar(7) << "After cleanup we have " << _membertrix.count() << " assigned data items (should be the same)" << endl;
 
-	// just only pick a few
+	// just only pick a few, set M=1 for debugging, but M<N can also be used to perform fewer "large" steps
 	int M = N;
 	if (M > N) M = N;
 
 	int cycle_print = 100;
-	int cycle_max_likelihood = 1;
+	int cycle_max_likelihood = 10;
 
 	// update clusters
 	for (int t = 0; t < T; ++t) {
@@ -141,13 +141,13 @@ const membertrix & MCMC::getMembershipMatrix() const {
 
 void MCMC::considerMaxLikelihood() {
 	const clusters_t &clusters = _membertrix.getClusters();
-	double current_likelihood = 1.0;
+	double current_likelihood = .0;
 	for (auto cluster_pair: clusters) {
 		auto const &key = cluster_pair.first;
 		auto const &cluster = cluster_pair.second;
 		dataset_t *dataset = _membertrix.getData(key);
 		_likelihood.init(cluster->getSuffies());
-		current_likelihood *= _likelihood.probability(*dataset) ;
+		current_likelihood += _likelihood.logprobability(*dataset) ;
 	}
 
 	if (current_likelihood > _max_likelihood) {
@@ -155,6 +155,6 @@ void MCMC::considerMaxLikelihood() {
 		_max_likelihood_membertrix = _membertrix;
 	}
 
-	foutvar(Notice) << "Likelihood now: " << current_likelihood << endl;
+	foutvar(Notice) << "Loglikelihood now: " << current_likelihood << endl;
 }
 
