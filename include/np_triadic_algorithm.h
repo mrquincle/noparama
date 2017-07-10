@@ -67,8 +67,6 @@ class TriadicAlgorithm: public UpdateClusterPopulation {
 
 		double ratioProposal(bool split, int N, int C);
 
-		void checkLikelihoods(double lsrc, double ldest, bool &accept, bool &overwrite);
-
 		void propose_merge(std::vector<data_ids_t> &pdata, const data_ids_t &data_ids, 
 				cluster_ids_t &cluster_ids, split_method_t split_method);
 

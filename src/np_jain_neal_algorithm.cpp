@@ -31,6 +31,7 @@ JainNealAlgorithm::JainNealAlgorithm(
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 
 	_split_method = sams_prior;
+	//_split_method = simple_random_split;
 }
 
 double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1) {
@@ -54,7 +55,11 @@ double JainNealAlgorithm::ratioProposal(bool split, int nc) {
 	if (_split_method == sams_prior) {
 		return 0.0;
 	}
-	assert(false);
+	double result = std::log(pow(2, nc - 2));
+	if (split)
+		return result;
+	else
+		return -result;
 #else
 	if (_split_method == sams_prior) {
 		return 1.0;
@@ -128,34 +133,21 @@ void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, da
 					// shouldn't we at least sample more options as with the m auxiliary proposals?
 
 					// SAMS
-					_likelihood.init(new_cluster.getSuffies());
+					std::vector<double> ldata(2);
 					data_t * datum = _cluster_matrix->getDatum(data_id);
-					//fout << "Consider datum: " << data_id << ": " << *datum << endl;
-					double ldest = _likelihood.probability(*datum) * move.size();
-
-					//fout << "It has a likelihood at the new cluster of " << ldest << endl;
+					
 					_likelihood.init(current_cluster->getSuffies());
+					ldata[0] = _likelihood.probability(*datum) * remain.size();
 
-					double lsrc = _likelihood.probability(*datum) * remain.size();
-					//fout << "It has a likelihood at the existing cluster of " << lsrc << endl;
-
-					double frac;
-					if (ldest + lsrc == 0) {
-						frac = 1/2;
-					} else {
-						frac = ldest / (ldest + lsrc);
-					}
-					//cout << "frac: " << frac << endl;
-					double u = _distribution(_generator);
-
-					if (frac > u) {
-						//fout << "Add " << data_id << " to new cluster" << endl;
-						move.push_back(data_id);
-					} else {
-						//fout << "Keep " << data_id << " at existing cluster" << endl;
+					_likelihood.init(new_cluster.getSuffies());
+					ldata[1] = _likelihood.probability(*datum) * move.size();
+					
+					int index = algebra::random_weighted_pick(ldata.begin(), ldata.end(), _generator);
+					if (index == 0) {
 						remain.push_back(data_id);
+					} else {
+						move.push_back(data_id);
 					}
-
 					break;
 				}
 			case sams_random_walk: 
@@ -202,10 +194,7 @@ bool JainNealAlgorithm::split(
 	dataset_t data_to_move;
 	int nc0, nc1, nc;
 	double p21, q12;
-#ifdef USE_LOGARITHM
-	double lsrc, ldest; 
-#endif
-	double lratio;
+	double lsrc, ldest, lratio;
 	bool accept, overwrite = false;
 
 	_statistics.split.attempts++;
@@ -302,10 +291,7 @@ bool JainNealAlgorithm::merge(
 	dataset_t *data_to_move;
 	int nc0, nc1, nc;
 	double p12, q21;
-#ifdef USE_LOGARITHM
-	double lsrc, ldest;
-#endif
-	double lratio;
+	double lsrc, ldest, lratio;
 	bool accept, overwrite = false;
 
 	_statistics.merge.attempts++;
