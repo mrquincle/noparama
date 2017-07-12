@@ -26,7 +26,8 @@ JainNealAlgorithm::JainNealAlgorithm(
 	_verbosity = Debug;
 	_verbosity = Warning;
 	
-	_statistics = (statistics_t){{0}};
+	_statistics.step[0].type = "merge";
+	_statistics.step[1].type = "split";
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 
@@ -34,9 +35,13 @@ JainNealAlgorithm::JainNealAlgorithm(
 	//_split_method = simple_random_split;
 }
 
-double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1) {
+JainNealAlgorithm::~JainNealAlgorithm() {
+}
+
+double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1, int nc) {
 #ifdef USE_LOGARITHM
-	double result = std::log(_alpha) + lgamma(nc0) + lgamma(nc1) - lgamma(nc0 + nc1);
+	assert (nc == nc0 + nc1);
+	double result = std::log(_alpha) + lgamma(nc0) + lgamma(nc1) - lgamma(nc);
 	if (split)
 		return result;
 	else
@@ -50,12 +55,13 @@ double JainNealAlgorithm::ratioStateProb(bool split, int nc0, int nc1) {
 #endif
 }
 
-double JainNealAlgorithm::ratioProposal(bool split, int nc) {
+double JainNealAlgorithm::ratioProposal(bool split, int N, int C) {
 #ifdef USE_LOGARITHM
 	if (_split_method == sams_prior) {
 		return 0.0;
 	}
-	double result = std::log(pow(2, nc - 2));
+	double result = (C - N - 1) * std::log(C - 1) - (C - N) * std::log(C);
+//	double result = std::log(pow(2, nc - 2));
 	if (split)
 		return result;
 	else
@@ -195,9 +201,9 @@ bool JainNealAlgorithm::split(
 	int nc0, nc1, nc;
 	double p21, q12;
 	double lsrc, ldest, lratio;
-	bool accept, overwrite = false;
+	bool accept = true, overwrite = false;
 
-	_statistics.split.attempts++;
+	_statistics.step[1].attempts++;
 	
 	// current cluster
 	auto current_cluster = _cluster_matrix->getCluster(current_cluster_id);
@@ -213,11 +219,15 @@ bool JainNealAlgorithm::split(
 	nc = nc0 + nc1; 
 	fout << "Cluster is size " << nc << " and after split would become size " << nc0 << " and " << nc1 << endl;
 
-	p21 = ratioStateProb(true, nc0, nc1);
+	p21 = ratioStateProb(true, nc0, nc1, nc);
+	assert ( ratioStateProb(true, nc1, nc0, nc) == p21 );
 	q12 = ratioProposal(true, nc);
 
+#ifdef USE_LOGARITHM
+	fout << "The q(.|.)p(.) ratio for the MH split is " << q12 << " + " << p21 << " = " << q12 + p21 << endl;
+#else
 	fout << "The q(.|.)p(.) ratio for the MH split is " << q12 << " * " << p21 << " = " << q12 * p21 << endl;
-
+#endif
 	// only consider the data points that move to the new one, but at the old cluster
 	_cluster_matrix->getData(move, data_to_move);
 
@@ -241,7 +251,7 @@ bool JainNealAlgorithm::split(
 	lratio = ldest - lsrc;
 #else
 	// handle weird corner cases
-	checkLikelihoods(lsrc, ldest, _statistics.split, lratio, accept, overwrite);
+	checkLikelihoods(lsrc, ldest, _statistics.step[1], lratio, accept, overwrite);
 #endif
 	// normal MH step
 	if (!overwrite) {
@@ -257,10 +267,10 @@ bool JainNealAlgorithm::split(
 		fout << "Sampled u: " << u << endl;
 
 		if (a_split < u) {
-			_statistics.split.likelihood_both_nonzero_reject++;
+			_statistics.step[1].likelihood_both_nonzero_reject++;
 			accept = false;
 		} else {
-			_statistics.split.likelihood_both_nonzero_accept++;
+			_statistics.step[1].likelihood_both_nonzero_accept++;
 			accept = true;
 		}
 	}
@@ -292,9 +302,9 @@ bool JainNealAlgorithm::merge(
 	int nc0, nc1, nc;
 	double p12, q21;
 	double lsrc, ldest, lratio;
-	bool accept, overwrite = false;
+	bool accept = true, overwrite = false;
 
-	_statistics.merge.attempts++;
+	_statistics.step[0].attempts++;
 
 	// get assignments (just ids, not the data itself)
 	_cluster_matrix->getAssignments(current_clusters[0], data_ids0);
@@ -305,10 +315,14 @@ bool JainNealAlgorithm::merge(
 	nc = nc0 + nc1;
 	fout << "Clusters are size " << nc0 << " and " << nc1 << " and after merge become " << nc << endl;
 
-	p12 = ratioStateProb(false, nc0, nc1);
+	p12 = ratioStateProb(false, nc0, nc1, nc);
+	assert ( ratioStateProb(false, nc1, nc0, nc) == p12 );
 	q21 = ratioProposal(false, nc);
-	fout << "The q(.|.)p(.) ratio for the MH split is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
-	
+#ifdef USE_LOGARITHM
+	fout << "The q(.|.)p(.) ratio for the MH merge is " << q21 << " + " << p12 << " = " << q21 + p12 << endl;
+#else
+	fout << "The q(.|.)p(.) ratio for the MH merge is " << q21 << " * " << p12 << " = " << q21 * p12 << endl;
+#endif	
 	// data to move sits in cluster 0
 	data_to_move = _cluster_matrix->getData(current_clusters[0]);
 
@@ -335,7 +349,7 @@ bool JainNealAlgorithm::merge(
 #ifdef USE_LOGARITHM
 	lratio = ldest - lsrc;
 #else
-	checkLikelihoods(lsrc, ldest, _statistics.merge, lratio, accept, overwrite);
+	checkLikelihoods(lsrc, ldest, _statistics.step[0], lratio, accept, overwrite);
 #endif
 
 	if (!overwrite) {
@@ -351,10 +365,10 @@ bool JainNealAlgorithm::merge(
 		fout << "Sampled u: " << u << endl;
 
 		if (a_merge < u) {
-			_statistics.merge.likelihood_both_nonzero_reject++;
+			_statistics.step[0].likelihood_both_nonzero_reject++;
 			accept = false;
 		} else {
-			_statistics.merge.likelihood_both_nonzero_accept++;
+			_statistics.step[0].likelihood_both_nonzero_accept++;
 			accept = true;
 		}
 	}
@@ -412,7 +426,7 @@ void JainNealAlgorithm::update(
 
 	int uniq_cluster_count = algebra::count_unique(current_clusters.begin(), current_clusters.end());
 	fout << "The data comes from " << uniq_cluster_count << " unique cluster(s)" << endl;
-
+	
 	// a single cluster
 	switch (uniq_cluster_count) {
 		case 0: default:
@@ -432,9 +446,9 @@ void JainNealAlgorithm::update(
 					size_t Kb = _cluster_matrix->getClusterCount();
 					assert (Kb == Ka + 1);
 
-					_statistics.split.cluster_events_accept++;
+					_statistics.step[1].cluster_events_accept++;
 				} else {
-					_statistics.split.cluster_events_reject++;
+					_statistics.step[1].cluster_events_reject++;
 				}
 				break;
 			}
@@ -451,9 +465,9 @@ void JainNealAlgorithm::update(
 					size_t Kb = _cluster_matrix->getClusterCount();
 					assert (Kb == Ka - 1);
 					
-					_statistics.merge.cluster_events_accept++;
+					_statistics.step[0].cluster_events_accept++;
 				} else {
-					_statistics.merge.cluster_events_reject++;
+					_statistics.step[0].cluster_events_reject++;
 				}
 				break;
 			}
@@ -472,37 +486,25 @@ void JainNealAlgorithm::printStatistics() {
 
 	fout << endl;
 	fout << "Statistics:" << endl;
-	fout << " # of split attempts: " << _statistics.split.attempts << endl;
-	fout << "   o of accepted split cluster events: " << _statistics.split.cluster_events_accept << endl;
-	fout << "     - of accept 0->? overrides: " << _statistics.split.source_likelihood_zero << endl;
-//	fout << "     - of likelihood ratio 0/0 (accepted anyhow): " << _statistics.split.likelihood_both_zero << endl;
-	fout << "     - of events accepted after consideration: " << _statistics.split.likelihood_both_nonzero_accept << endl;
-	
-	fout << "   o of rejected split cluster events: " << _statistics.split.cluster_events_reject << endl;
-	fout << "   # of reject 0->0 overrides: " << _statistics.split.likelihood_both_zero << endl;
-	fout << "   # of reject ?->0 overrides: " << _statistics.split.target_likelihood_zero << endl;
+	for (int i = 0; i < 2; ++i) {
+		step_t step = _statistics.step[i];
+		fout << " # of " << step.type << " attempts: " << step.attempts << endl;
+		fout << "   o of accepted " << step.type << " cluster events: " << step.cluster_events_accept << endl;
+		fout << "     - of accept 0->? overrides: " << step.source_likelihood_zero << endl;
+		fout << "     - of events accepted after consideration: " << step.likelihood_both_nonzero_accept << endl;
 
-	fout << "   # of metropolis-hastings decisions: " << _statistics.split.likelihood_both_nonzero << endl;
-	fout << "     - accepted: " << _statistics.split.likelihood_both_nonzero_accept << endl;
-	fout << "     - rejected: " << _statistics.split.likelihood_both_nonzero_reject << endl;
+		fout << "   o of rejected " << step.type << " cluster events: " << step.cluster_events_reject << endl;
+		fout << "   # of reject ?->0 overrides: " << step.target_likelihood_zero << endl;
 
-	fout << " # of merge attempts: " << _statistics.merge.attempts << endl;
-	fout << "   o of accepted merge cluster events: " << _statistics.merge.cluster_events_accept << endl;
-	fout << "     - of accept 0->? overrides: " << _statistics.merge.source_likelihood_zero << endl;
-//	fout << "     - of likelihood ratio 0/0 (accepted anyhow): " << _statistics.merge.likelihood_both_zero << endl;
-	fout << "     - of events accepted after consideration: " << _statistics.merge.likelihood_both_nonzero_accept << endl;
-	
-	fout << "   o of rejected merge cluster events: " << _statistics.merge.cluster_events_reject << endl;
-	fout << "   # of reject 0->0 overrides: " << _statistics.merge.likelihood_both_zero << endl;
-	fout << "   # of reject ?->0 overrides: " << _statistics.merge.target_likelihood_zero << endl;
-
-	fout << "   # of metropolis-hastings decisions: " << _statistics.merge.likelihood_both_nonzero << endl;
-	fout << "     - accepted: " << _statistics.merge.likelihood_both_nonzero_accept << endl;
-	fout << "     - rejected: " << _statistics.merge.likelihood_both_nonzero_reject << endl;
-
+		fout << "   # of metropolis-hastings decisions: " << step.likelihood_both_nonzero << endl;
+		fout << "     - accepted: " << step.likelihood_both_nonzero_accept << endl;
+		fout << "     - rejected: " << step.likelihood_both_nonzero_reject << endl;
+	}
 
 	// set back to zero
-	_statistics = (statistics_t){0};
+	_statistics = {};
+	_statistics.step[0].type = "merge";
+	_statistics.step[1].type = "split";
 
 	_verbosity = verbosity;
 } 

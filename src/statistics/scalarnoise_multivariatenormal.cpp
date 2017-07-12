@@ -79,6 +79,12 @@ double scalarnoise_multivariate_normal_distribution::probability(data_t & data) 
 	}
 }
 
+// Numbers are always compared in a ratio where the number of data points is exactly the same in the nominator and
+// the denominator, so multiplying with the number of data points is unnecessary. This is especially easy to see 
+// with loglikelihoods, where we just add some constants above and below the fraction bar.
+
+//#define FACTOR_IN_SIZE
+
 double scalarnoise_multivariate_normal_distribution::probability(dataset_t & dataset) const
 {
 	assert (dataset.size() > 0);
@@ -86,7 +92,11 @@ double scalarnoise_multivariate_normal_distribution::probability(dataset_t & dat
 	for (int i = 0; i < (int)dataset.size(); ++i) {
 		result *= probability(*dataset[i]);
 	}
-	return result;
+#ifdef FACTOR_IN_SIZE
+	return result * dataset.size();
+#else
+	return result; 
+#endif
 }
 
 double scalarnoise_multivariate_normal_distribution::logprobability(data_t & data) const
@@ -130,5 +140,9 @@ double scalarnoise_multivariate_normal_distribution::logprobability(dataset_t & 
 	for (int i = 0; i < (int)dataset.size(); ++i) {
 		result += logprobability(*dataset[i]);
 	}
+#ifdef FACTOR_IN_SIZE
+	return result + dataset.size();
+#else
 	return result;
+#endif
 }

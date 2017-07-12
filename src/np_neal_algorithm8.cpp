@@ -22,7 +22,6 @@ NealAlgorithm8::NealAlgorithm8(
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 		
-	_statistics.new_clusters_events = 0;
 }
 
 /*
@@ -156,7 +155,7 @@ void NealAlgorithm8::update(
 		cluster_id_t cluster_index = cluster_matrix.addCluster(new_cluster);
 		fout << "Assign data to cluster with id " << cluster_index << endl;
 		cluster_matrix.assign(cluster_index, data_id);
-		_statistics.new_clusters_events++;
+		_statistics.step[0].cluster_events_accept++;
 	} else {
 		// pick existing cluster with given cluster_id
 		fout << "Existing cluster" << endl;
@@ -167,6 +166,7 @@ void NealAlgorithm8::update(
 		assert (cluster_matrix.count(cluster_id) != 0);
 		
 		cluster_matrix.assign(cluster_id, data_id);
+		_statistics.step[0].cluster_events_reject++;
 	}
 	
 	// deallocate new clusters that have not been used
@@ -183,6 +183,7 @@ void NealAlgorithm8::printStatistics() {
 	int verbosity = _verbosity;
 	_verbosity = 0;
 	fout << "Statistics:" << endl;
-	fout << " # of new cluster events: " << _statistics.new_clusters_events << endl;
+	fout << " # of new cluster events accepted: " << _statistics.step[0].cluster_events_accept << endl;
+	fout << " # of new cluster events rejected: " << _statistics.step[0].cluster_events_reject << endl;
 	_verbosity = verbosity;
 } 

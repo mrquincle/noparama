@@ -24,6 +24,9 @@ class UpdateClusterPopulation {
 			_distribution(0.0, 1.0) {
 		}
 
+		virtual ~UpdateClusterPopulation() {
+		}
+
 		/*!
 		 * Update the cluster population. The observation has to be deleted beforehand.
 		 * @param[inout] cluster_matrix				Cluster-observation membership matrix

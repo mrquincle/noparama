@@ -68,21 +68,33 @@ void UpdateClusters::update(
 			// current likelihood for this cluster, compare with new sample and reuse the _likelihood object
 			_likelihood.init(cluster->getSuffies());
 			dataset_t *dataset = cluster_matrix.getData(key);
+#define USE_LOGARITHMS
+#ifdef USE_LOGARITHMS
+			likelihood = _likelihood.logprobability(*dataset);
+#else
 			likelihood = _likelihood.probability(*dataset);
+#endif
 			fout << "likelihood cluster " << key << " is " << likelihood << endl;
 			
 			Suffies *proposed_suffies = propose();
 			_likelihood.init(*proposed_suffies);
+#ifdef USE_LOGARITHMS
+			proposed_likelihood = _likelihood.logprobability(*dataset);
+#else
 			proposed_likelihood = _likelihood.probability(*dataset);
-			
+#endif		
 			if (!likelihood) {
 				// likelihood can be zero at start, in that case accept any proposal
 				cluster->setSuffies(*proposed_suffies);
 				continue;
 			} 
 
-			double alpha = proposed_likelihood / likelihood;
-	
+			double alpha;
+#ifdef USE_LOGARITHMS
+			alpha = std::exp(proposed_likelihood - likelihood);
+#else
+			alpha = proposed_likelihood / likelihood;
+#endif	
 			double reject = _distribution(_generator);
 
 			if (reject < alpha) {

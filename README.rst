@@ -176,4 +176,4 @@ Especially the split-merge samplers are not doing what I want them to be doing..
 :Authors:
     Anne van Rossum
 
-:Version: 0.1.72
+:Version: 0.1.73

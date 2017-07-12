@@ -6,25 +6,7 @@
 #include <membertrix.h>
 #include <np_update_cluster_population.h>
 #include <statistics/dirichlet.h>
-
-typedef enum { simple_random_split, sams_prior, sams_random_walk, random_mixing } split_method_t;
-
-typedef struct step {
-	int attempts;
-	int cluster_events_accept;
-	int cluster_events_reject;
-	int target_likelihood_zero;
-	int source_likelihood_zero;
-	int likelihood_both_zero;
-	int likelihood_both_nonzero;
-	int likelihood_both_nonzero_accept;
-	int likelihood_both_nonzero_reject;
-} step_t;
-
-struct statistics_t {
-	step_t split;
-	step_t merge;
-};
+#include <np_statistics.h>
 
 /**
  * This class JainNealAlgorithm updates the cluster population assuming a dirichlet process as nonparametric prior.
@@ -61,9 +43,9 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 		// statistics
 		statistics_t _statistics;
 
-		double ratioStateProb(bool split, int nc0, int nc1);
+		double ratioStateProb(bool split, int nc0, int nc1, int nc);
 
-		double ratioProposal(bool split, int nc);
+		double ratioProposal(bool split, int N, int C = 2);
 
 		void checkLikelihoods(double l1, double l2, step_t statistics_step, double &l21, bool &accept, bool &overwrite);
 
@@ -88,6 +70,8 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 			distribution_t & likelihood,
 			dirichlet_process & nonparametrics
 		);
+
+		~JainNealAlgorithm();
 
 		/*!
 		 * Update the cluster population. The observation has to be deleted beforehand.

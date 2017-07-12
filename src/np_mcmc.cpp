@@ -105,6 +105,19 @@ void MCMC::run(dataset_t & dataset, int T) {
 			random_order(indices[i].begin(), indices[i].end());
 		}
 
+//#define TEST_ADDITIONAL_DUPLICATES
+#ifdef TEST_ADDITIONAL_DUPLICATES
+		int Q = 3; 
+		if (Q > M) Q = M;
+		for (int i = 0; i < Q; ++i) {
+			double copy = indices[0][i];
+			std::vector<int> subset(_subset_count);
+			for (int j = 1; j < _subset_count; ++j) {
+				indices[j][i] = copy;
+			}
+		}
+#endif
+
 		fout << "Create subset of size " << _subset_count << endl;
 		for (int i = 0; i < M; ++i) {
 			// create subset vector of size _subset_count

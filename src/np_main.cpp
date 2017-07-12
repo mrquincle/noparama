@@ -19,19 +19,26 @@
 #include <statistics/normalinvwishart.h>
 #include <statistics/normalinvgamma.h>
 
-#define ALGORITHM 10
-
-#if ALGORITHM==8
 #include <np_neal_algorithm8.h>
-#elif ALGORITHM==9
 #include <np_jain_neal_algorithm.h>
-#else
 #include <np_triadic_algorithm.h>
-#endif
 
 #include <pretty_print.hpp>
 
 using namespace std;
+
+enum algorithm_t { algorithm8, jain_neal_split, triadic };
+
+void disp_help(std::string appname) {
+	std::string datafilename;
+	cout << "noparama [version 0.1.72]" << endl;
+	cout << endl;
+	cout << "Usage: " << endl;
+	cout << "  noparama -d datafile -a algorithm8|jain_neal_split|triadic  [-T ticks] [-c regression|clustering]" << endl;
+	cout << "For example:" << endl;
+	datafilename = "datasets/twogaussians.data";
+	cout << "  " << appname << " -d " << datafilename << " -a triadic -T 5000 -c regression" << endl;
+}
 
 /**
  * With the dataset twogaussians it is important to realize that this did not originate from a Dirichlet process. Even
@@ -47,12 +54,9 @@ int main(int argc, char *argv[]) {
 	// ---------------------------------------------------------------------------------------------------------------
 	// Configuration parameters 
 	// ---------------------------------------------------------------------------------------------------------------
-	int T = 2000;
-
 	double alpha = 1;
 	// ---------------------------------------------------------------------------------------------------------------
 
-	fout << "Run MCMC sampler for " << T << " steps " << endl;
 
 	fout << "The Dirichlet Process is run with alpha=" << alpha << endl;
 
@@ -69,11 +73,9 @@ int main(int argc, char *argv[]) {
 
 	// Configuration strings that can be filled from CLI arguments
 	string datafilename;
-	string configuration;
-
 	int token;
 	unordered_map<int, string> flags;
-	while( (token = getopt(argc, argv, "d:c:")) != EOF)
+	while( (token = getopt(argc, argv, "d:c:a:T:h?")) != EOF)
 	{
 		switch (token)
 		{
@@ -83,37 +85,63 @@ int main(int argc, char *argv[]) {
 			case 'c':
 				flags['c'] = string(optarg);
 				break;
+			case 'a':
+				flags['a'] = string(optarg);
+				break;
+			case 'T':
+				flags['T'] = string(optarg);
+				break;
+			case 'h': case '?':
+				disp_help(std::string(argv[0]));
+				exit(1);
+				break;
 		}
 	}
 
-	if (flags.find('d') == flags.end()) {
-		// required, so show help and exit
-		cout << "noparama [version 0.0.1]" << endl;
-		cout << endl << endl;
-		cout << "Usage: " << endl;
-		fout << "  noparama [arguments]" << endl;
-		datafilename = "$HOME/workspace/thesis/dpm/inference/data/many-modal/pattern100_sigma0_1.plain.txt";
-		fout << argv[0] << " -d " << datafilename << endl;
-		fout << "Or:" << endl;
-		datafilename = "datasets/twogaussians.data";
-		fout << argv[0] << " -d " << datafilename << endl;
+	// required, so show help and exit
+	algorithm_t algorithm;
+	if (flags.find('d') == flags.end() || flags.find('a') == flags.end()) {
+		disp_help(std::string(argv[0]));
 		exit(1);
 	} else {
 		datafilename = flags['d'];
-	}
 
-	bool regression = false;
-	if (flags.find('c') == flags.end()) {
-		// no configuration parameter, but optional anyway
-			fout << "Clustering mode" << endl;
-	} else {
-		configuration = flags['c'];
-		if (configuration == "regression") {
-			regression = true;
-			fout << "Regression mode" << endl;
+		std::string algorithm_str = flags['a'];
+		if (algorithm_str == "algorithm8") {
+			algorithm = algorithm8;
+		} else if (algorithm_str == "jain_neal_split") {
+			algorithm = jain_neal_split;
+		} else if (algorithm_str == "triadic") {
+			algorithm = triadic;
+		} else {
+			cerr << "Unknown algorithm: " << algorithm_str << endl;
+			exit(1);
 		}
 	}
+	
+	// optional T flag
+	int T = 2000;
+	if (flags.find('T') != flags.end()) {
+		T = std::stoi(flags['T']);
+	}
 
+	// optional clustering/regression flag
+	bool regression = false;
+	if (flags.find('c') != flags.end()) {
+		std::string configuration = flags['c'];
+		if (configuration == "regression") {
+			regression = true;
+		}
+	}
+	
+	fout << "Run MCMC sampler for " << T << " steps " << endl;
+
+	if (regression) {
+		fout << "Regression mode" << endl;
+	} else {
+		fout << "Clustering mode" << endl;
+	}
+	
 	fout << "Load file: " << datafilename << endl;
 
 	dataset_t dataset;
@@ -211,29 +239,45 @@ int main(int argc, char *argv[]) {
 	fout << "Set up UpdateClusterPopulation object" << endl;
 
 	int subset_count;
-#if ALGORITHM==8
-	fout << "We will be using algorithm 8 by Neal" << endl;
-	NealAlgorithm8 update_cluster_population(generator, *likelihood, hyper);
-	subset_count = 1;
-#elif ALGORITHM==9
-	fout << "We will be using the Jain-Neal algorithm" << endl;
-	JainNealAlgorithm update_cluster_population(generator, *likelihood, hyper);
-	subset_count = 2;
+	UpdateClusterPopulation *update_cluster_population;
+	switch(algorithm) {
+		case algorithm8: 
+			{
+				fout << "We will be using algorithm 8 by Neal" << endl;
+				update_cluster_population = new NealAlgorithm8(generator, *likelihood, hyper);
+				subset_count = 1;
+				break;
+			}
+		case jain_neal_split:
+			{
+				fout << "We will be using the Jain-Neal algorithm" << endl;
+				update_cluster_population = new JainNealAlgorithm(generator, *likelihood, hyper);
+				subset_count = 2;
+				break;
+			}
+		case triadic:
+			{
+				fout << "We will be using the Triadic algorithm" << endl;
+				update_cluster_population = new TriadicAlgorithm(generator, *likelihood, hyper);
+#define TEST_WITH_TWO
+#ifdef TEST_WITH_TWO
+				subset_count = 2;
 #else
-	fout << "We will be using the Triadic algorithm" << endl;
-	TriadicAlgorithm update_cluster_population(generator, *likelihood, hyper);
-	subset_count = 3;
+				subset_count = 3;
 #endif
+				break;
+			}
+	}
 
 	// create MCMC object
 	fout << "Set up MCMC" << endl;
-	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, update_cluster_population, subset_count, *likelihood);
+	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, *update_cluster_population, subset_count, *likelihood);
 
 	fout << "Run MCMC for " << T << " steps" << endl;
 	mcmc.run(dataset, T);
 
 	fout << "Print statistics" << endl;
-	update_cluster_population.printStatistics();
+	update_cluster_population->printStatistics();
 
 	fout << "Write results" << endl;
 	const membertrix trix = mcmc.getMembershipMatrix();
@@ -261,6 +305,7 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < N; ++i) {
 		delete dataset[i];
 	}
+	delete update_cluster_population;
 }
 
 

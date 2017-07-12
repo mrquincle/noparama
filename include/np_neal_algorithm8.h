@@ -6,10 +6,7 @@
 #include <membertrix.h>
 #include <np_update_cluster_population.h>
 #include <statistics/dirichlet.h>
-
-struct statistics_t {
-	int new_clusters_events;
-};
+#include <np_statistics.h>
 
 /**
  * This class NealAlgorithm8 updates the cluster population assuming a dirichlet process as nonparametric prior.
