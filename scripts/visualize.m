@@ -40,7 +40,7 @@ if (plot_gaussians)
 
 else
 
-	mmax=5;
+	mmax=2;
 	printf("Only display lines with more than %i points\n", mmax);
 
 	for i = 1:K

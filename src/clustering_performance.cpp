@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include <Eigen/Dense>
 
@@ -48,7 +49,7 @@ void clustering_performance::calculateSimilarity(matrix_t & frequencies) {
 	auto R = frequencies.rowwise().sum();
 	auto C = frequencies.colwise().sum();
 	
-	double _purity = frequencies.colwise().maxCoeff().sum() / (double)N;
+	_purity = frequencies.colwise().maxCoeff().sum() / (double)N;
 
 	auto a = ((A.cwiseProduct(A) - A) / 2).sum();
 	auto b = ((R.cwiseProduct(R) - R) / 2).sum();
@@ -78,4 +79,15 @@ void clustering_performance::calculateSimilarity(matrix_t & frequencies) {
 	cout << "Adjusted Rand Index: " << _adjusted_rand_index << endl;
 
 	delete &frequencies;
+}
+
+void clustering_performance::write(std::string fname) {
+	std::ofstream ofile;
+	ofile.open(fname);
+
+	ofile << "Purity: " << _purity << endl;
+	ofile << "Rand Index: " << _rand_index << endl;
+	ofile << "Adjusted Rand Index: " << _adjusted_rand_index << endl;
+
+	ofile.close();
 }

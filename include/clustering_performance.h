@@ -10,6 +10,8 @@ class clustering_performance {
 
         void calculateSimilarity(matrix_t & frequencies);
 
+        void write(std::string fname);
+
     private:
         double _rand_index;
 

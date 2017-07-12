@@ -91,4 +91,6 @@ class MCMC {
 		 * @return                               The membership matrix (const)
 		 */
 		const membertrix & getMembershipMatrix() const;
+
+		const membertrix & getMaxLikelihoodMatrix() const;
 };

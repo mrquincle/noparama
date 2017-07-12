@@ -37,7 +37,7 @@ MCMC::MCMC(
 
 	_subset_count = subset_count;
 
-	_max_likelihood = 0.0;
+	_max_likelihood = -std::numeric_limits<double>::infinity();
 }
 
 void MCMC::run(dataset_t & dataset, int T) {
@@ -152,22 +152,24 @@ const membertrix & MCMC::getMembershipMatrix() const {
 	return _membertrix;
 }
 
+const membertrix & MCMC::getMaxLikelihoodMatrix() const {
+	return _max_likelihood_membertrix;
+}
+
 void MCMC::considerMaxLikelihood() {
 	const clusters_t &clusters = _membertrix.getClusters();
 	double current_likelihood = .0;
 	for (auto cluster_pair: clusters) {
-		auto const &key = cluster_pair.first;
-		auto const &cluster = cluster_pair.second;
+		auto const key = cluster_pair.first;
+		auto const cluster = cluster_pair.second;
 		dataset_t *dataset = _membertrix.getData(key);
 		_likelihood.init(cluster->getSuffies());
 		current_likelihood += _likelihood.logprobability(*dataset) ;
 	}
-
 	if (current_likelihood > _max_likelihood) {
 		_max_likelihood = current_likelihood;
-		_max_likelihood_membertrix = _membertrix;
+		_max_likelihood_membertrix = *_membertrix.clone();
 	}
-
 	foutvar(Notice) << "Loglikelihood now: " << current_likelihood << endl;
 }
 

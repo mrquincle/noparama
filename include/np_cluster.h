@@ -4,6 +4,8 @@
 
 #include "np_suffies.h"
 
+#include <iostream>
+
 // Forward reference to cluster_t
 class cluster_t;
 
@@ -27,13 +29,15 @@ class cluster_t {
 		//! The parameters are sufficient statistics of the related probability density function
 		//! They are stored by reference, or else the construction will be a copy by value operation.
 		Suffies & _suffies;
-
 	public:
 		cluster_t(Suffies & suffies): _suffies(suffies) {
 		}
-		
+
+		cluster_t(const cluster_t &other): _suffies(other._suffies) {
+			std::cout << "Copy cluster " << std::endl;
+		}
+
 		~cluster_t() {
-		//	delete &_suffies;
 		};
 
 		//! Get sufficient statistics
@@ -44,5 +48,22 @@ class cluster_t {
 		//! Set sufficient statistics
 		void setSuffies(Suffies & suffies) {
 			_suffies = suffies;
+		}
+
+		void updateSuffies(Suffies suffies) {
+			// overwrite 
+			_suffies = suffies;
+		}
+		
+		friend void swap(cluster_t& first, cluster_t& second) {
+			using std::swap;
+
+			swap(first._suffies, second._suffies);
+		}
+		
+		cluster_t &operator=(cluster_t other) {
+			swap(*this, other);
+
+			return *this;
 		}
 };

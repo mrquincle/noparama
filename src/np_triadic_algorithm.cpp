@@ -12,7 +12,7 @@ using namespace std;
 
 #define EXCESSIVE_CHECKS
 
-#define TEST_WITH_TWO
+//#define TEST_WITH_TWO
 
 TriadicAlgorithm::TriadicAlgorithm(
 			random_engine_t & generator,
@@ -35,8 +35,8 @@ TriadicAlgorithm::TriadicAlgorithm(
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 
-	_beta = 0.5;
-	_beta = 1;
+	_beta = 0.1;
+	//_beta = 1;
 
 	_split_method = sams_prior;
 	//_split_method = simple_random_split;
@@ -47,6 +47,7 @@ TriadicAlgorithm::TriadicAlgorithm(
  * the merge, for a split, more contains the clusters after the split.
  */
 double TriadicAlgorithm::ratioStateProb(bool split, const std::vector<int> & more, const std::vector<int> & less) {
+	assert (more.size() > less.size());
 	double logfraction = 0.0;
 	for (int i = 0; i < (int)more.size(); ++i) {
 		logfraction += lgamma(more[i]);
@@ -71,17 +72,30 @@ double TriadicAlgorithm::ratioProposal(bool split, int N, int C) {
 	if (_split_method == sams_prior) {
 		return .0;
 	}
-	//double result = pow(3, nc - 3) * pow(2, 2 - nc);
-	// we can generalize to  (c/(c-1))^(n-c+1)/c
-	//double f = C / (C - 1.0);
-	//double result = pow(f, N - C + 1) / C;
-	//double result = (N - C + 1 ) * std::log(f) - std::log(C);
-	//double result = (N - C + 1 ) * ( std::log(C) - std::log( C-1 ) ) - std::log(C);
 	double result = (C - N - 1) * std::log(C - 1) - (C - N) * std::log(C);
 	if (split) { 
 		return result;
 	} else {
 		return -result;
+	}
+}
+
+/**
+ * @param[in] S                                  source count (in split procedure S < T)
+ * @param[in] T                                  target count
+ */
+double TriadicAlgorithm::ratioR(bool split, int S, int T) {
+	assert( _beta < 1 );
+	if (split) {
+		assert (S < T);
+		if (S == 1 && T == 2) return std::log(_beta);
+		if (S == 2 && T == 3) return -std::log(1 - _beta);
+		assert(false);
+	} else {
+		assert (S > T);
+		if (S == 2 && T == 1) return -std::log(_beta);
+		if (S == 3 && T == 2) return std::log(1 - _beta);
+		assert(false);
 	}
 }
 
@@ -278,7 +292,7 @@ bool TriadicAlgorithm::split(
 	std::vector<int> ndata(C), npdata(Q);
 	std::vector<double> ldata(Q), lpdata(Q);
 	int N = 0;
-	double rP, rQ, rL = 0.0;
+	double rP, rQ, rR, rL = 0.0;
 	bool accept = true;
 
 #ifdef EXCESSIVE_CHECKS
@@ -315,6 +329,9 @@ bool TriadicAlgorithm::split(
 	for (int i = 0; i != Q; ++i) {
 		Ncheck += npdata[i];
 	}
+	if (Ncheck != N) {
+		cerr << "Number of data items before and after is different: " << N << " vs " << Ncheck << endl;
+	}
 	assert(Ncheck == N);
 #endif
 
@@ -323,6 +340,7 @@ bool TriadicAlgorithm::split(
 	// split(): npdata contains more clusters than ndata
 	rP = ratioStateProb(true, npdata, ndata);
 	rQ = ratioProposal(true, N, Q);
+	rR = ratioR(true, C, Q);
 
 #ifdef EXCESSIVE_CHECKS
 //	assert (ratioStateProb(false, ndata, npdata) == rP);
@@ -376,8 +394,8 @@ bool TriadicAlgorithm::split(
 
 	statistics_step.likelihood_both_nonzero++;
 
-	double a_split = std::exp(rQ + rP + rL);
-	fout << "Acceptance for split: " << rQ + rP + rL << " becomes a = " << a_split << endl;
+	double a_split = std::exp(rQ + rP + rR + rL);
+	fout << "Acceptance for split: " << rQ + rP + rR + rL << " becomes a = " << a_split << endl;
 
 	double u = _distribution(_generator);
 
@@ -448,7 +466,7 @@ bool TriadicAlgorithm::merge(
 	std::vector<int> ndata(C), npdata(Q);
 	std::vector<double> ldata(C), lpdata(C);
 	int N = 0;
-	double rP, rQ, rL = .0;
+	double rP, rQ, rR, rL = .0;
 	bool accept = true;
 	
 	step_t & statistics_step = _statistics.step[S];
@@ -482,6 +500,7 @@ bool TriadicAlgorithm::merge(
 	// merge(): ndata contains more clusters than npdata
 	rP = ratioStateProb(false, ndata, npdata);
 	rQ = ratioProposal(false, N, C);
+	rR = ratioR(false, C, Q);
 
 	fout << "The q(.|.)p(.) ratio for the MH merge is " << rQ << " + " << rP << " = " << rQ + rP << endl;
 
@@ -526,8 +545,8 @@ bool TriadicAlgorithm::merge(
 		
 	statistics_step.likelihood_both_nonzero++;
 
-	double a_merge = std::exp(rQ + rP + rL);
-	fout << "Acceptance for merge: " << rQ + rP + rL << " becomes a = " << a_merge << endl;
+	double a_merge = std::exp(rQ + rP + rR + rL);
+	fout << "Acceptance for merge: " << rQ + rP + rR + rL << " becomes a = " << a_merge << endl;
 
 	double u = _distribution(_generator);
 	fout << "Sampled u: " << u << endl;
@@ -612,7 +631,7 @@ void TriadicAlgorithm::update(
 		fout << "We found data item " << data_id << " at cluster " << cluster_id << endl;
 		cluster_ids.push_back( cluster_id );
 	}
-#define TEST_DELETE_POINT
+//#define TEST_DELETE_POINT
 
 #ifdef TEST_DELETE_POINT
 #ifndef TEST_WITH_TWO

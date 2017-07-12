@@ -87,6 +87,8 @@ class membertrix {
 		 */
 		membertrix(const membertrix &other);
 
+		membertrix* clone();
+
 		/*!
 		 * The destructor.
 		 */

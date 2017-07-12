@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
 			{
 				fout << "We will be using the Triadic algorithm" << endl;
 				update_cluster_population = new TriadicAlgorithm(generator, *likelihood, hyper);
-#define TEST_WITH_TWO
+//#define TEST_WITH_TWO
 #ifdef TEST_WITH_TWO
 				subset_count = 2;
 #else
@@ -278,10 +278,7 @@ int main(int argc, char *argv[]) {
 
 	fout << "Print statistics" << endl;
 	update_cluster_population->printStatistics();
-
-	fout << "Write results" << endl;
-	const membertrix trix = mcmc.getMembershipMatrix();
-
+	
 	// analyse and write out results
 	std::chrono::time_point<std::chrono::system_clock> clock;
 	clock = std::chrono::system_clock::now();
@@ -292,13 +289,21 @@ int main(int argc, char *argv[]) {
 	std::stringstream tss; 
 	tss << std::put_time(&tm, "%Y%m%d_%H:%M");
 	std::string dirname = tss.str(); 
-	std::string basename = "results";
-
+	std::string basename = "snapshot";
+	
+	fout << "Last item" << endl;
+	const membertrix trix_snapshot = mcmc.getMembershipMatrix();
+	Results results_snapshot(trix_snapshot, ground_truth);
+	results_snapshot.write(workspace, dirname, basename);
+	
+	basename = "results";
+	
+	fout << "Write results" << endl;
+	const membertrix trix = mcmc.getMaxLikelihoodMatrix();
 	Results results(trix, ground_truth);
 	results.write(workspace, dirname, basename);
 	
 	fout << "Memory deallocation" << endl;
-
 	delete &mcmc;
 	delete likelihood;
 	delete prior;

@@ -36,14 +36,18 @@ matrix_t & Results::calculateContingencyMatrix() {
 	return _clustering_performance.calculateContingencyMatrix(gt, res);
 }
 
-void Results::write(const string &workspace, const string & path, const string & basename) {
-
-	matrix_t & mat = calculateContingencyMatrix();
-
-	_clustering_performance.calculateSimilarity(mat);
+void Results::write(const std::string &workspace, const std::string & path, const std::string & basename) {
 
 	bool success;
+	std::string fname;
+	stringstream sstream;
 
+	// calculate contigency matrix first
+	matrix_t & mat = calculateContingencyMatrix();
+
+	// now we can calculate similarities and scores
+	_clustering_performance.calculateSimilarity(mat);
+	
 	std::string ws_path = std::string(workspace + path);
 
 	success = fs::create_directories(ws_path);
@@ -94,12 +98,17 @@ void Results::write(const string &workspace, const string & path, const string &
 		k++;
 	}
 	
-	fout << "Write to file " << basename << ".txt" << endl;
-	stringstream sstream;
+	fout << "Write parameters to file " << basename << ".txt" << endl;
 	sstream.str("");
 	sstream << ws_path << '/' << basename << ".txt";
-	string fname = sstream.str();
+	fname = sstream.str();
 	writeOctave(fname);
+	
+	fout << "Write scores to file" << basename << ".score.txt" << endl;
+	sstream.str("");
+	sstream << ws_path << '/' << basename << ".score.txt";
+	fname = sstream.str();
+	_clustering_performance.write(fname);
 	_verbosity = 4;
 }
 

@@ -37,9 +37,8 @@ membertrix::membertrix(const membertrix &other) {
 	for (auto cluster_pair: other._cluster_objects) {
 		auto cluster_id = cluster_pair.first;
 		auto cluster = cluster_pair.second;
-
+		
 		cluster_id_t new_cluster_id = addCluster(cluster);
-	
 		auto cluster_data = other._membership_matrix.col(cluster_id);
 		for (int i = 0; i < cluster_data.size(); ++i) {
 			if (cluster_data(i)) {
@@ -47,6 +46,29 @@ membertrix::membertrix(const membertrix &other) {
 			}
 		}
 	}
+}
+
+membertrix* membertrix::clone() {
+	membertrix *m = new membertrix();
+	m->_verbosity = _verbosity;
+	for (auto data_ptr: _data_objects) {
+		data_t *data = data_ptr;
+		m->addData(*data);
+	}
+	
+	for (auto cluster_pair: _cluster_objects) {
+		auto cluster_id = cluster_pair.first;
+		auto cluster = cluster_pair.second;
+		cluster_t *p_cluster = new cluster_t(cluster->getSuffies());
+		cluster_id_t new_cluster_id = m->addCluster(p_cluster);
+		auto cluster_data = _membership_matrix.col(cluster_id);
+		for (int i = 0; i < cluster_data.size(); ++i) {
+			if (cluster_data(i)) {
+				m->assign(new_cluster_id, i);
+			}
+		}
+	}
+	return m;
 }
 
 membertrix::~membertrix() {
@@ -334,7 +356,7 @@ int membertrix::cleanup() {
 	}
 	return clusters_removed;
 }
-		
+
 membertrix &membertrix::operator=(membertrix other) {
 	swap(*this, other);
 
