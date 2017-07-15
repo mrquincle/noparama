@@ -9,8 +9,8 @@ using namespace std;
 using namespace Eigen;
 
 int main() {
-	//static std::mt19937 generator{ std::random_device{}() };
 	default_random_engine generator;
+	generator.seed(23849398);
 
 	Vector2d mean(1,1);
 	Matrix2d covar;

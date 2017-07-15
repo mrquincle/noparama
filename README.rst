@@ -21,6 +21,19 @@ A dataset can be found in a companion repository: dataset_
 
 .. _dataset: https://github.com/mrquincle/noparama-datasets.git.
 
+This is a Monte Carlo approach, so you will have to take additional care that there are good random numbers available
+on your system. The `entropy_avail` file is typically higher than 3000 on my system. 
+
+.. code-block:: bash
+
+	cat /proc/sys/kernel/random/entropy_avail
+
+You can remediate this by installing `rng-tools`.
+
+This simulation has been run with g++ version 6.2.0, 7.0.1, 7.1.0 without trouble. However, running it with 5.4.0 
+lead to significantly slower convergence. There might be some errors in older g++ compilers that reduce the diversity
+in random numbers. I'm too lazy to figure that out, just use a more modern compiler if you encounter this.
+
 Use
 ---
 
@@ -176,4 +189,4 @@ Especially the split-merge samplers are not doing what I want them to be doing..
 :Authors:
     Anne van Rossum
 
-:Version: 0.1.75
+:Version: 0.1.76
