@@ -6,6 +6,7 @@
 
 // Include getopt
 #include <unistd.h>
+#include <experimental/filesystem>
 
 #include <np_mcmc.h>
 #include <np_data.h>
@@ -25,19 +26,19 @@
 
 #include <pretty_print.hpp>
 
-using namespace std;
+namespace fs = std::experimental::filesystem;
 
 enum algorithm_t { algorithm8, jain_neal_split, triadic };
 
 void disp_help(std::string appname) {
 	std::string datafilename;
-	cout << "noparama [version 0.1.72]" << endl;
-	cout << endl;
-	cout << "Usage: " << endl;
-	cout << "  noparama -d datafile -a algorithm8|jain_neal_split|triadic  [-T ticks] [-c regression|clustering]" << endl;
-	cout << "For example:" << endl;
+	std::cout << "noparama [version 0.1.72]" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Usage: " << std::endl;
+	std::cout << "  noparama -d datafile -a algorithm8|jain_neal_split|triadic  [-T ticks] [-c regression|clustering]" << std::endl;
+	std::cout << "For example:" << std::endl;
 	datafilename = "datasets/twogaussians.data";
-	cout << "  " << appname << " -d " << datafilename << " -a triadic -T 5000 -c regression" << endl;
+	std::cout << "  " << appname << " -d " << datafilename << " -a triadic -T 5000 -c regression" << std::endl;
 }
 
 /**
@@ -49,7 +50,7 @@ void disp_help(std::string appname) {
 int main(int argc, char *argv[]) {
 	char _verbosity = Debug;
 	
-	fout << "Welcome to noparama" << endl;
+	fout << "Welcome to noparama" << std::endl;
 
 	// ---------------------------------------------------------------------------------------------------------------
 	// Configuration parameters 
@@ -58,38 +59,38 @@ int main(int argc, char *argv[]) {
 	// ---------------------------------------------------------------------------------------------------------------
 
 
-	fout << "The Dirichlet Process is run with alpha=" << alpha << endl;
+	fout << "The Dirichlet Process is run with alpha=" << alpha << std::endl;
 
 	// limit number of data items
 	bool limit = false;
 	int N = 10;
 	if (limit) {
-		fout << "Using limited dataset with only " << N << " items " << endl;
+		fout << "Using limited dataset with only " << N << " items " << std::endl;
 	} else {
-		fout << "Using full dataset" << endl;
+		fout << "Using full dataset" << std::endl;
 	}
 
-	default_random_engine generator(random_device{}()); 
+	std::default_random_engine generator(std::random_device{}()); 
 
-	// Configuration strings that can be filled from CLI arguments
-	string datafilename;
+	// Configuration std::strings that can be filled from CLI arguments
+	std::string datafilename;
 	int token;
-	unordered_map<int, string> flags;
+	std::unordered_map<int, std::string> flags;
 	while( (token = getopt(argc, argv, "d:c:a:T:h?")) != EOF)
 	{
 		switch (token)
 		{
 			case 'd':
-				flags['d'] = string(optarg);
+				flags['d'] = std::string(optarg);
 				break;
 			case 'c':
-				flags['c'] = string(optarg);
+				flags['c'] = std::string(optarg);
 				break;
 			case 'a':
-				flags['a'] = string(optarg);
+				flags['a'] = std::string(optarg);
 				break;
 			case 'T':
-				flags['T'] = string(optarg);
+				flags['T'] = std::string(optarg);
 				break;
 			case 'h': case '?':
 				disp_help(std::string(argv[0]));
@@ -99,6 +100,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// required, so show help and exit
+	std::string algorithm_str = flags['a'];
 	algorithm_t algorithm;
 	if (flags.find('d') == flags.end() || flags.find('a') == flags.end()) {
 		disp_help(std::string(argv[0]));
@@ -106,7 +108,6 @@ int main(int argc, char *argv[]) {
 	} else {
 		datafilename = flags['d'];
 
-		std::string algorithm_str = flags['a'];
 		if (algorithm_str == "algorithm8") {
 			algorithm = algorithm8;
 		} else if (algorithm_str == "jain_neal_split") {
@@ -114,7 +115,7 @@ int main(int argc, char *argv[]) {
 		} else if (algorithm_str == "triadic") {
 			algorithm = triadic;
 		} else {
-			cerr << "Unknown algorithm: " << algorithm_str << endl;
+			std::cerr << "Unknown algorithm: " << algorithm_str << std::endl;
 			exit(1);
 		}
 	}
@@ -133,20 +134,29 @@ int main(int argc, char *argv[]) {
 			regression = true;
 		}
 	}
-	
-	fout << "Run MCMC sampler for " << T << " steps " << endl;
 
-	if (regression) {
-		fout << "Regression mode" << endl;
-	} else {
-		fout << "Clustering mode" << endl;
+	// check if output directory exists and bail out if this is the case
+	std::string justdatafilename = fs::path(datafilename).filename();
+	std::string workspace = "output/" + algorithm_str + '/' + justdatafilename + '/';
+	fout << "Have workspace: " << workspace << std::endl;
+	if (fs::exists(workspace)) {
+		std::cerr << "Directory already exists. Drop out. We don't want to overwrite it or do double work." << std::endl;
+		exit(106);
 	}
 	
-	fout << "Load file: " << datafilename << endl;
+	fout << "Run MCMC sampler for " << T << " steps " << std::endl;
+
+	if (regression) {
+		fout << "Regression mode" << std::endl;
+	} else {
+		fout << "Clustering mode" << std::endl;
+	}
+	
+	fout << "Load file: " << datafilename << std::endl;
 
 	dataset_t dataset;
 	// The data file should have "a b c" on lines, separated by spaces (without quotes, each value of the type double).
-	fout << "Read dataset" << endl;
+	fout << "Read dataset" << std::endl;
 	std::ifstream datafilehandle(datafilename);
 	double a, b, c;
 	ground_truth_t ground_truth;
@@ -169,21 +179,21 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (n == 0) {
-		fout << "No data found... Check the file or the contents of the file." << endl;
+		fout << "No data found... Check the file or the contents of the file." << std::endl;
 		exit(7);
 	}
 
 	int I = 5;
-	fout << "Display first " << I << " items of the dataset" << endl;
+	fout << "Display first " << I << " items of the dataset" << std::endl;
 	for (int i = 0; i < I; ++i) {
 		if (i == (int)ground_truth.size()) break;
-		fout << "Data: " << *dataset[i] << " with ground truth " << ground_truth[i] << endl;
+		fout << "Data: " << *dataset[i] << " with ground truth " << ground_truth[i] << std::endl;
 	}
 
 	// The likelihood function only is required w.r.t. type, parameters are normally set later
 	distribution_t *likelihood;
 	if (regression) {
-		fout << "Multivariate normal suffies (sigma scalar)" << endl;
+		fout << "Multivariate normal suffies (sigma scalar)" << std::endl;
 		// note that we need to allocate the suffies or else it won't exists after the call to new multivar..
 		//Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
 		Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
@@ -191,23 +201,23 @@ int main(int argc, char *argv[]) {
 		suffies_mvn->sigma = 1;
 		likelihood = new scalarnoise_multivariate_normal_distribution(*suffies_mvn, true);
 	} else {
-		fout << "Multivariate normal suffies" << endl;
+		fout << "Multivariate normal suffies" << std::endl;
 		Suffies_MultivariateNormal * suffies_mvn = new Suffies_MultivariateNormal(2);
 		suffies_mvn->mu << 0, 0;
 		suffies_mvn->sigma << 1, 0, 0, 1; // get rid of this
 		likelihood = new multivariate_normal_distribution(*suffies_mvn);
 	}
 		
-	fout << "likelihood still: " << likelihood->getSuffies() << endl;
+	fout << "likelihood still: " << likelihood->getSuffies() << std::endl;
 
 	// The hierarchical prior has an alpha of 1 and the base distribution is handed separately through the prior
-	fout << "Dirichlet distribution" << endl;
+	fout << "Dirichlet distribution" << std::endl;
 	Suffies_Dirichlet suffies_dirichlet;
 	suffies_dirichlet.alpha = alpha;
 	distribution_t *prior;
 
 	if (regression) {
-		fout << "Normal Inverse Gamma distribution" << endl;
+		fout << "Normal Inverse Gamma distribution" << std::endl;
 		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(2);
 		suffies_nig->mu << 0, 0;
 		suffies_nig->alpha = 10;
@@ -215,7 +225,7 @@ int main(int argc, char *argv[]) {
 		suffies_nig->Lambda << 0.01, 0, 0, 0.01;
 		prior = new normal_inverse_gamma_distribution(*suffies_nig);
 	} else {
-		fout << "Normal Inverse Wishart distribution" << endl;
+		fout << "Normal Inverse Wishart distribution" << std::endl;
 		Suffies_NormalInvWishart * suffies_niw = new Suffies_NormalInvWishart(2);
 		suffies_niw->mu << 6, 6;
 		suffies_niw->kappa = 1.0/500;
@@ -223,41 +233,41 @@ int main(int argc, char *argv[]) {
 		suffies_niw->Lambda << 0.01, 0, 0, 0.01;
 		prior = new normal_inverse_wishart_distribution(*suffies_niw);
 	}
-	fout << "Create Dirichlet Process" << endl;
+	fout << "Create Dirichlet Process" << std::endl;
 	dirichlet_process hyper(suffies_dirichlet, *prior);
 	
-	fout << "Set up InitClusters object" << endl;
+	fout << "Set up InitClusters object" << std::endl;
 	InitClusters init_clusters(generator, hyper);
 
 	// To update cluster parameters we need prior (hyper parameters) and likelihood, the membership matrix is left 
 	// invariant
-	fout << "Set up UpdateClusters object" << endl;
+	fout << "Set up UpdateClusters object" << std::endl;
 	UpdateClusters update_clusters(generator, *likelihood, hyper);
 
 	// To update the cluster population we need	to sample new clusters using hyper parameters and adjust existing ones
 	// using prior and likelihood
-	fout << "Set up UpdateClusterPopulation object" << endl;
+	fout << "Set up UpdateClusterPopulation object" << std::endl;
 
 	int subset_count;
 	UpdateClusterPopulation *update_cluster_population;
 	switch(algorithm) {
 		case algorithm8: 
 			{
-				fout << "We will be using algorithm 8 by Neal" << endl;
+				fout << "We will be using algorithm 8 by Neal" << std::endl;
 				update_cluster_population = new NealAlgorithm8(generator, *likelihood, hyper);
 				subset_count = 1;
 				break;
 			}
 		case jain_neal_split:
 			{
-				fout << "We will be using the Jain-Neal algorithm" << endl;
+				fout << "We will be using the Jain-Neal algorithm" << std::endl;
 				update_cluster_population = new JainNealAlgorithm(generator, *likelihood, hyper);
 				subset_count = 2;
 				break;
 			}
 		case triadic:
 			{
-				fout << "We will be using the Triadic algorithm" << endl;
+				fout << "We will be using the Triadic algorithm" << std::endl;
 				update_cluster_population = new TriadicAlgorithm(generator, *likelihood, hyper);
 //#define TEST_WITH_TWO
 #ifdef TEST_WITH_TWO
@@ -270,13 +280,13 @@ int main(int argc, char *argv[]) {
 	}
 
 	// create MCMC object
-	fout << "Set up MCMC" << endl;
+	fout << "Set up MCMC" << std::endl;
 	MCMC & mcmc = *new MCMC(generator, init_clusters, update_clusters, *update_cluster_population, subset_count, *likelihood);
 
-	fout << "Run MCMC for " << T << " steps" << endl;
+	fout << "Run MCMC for " << T << " steps" << std::endl;
 	mcmc.run(dataset, T);
 
-	fout << "Print statistics" << endl;
+	fout << "Print statistics" << std::endl;
 	update_cluster_population->printStatistics();
 	
 	// analyse and write out results
@@ -285,25 +295,24 @@ int main(int argc, char *argv[]) {
 	std::time_t time = std::chrono::system_clock::to_time_t(clock);
 	std::tm tm = *std::localtime(&time);
 
-	std::string workspace = "output/";
 	std::stringstream tss; 
 	tss << std::put_time(&tm, "%Y%m%d_%H:%M");
 	std::string dirname = tss.str(); 
 	std::string basename = "snapshot";
 	
-	fout << "Last item" << endl;
+	fout << "Last item" << std::endl;
 	const membertrix trix_snapshot = mcmc.getMembershipMatrix();
 	Results results_snapshot(trix_snapshot, ground_truth);
 	results_snapshot.write(workspace, dirname, basename);
 	
 	basename = "results";
 	
-	fout << "Write results" << endl;
+	fout << "Write results" << std::endl;
 	const membertrix trix = mcmc.getMaxLikelihoodMatrix();
 	Results results(trix, ground_truth);
 	results.write(workspace, dirname, basename);
 	
-	fout << "Memory deallocation" << endl;
+	fout << "Memory deallocation" << std::endl;
 	delete &mcmc;
 	delete likelihood;
 	delete prior;
