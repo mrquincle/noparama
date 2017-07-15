@@ -4,7 +4,11 @@ cmap = colormap;
 
 %dirname = ['../output/20170215_13:05'];
 %dirname = ['../output/20170215_13:10'];
-dirname = ['../output/LATEST'];
+if (dirname)
+	printf("Use directory: %s\n", dirname);
+else
+	dirname = ['../output/LATEST'];
+end
 
 plot_gaussians=false;
 
