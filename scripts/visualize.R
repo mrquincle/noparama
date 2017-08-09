@@ -1,10 +1,21 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+
 library(ggplot2)
 
-method <- 'triadic-backup'
-method <- 'algorithm8'
-method <- 'jain-neal'
+if (length(args)<3) {
+	stop("Usage: Rscript --vanilla visualize.R [method] [input folder] [output folder].\n", call.=FALSE)
+} 
+	
+method <- args[1]
+dir_in <- args[2]
+dir_out <- args[3]
 
-if (method == 'triadic-backup') {
+#method <- 'triadic-backup'
+#method <- 'algorithm8'
+#method <- 'jain-neal'
+
+if (method == 'triadic') {
 	method_title = "Triadic MCMC sampler"
 } else if (method == 'algorithm8') {
 	method_title = "Auxiliary variable MCMC sampler"
@@ -15,7 +26,7 @@ if (method == 'triadic-backup') {
 	print("Unknown method");
 }
 
-wpath <- file.path('../output', method)
+wpath <- file.path(dir_in)
 
 purity <- read.table(file.path(wpath, 'purity.txt'), header=FALSE)
 rand <- read.table(file.path(wpath, 'rand.txt'), header=FALSE)
@@ -32,12 +43,16 @@ dataframe.m <- reshape2::melt(dataframe, id.vars = NULL)
 
 bold.text <- element_text(face = "bold")
 
+pdf(NULL)
+
 ggplot(dataframe.m, aes(x = variable, y = value)) + 
 	geom_violin() + 
 	ggtitle(paste("Line estimation with the", method_title, sep=" ")) +
 	scale_x_discrete(name = "Clustering metric") + 
-	scale_y_continuous(name = "Clustering performance [0..1]") +
+	scale_y_continuous(name = "Clustering performance [0..1]", limits = c(0,1) ) +
 	theme(title = bold.text, axis.title = bold.text) + 
-	theme(plot.title = element_text(hjust = 0.5))
+	theme(plot.title = element_text(hjust = 0.5)) +
+	geom_boxplot(width=.1, outlier.size=0)
 
-ggsave(paste(method, "png", sep="."))
+dir.create(file.path(dir_out), showWarnings = FALSE)
+ggsave(file.path(dir_out, paste(method, "png", sep=".")))

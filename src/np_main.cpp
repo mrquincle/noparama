@@ -35,7 +35,7 @@ void disp_help(std::string appname) {
 	std::cout << "noparama [version 0.1.72]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Usage: " << std::endl;
-	std::cout << "  noparama -d datafile -a algorithm8|jain_neal_split|triadic  [-T ticks] [-c regression|clustering]" << std::endl;
+	std::cout << "  noparama -d datafile -a algorithm8|jain_neal_split|triadic  [-T ticks] [-c regression|clustering|angular]" << std::endl;
 	std::cout << "For example:" << std::endl;
 	datafilename = "datasets/twogaussians.data";
 	std::cout << "  " << appname << " -d " << datafilename << " -a triadic -T 5000 -c regression" << std::endl;
@@ -127,11 +127,20 @@ int main(int argc, char *argv[]) {
 	}
 
 	// optional clustering/regression flag
-	bool regression = false;
+	representation_mode_t representation_mode = regression_mode; 
 	if (flags.find('c') != flags.end()) {
 		std::string configuration = flags['c'];
 		if (configuration == "regression") {
-			regression = true;
+			fout << "Regression mode" << std::endl;
+			representation_mode = regression_mode;
+		} else if (configuration == "clustering") {
+			fout << "Clustering mode" << std::endl;
+			representation_mode = clustering_mode;
+		} else if (configuration == "angular") {
+			fout << "Angular mode (form of regression)" << std::endl;
+			representation_mode = angular_mode;
+		} else {
+			fout << "Picked regression mode by default." << std::endl;
 		}
 	}
 
@@ -146,12 +155,6 @@ int main(int argc, char *argv[]) {
 	
 	fout << "Run MCMC sampler for " << T << " steps " << std::endl;
 
-	if (regression) {
-		fout << "Regression mode" << std::endl;
-	} else {
-		fout << "Clustering mode" << std::endl;
-	}
-	
 	fout << "Load file: " << datafilename << std::endl;
 
 	dataset_t dataset;
@@ -163,15 +166,22 @@ int main(int argc, char *argv[]) {
 	ground_truth.clear();
 	int n = 0;
 	while (datafilehandle >> a >> b >> c) {
-		if (regression) {
-			// prepend vector with constant for regression
-			data_t *data = new data_t(3);
-			*data = { 1, a, b };
-			dataset.push_back(data);
-		} else {
-			data_t *data = new data_t(2);
-			*data = { a, b };
-			dataset.push_back(data);
+		switch(representation_mode) {
+		case regression_mode:
+			{
+				data_t *data = new data_t(3);
+				// prepend vector with constant for regression
+				*data = { 1, a, b };
+				dataset.push_back(data);
+				break;
+			}
+		case angular_mode: case clustering_mode: 
+			{
+				data_t *data = new data_t(2);
+				*data = { a, b };
+				dataset.push_back(data);
+				break;
+			}
 		}
 		ground_truth[n] = (int)c;
 		n++;
@@ -192,14 +202,13 @@ int main(int argc, char *argv[]) {
 
 	// The likelihood function only is required w.r.t. type, parameters are normally set later
 	distribution_t *likelihood;
-	if (regression) {
+	if (representation_mode == regression_mode || representation_mode == angular_mode) {
 		fout << "Multivariate normal suffies (sigma scalar)" << std::endl;
 		// note that we need to allocate the suffies or else it won't exists after the call to new multivar..
-		//Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
 		Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
 		suffies_mvn->mu << 0, 0;
 		suffies_mvn->sigma = 1;
-		likelihood = new scalarnoise_multivariate_normal_distribution(*suffies_mvn, true);
+		likelihood = new scalarnoise_multivariate_normal_distribution(*suffies_mvn, representation_mode);
 	} else {
 		fout << "Multivariate normal suffies" << std::endl;
 		Suffies_MultivariateNormal * suffies_mvn = new Suffies_MultivariateNormal(2);
@@ -216,7 +225,7 @@ int main(int argc, char *argv[]) {
 	suffies_dirichlet.alpha = alpha;
 	distribution_t *prior;
 
-	if (regression) {
+	if (representation_mode == regression_mode || representation_mode == angular_mode) {
 		fout << "Normal Inverse Gamma distribution" << std::endl;
 		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(2);
 		suffies_nig->mu << 0, 0;

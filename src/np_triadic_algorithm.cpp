@@ -65,7 +65,7 @@ double TriadicAlgorithm::ratioStateProb(bool split, const std::vector<int> & mor
 }
 
 /**
- * @param[in] N                                  number of data points assigned to clustesr
+ * @param[in] N                                  number of data points assigned to clusters
  * @param[in] C                                  maximum number of clusters (in merge/split between 2 to 3, it is 3)
  */
 double TriadicAlgorithm::ratioProposal(bool split, int N, int C) {

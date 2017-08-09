@@ -9,7 +9,7 @@ rm $directory/rand.txt
 touch $directory/adjusted_rand.txt
 rm $directory/adjusted_rand.txt
 
-for f in $directory/*; do
+for f in $directory/*/*/; do
   cat $f/results.score.txt | grep ^Purity | cut -f2 -d: >> $directory/purity.txt
   cat $f/results.score.txt | grep ^Rand | cut -f2 -d: >> $directory/rand.txt
   cat $f/results.score.txt | grep ^Adjusted | cut -f2 -d: >> $directory/adjusted_rand.txt

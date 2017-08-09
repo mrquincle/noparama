@@ -11,6 +11,8 @@
 #include <pretty_print.hpp>
 #include <typeinfo>
 
+enum representation_mode_t { clustering_mode, regression_mode, angular_mode };
+
 /*!
  * To sample from a multivariate normal distribution, we need to initialize it with mean and covariance matrix
  * and then get samples out using a uniform random generator as input.
@@ -41,12 +43,14 @@ class scalarnoise_multivariate_normal_distribution: public distribution_t {
 		Eigen::MatrixXd _transform;
 		int _D;
 
+		//! Input are sufficient statistics for a multivariate normal distribution with scalar noise
 		Suffies_ScalarNoise_MultivariateNormal * _suffies_mvn;
 		
+		//! Result is a multivariate normal distribution
 		Suffies_Unity_MultivariateNormal * _suffies_result;
 	
-		//! Regression flag
-		bool _regression;
+		//! Mode of operation
+		representation_mode_t _mode;
 	public:
 
 		/**
@@ -57,13 +61,18 @@ class scalarnoise_multivariate_normal_distribution: public distribution_t {
 		 * out of scope after calling the constructor.
 		 *
 		 * @param[in] suffies          mean and covariance matrix in one structure
-		 * @param[in] regression       handle data as regression data [y = X*d]
+		 * @param[in] mode             handle data as regression data [y = X*d]
 		 *
 		 * TODO: Find out a way to communicate that the caller has to take care of the lifetime of suffies 
 		 */
-		scalarnoise_multivariate_normal_distribution(Suffies_ScalarNoise_MultivariateNormal & suffies, bool regression = false);
-		
-		inline void setRegression(bool regression);
+		scalarnoise_multivariate_normal_distribution(Suffies_ScalarNoise_MultivariateNormal & suffies, 
+				representation_mode_t mode = clustering_mode);
+	
+		/**
+		 * Set the mode of operation. This mode can be clustering, regression, or angular mode. In clustering
+		 * mode
+		 */
+		inline void setMode(representation_mode_t mode);
 
 		void init(Suffies & suffies);
 

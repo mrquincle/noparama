@@ -143,11 +143,19 @@ void JainNealAlgorithm::propose_split(data_ids_t & move, data_ids_t & remain, da
 					data_t * datum = _cluster_matrix->getDatum(data_id);
 					
 					_likelihood.init(current_cluster->getSuffies());
+					//cout << "Get probability for " << *datum << endl;
+#ifdef USE_LOGARITHM
+					ldata[0] = _likelihood.logprobability(*datum) + remain.size();
+#else
 					ldata[0] = _likelihood.probability(*datum) * remain.size();
+#endif
 
 					_likelihood.init(new_cluster.getSuffies());
+#ifdef USE_LOGARITHM
+					ldata[1] = _likelihood.logprobability(*datum) + move.size();
+#else
 					ldata[1] = _likelihood.probability(*datum) * move.size();
-					
+#endif
 					int index = algebra::random_weighted_pick(ldata.begin(), ldata.end(), _generator);
 					if (index == 0) {
 						remain.push_back(data_id);
