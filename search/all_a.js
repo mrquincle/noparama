@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ordered_5fdata_5ft',['ordered_data_t',['../np__mcmc_8h.html#a65b35ecbff9cbbfbfffd8ab32eb88d23',1,'np_mcmc.h']]]
+  ['kappa',['kappa',['../classSuffies__NormalInvWishart.html#a95ab0946c6cf0db1d7272a8889be6a3a',1,'Suffies_NormalInvWishart']]]
 ];

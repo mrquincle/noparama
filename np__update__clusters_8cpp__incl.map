@@ -1,6 +1,8 @@
 <map id="src/np_update_clusters.cpp" name="src/np_update_clusters.cpp">
-<area shape="rect" id="node2" href="$np__update__clusters_8h.html" title="np_update_clusters.h" alt="" coords="5,80,152,107"/>
-<area shape="rect" id="node3" href="$np__likelihood_8h.html" title="np_likelihood.h" alt="" coords="177,80,285,107"/>
-<area shape="rect" id="node4" href="$np__posterior__predictive_8h.html" title="np_posterior_predictive.h" alt="" coords="309,80,475,107"/>
-<area shape="rect" id="node5" href="$np__sufficient__statistics_8h.html" title="np_sufficient_statistics.h" alt="" coords="309,155,475,181"/>
+<area shape="rect" id="node2" href="$np__update__clusters_8h.html" title="np_update_clusters.h" alt="" coords="263,80,410,107"/>
+<area shape="rect" id="node15" href="$pretty__print_8hpp.html" title="pretty_print.hpp" alt="" coords="590,229,702,256"/>
+<area shape="rect" id="node6" href="$membertrix_8h.html" title="membertrix.h" alt="" coords="243,155,342,181"/>
+<area shape="rect" id="node10" href="$np__cluster_8h.html" title="np_cluster.h" alt="" coords="382,229,475,256"/>
+<area shape="rect" id="node7" href="$np__data_8h.html" title="np_data.h" alt="" coords="279,229,357,256"/>
+<area shape="rect" id="node11" href="$np__suffies_8h.html" title="np_suffies.h" alt="" coords="425,304,518,331"/>
 </map>

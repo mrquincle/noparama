@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['posteriorpredictive',['PosteriorPredictive',['../classPosteriorPredictive.html',1,'']]]
+  ['jainnealalgorithm',['JainNealAlgorithm',['../classJainNealAlgorithm.html',1,'']]]
 ];

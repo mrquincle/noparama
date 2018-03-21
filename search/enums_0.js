@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['error_5ft',['error_t',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689c',1,'membertrix.h']]]
+  ['algorithm_5ft',['algorithm_t',['../np__main_8cpp.html#af7e76874ebb2ea89c8372be017aa4bec',1,'np_main.cpp']]]
 ];

@@ -1,20 +1,5 @@
 var searchData=
 [
-  ['np_5fcluster_2eh',['np_cluster.h',['../np__cluster_8h.html',1,'']]],
-  ['np_5fdata_2eh',['np_data.h',['../np__data_8h.html',1,'']]],
-  ['np_5finference_2eh',['np_inference.h',['../np__inference_8h.html',1,'']]],
-  ['np_5flikelihood_2ecpp',['np_likelihood.cpp',['../np__likelihood_8cpp.html',1,'']]],
-  ['np_5flikelihood_2eh',['np_likelihood.h',['../np__likelihood_8h.html',1,'']]],
-  ['np_5fmain_2ecpp',['np_main.cpp',['../np__main_8cpp.html',1,'']]],
-  ['np_5fmcmc_2ecpp',['np_mcmc.cpp',['../np__mcmc_8cpp.html',1,'']]],
-  ['np_5fmcmc_2eh',['np_mcmc.h',['../np__mcmc_8h.html',1,'']]],
-  ['np_5fposterior_5fpredictive_2eh',['np_posterior_predictive.h',['../np__posterior__predictive_8h.html',1,'']]],
-  ['np_5fsample_5fpdf_2eh',['np_sample_pdf.h',['../np__sample__pdf_8h.html',1,'']]],
-  ['np_5fsufficient_5fstatistics_2eh',['np_sufficient_statistics.h',['../np__sufficient__statistics_8h.html',1,'']]],
-  ['np_5fsufficient_5fstatistics_5fdowndate_2eh',['np_sufficient_statistics_downdate.h',['../np__sufficient__statistics__downdate_8h.html',1,'']]],
-  ['np_5fsufficient_5fstatistics_5fupdate_2eh',['np_sufficient_statistics_update.h',['../np__sufficient__statistics__update_8h.html',1,'']]],
-  ['np_5fupdate_5fcluster_5fpopulation_2ecpp',['np_update_cluster_population.cpp',['../np__update__cluster__population_8cpp.html',1,'']]],
-  ['np_5fupdate_5fcluster_5fpopulation_2eh',['np_update_cluster_population.h',['../np__update__cluster__population_8h.html',1,'']]],
-  ['np_5fupdate_5fclusters_2ecpp',['np_update_clusters.cpp',['../np__update__clusters_8cpp.html',1,'']]],
-  ['np_5fupdate_5fclusters_2eh',['np_update_clusters.h',['../np__update__clusters_8h.html',1,'']]]
+  ['membertrix_2ecpp',['membertrix.cpp',['../membertrix_8cpp.html',1,'']]],
+  ['membertrix_2eh',['membertrix.h',['../membertrix_8h.html',1,'']]]
 ];

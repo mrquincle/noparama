@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['lambda',['Lambda',['../classSufficientStatistics__NormalInvGamma.html#a70cf550d200fcce4002f17d1fd37bfdc',1,'SufficientStatistics_NormalInvGamma::Lambda()'],['../np__sufficient__statistics_8h.html#a3db359547eed8cfd48ca821d95f577af',1,'lambda():&#160;np_sufficient_statistics.h']]]
+  ['cluster_5fevents_5faccept',['cluster_events_accept',['../structstep.html#a2b44360a04816c991d95d9cdb2b33075',1,'step']]],
+  ['cluster_5fevents_5freject',['cluster_events_reject',['../structstep.html#a1a234b2d765330dd57c2b1176b26c326',1,'step']]]
 ];

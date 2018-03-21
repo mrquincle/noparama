@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['variable_5ftype',['variable_type',['../np__data_8h.html#a549ef1b707f019389b0b2636b40cd7d8',1,'np_data.h']]]
+  ['distribution_5ftype_5ft',['distribution_type_t',['../np__suffies_8h.html#a7eb5e5fdc84e0cae91b04cff2541e880',1,'np_suffies.h']]]
 ];

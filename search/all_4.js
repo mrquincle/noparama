@@ -1,8 +1,26 @@
 var searchData=
 [
-  ['error_5falready_5fassigned',['error_already_assigned',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca54140bfd9d25ecfa79805de3f5df728b',1,'membertrix.h']]],
-  ['error_5fassignment_5fabsent',['error_assignment_absent',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca11acbe1277b3dc6127edeeae677b10b3',1,'membertrix.h']]],
-  ['error_5fassignment_5fremaining',['error_assignment_remaining',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca614c28714e198672a55e0d89f8d654e6',1,'membertrix.h']]],
-  ['error_5fnone',['error_none',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca021380030e124f879f67daf259d571fa',1,'membertrix.h']]],
-  ['error_5ft',['error_t',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689c',1,'membertrix.h']]]
+  ['d',['D',['../classSuffies.html#a37a22dd445704744d9d29b38fcbe5f49',1,'Suffies']]],
+  ['data_5fid_5ft',['data_id_t',['../np__data_8h.html#a24b60345f3483cce6b2911fd2d6eef83',1,'np_data.h']]],
+  ['data_5fids_5ft',['data_ids_t',['../np__data_8h.html#ab5a4204f466cd4a11334e9e89e848c69',1,'np_data.h']]],
+  ['data_5ft',['data_t',['../np__data_8h.html#aee0b469ce1a891b6096b50ca2b391bfc',1,'np_data.h']]],
+  ['data_5fvariable_5ftype_5ft',['data_variable_type_t',['../np__data_8h.html#a75fbdcd98a6d852c9f948eb399307ab2',1,'np_data.h']]],
+  ['dataset_5ft',['dataset_t',['../np__data_8h.html#ac84eefffc26fa60d8927f3dc98b9952f',1,'np_data.h']]],
+  ['debug',['Debug',['../pretty__print_8hpp.html#a06fc87d81c62e9abb8790b6e5713c55bac909e86054cb6ad83c22bfc2b3e6e5b8',1,'pretty_print.hpp']]],
+  ['delimiter',['delimiter',['../structdelimiters__values.html#a063010fc33af96067d2783e6ca67fb2f',1,'delimiters_values']]],
+  ['delimiters',['delimiters',['../structdelimiters.html',1,'']]],
+  ['delimiters_3c_20std_3a_3apair_3c_20t1_2c_20t2_20_3e_2c_20char_20_3e',['delimiters&lt; std::pair&lt; T1, T2 &gt;, char &gt;',['../structdelimiters_3_01std_1_1pair_3_01T1_00_01T2_01_4_00_01char_01_4.html',1,'']]],
+  ['delimiters_3c_20std_3a_3apair_3c_20t1_2c_20t2_20_3e_2c_20wchar_5ft_20_3e',['delimiters&lt; std::pair&lt; T1, T2 &gt;, wchar_t &gt;',['../structdelimiters_3_01std_1_1pair_3_01T1_00_01T2_01_4_00_01wchar__t_01_4.html',1,'']]],
+  ['delimiters_3c_20std_3a_3aset_3c_20t_2c_20ttraits_2c_20tallocator_20_3e_2c_20char_20_3e',['delimiters&lt; std::set&lt; T, TTraits, TAllocator &gt;, char &gt;',['../structdelimiters_3_01std_1_1set_3_01T_00_01TTraits_00_01TAllocator_01_4_00_01char_01_4.html',1,'']]],
+  ['delimiters_3c_20std_3a_3aset_3c_20t_2c_20ttraits_2c_20tallocator_20_3e_2c_20wchar_5ft_20_3e',['delimiters&lt; std::set&lt; T, TTraits, TAllocator &gt;, wchar_t &gt;',['../structdelimiters_3_01std_1_1set_3_01T_00_01TTraits_00_01TAllocator_01_4_00_01wchar__t_01_4.html',1,'']]],
+  ['delimiters_3c_20t_2c_20char_20_3e',['delimiters&lt; T, char &gt;',['../structdelimiters_3_01T_00_01char_01_4.html',1,'']]],
+  ['delimiters_3c_20t_2c_20wchar_5ft_20_3e',['delimiters&lt; T, wchar_t &gt;',['../structdelimiters_3_01T_00_01wchar__t_01_4.html',1,'']]],
+  ['delimiters_5ftype',['delimiters_type',['../structprint__container__helper.html#a72eb2f5bd4dd91cc87e97d111de4691b',1,'print_container_helper']]],
+  ['delimiters_5fvalues',['delimiters_values',['../structdelimiters__values.html',1,'']]],
+  ['delimiters_5fvalues_3c_20char_20_3e',['delimiters_values&lt; char &gt;',['../structdelimiters__values.html',1,'']]],
+  ['delimiters_5fvalues_3c_20wchar_5ft_20_3e',['delimiters_values&lt; wchar_t &gt;',['../structdelimiters__values.html',1,'']]],
+  ['dirichlet',['Dirichlet',['../np__suffies_8h.html#a7eb5e5fdc84e0cae91b04cff2541e880ad2ba0bf65961bac8373de60a7e6571b9',1,'np_suffies.h']]],
+  ['disp_5fhelp',['disp_help',['../np__main_8cpp.html#a60ede494ca3557ecee3a14272ef26d69',1,'np_main.cpp']]],
+  ['distribution_5ftype',['distribution_type',['../classSuffies.html#ae0f41f041f32ff0db67f875cdf224218',1,'Suffies']]],
+  ['distribution_5ftype_5ft',['distribution_type_t',['../np__suffies_8h.html#a7eb5e5fdc84e0cae91b04cff2541e880',1,'np_suffies.h']]]
 ];

@@ -1,22 +1,5 @@
 var searchData=
 [
-  ['noparama',['Noparama',['../index.html',1,'']]],
-  ['np_5fcluster_2eh',['np_cluster.h',['../np__cluster_8h.html',1,'']]],
-  ['np_5fdata_2eh',['np_data.h',['../np__data_8h.html',1,'']]],
-  ['np_5finference_2eh',['np_inference.h',['../np__inference_8h.html',1,'']]],
-  ['np_5flikelihood_2ecpp',['np_likelihood.cpp',['../np__likelihood_8cpp.html',1,'']]],
-  ['np_5flikelihood_2eh',['np_likelihood.h',['../np__likelihood_8h.html',1,'']]],
-  ['np_5fmain_2ecpp',['np_main.cpp',['../np__main_8cpp.html',1,'']]],
-  ['np_5fmcmc_2ecpp',['np_mcmc.cpp',['../np__mcmc_8cpp.html',1,'']]],
-  ['np_5fmcmc_2eh',['np_mcmc.h',['../np__mcmc_8h.html',1,'']]],
-  ['np_5fposterior_5fpredictive_2eh',['np_posterior_predictive.h',['../np__posterior__predictive_8h.html',1,'']]],
-  ['np_5fsample_5fpdf_2eh',['np_sample_pdf.h',['../np__sample__pdf_8h.html',1,'']]],
-  ['np_5fsufficient_5fstatistics_2eh',['np_sufficient_statistics.h',['../np__sufficient__statistics_8h.html',1,'']]],
-  ['np_5fsufficient_5fstatistics_5fdowndate_2eh',['np_sufficient_statistics_downdate.h',['../np__sufficient__statistics__downdate_8h.html',1,'']]],
-  ['np_5fsufficient_5fstatistics_5fupdate_2eh',['np_sufficient_statistics_update.h',['../np__sufficient__statistics__update_8h.html',1,'']]],
-  ['np_5fupdate_5fcluster_5fpopulation_2ecpp',['np_update_cluster_population.cpp',['../np__update__cluster__population_8cpp.html',1,'']]],
-  ['np_5fupdate_5fcluster_5fpopulation_2eh',['np_update_cluster_population.h',['../np__update__cluster__population_8h.html',1,'']]],
-  ['np_5fupdate_5fclusters_2ecpp',['np_update_clusters.cpp',['../np__update__clusters_8cpp.html',1,'']]],
-  ['np_5fupdate_5fclusters_2eh',['np_update_clusters.h',['../np__update__clusters_8h.html',1,'']]],
-  ['nu',['nu',['../classSufficientStatistics__NormalInvGamma.html#a2ee25ae80866e9a88865be84226ea287',1,'SufficientStatistics_NormalInvGamma::nu()'],['../np__sufficient__statistics_8h.html#ada125a1e9709aba58e771e21bfd9b7b6',1,'nu():&#160;np_sufficient_statistics.h']]]
+  ['jain_5fneal_5fsplit',['jain_neal_split',['../np__main_8cpp.html#af7e76874ebb2ea89c8372be017aa4becac27e1adf7eb2645174c94b23b8749d3c',1,'np_main.cpp']]],
+  ['jainnealalgorithm',['JainNealAlgorithm',['../classJainNealAlgorithm.html',1,'JainNealAlgorithm'],['../classJainNealAlgorithm.html#a583dea4f6f63a37c1553a0429ef092da',1,'JainNealAlgorithm::JainNealAlgorithm()']]]
 ];

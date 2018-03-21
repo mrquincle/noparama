@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['likelihood',['Likelihood',['../classLikelihood.html#a9190d4b7cd4e55bf915c8c3243789a3d',1,'Likelihood']]]
+  ['empty',['empty',['../classmembertrix.html#add5c71458ec4447845e5117fb572d0a9',1,'membertrix']]],
+  ['exists',['exists',['../classmembertrix.html#a8eaf709556821495aafbca917bfd5ed3',1,'membertrix']]]
 ];

@@ -1,0 +1,24 @@
+<map id="include/np_suffies.h" name="include/np_suffies.h">
+<area shape="rect" id="node2" href="$np__suffies_8cpp.html" title="src/np_suffies.cpp" alt="" coords="249,80,379,107"/>
+<area shape="rect" id="node3" href="$np__cluster_8h.html" title="include/np_cluster.h" alt="" coords="403,80,542,107"/>
+<area shape="rect" id="node4" href="$membertrix_8h.html" title="include/membertrix.h" alt="" coords="795,155,937,181"/>
+<area shape="rect" id="node7" href="$np__init__clusters_8h.html" title="include/np_init_clusters.h" alt="" coords="388,237,557,263"/>
+<area shape="rect" id="node22" href="$np__update__clusters_8h.html" title="include/np_update_clusters.h" alt="" coords="173,237,364,263"/>
+<area shape="rect" id="node5" href="$membertrix_8cpp.html" title="src/membertrix.cpp" alt="" coords="581,237,716,263"/>
+<area shape="rect" id="node6" href="$np__main_8cpp.html" title="src/np_main.cpp" alt="" coords="1188,408,1307,435"/>
+<area shape="rect" id="node10" href="$np__mcmc_8h.html" title="include/np_mcmc.h" alt="" coords="499,326,633,353"/>
+<area shape="rect" id="node11" href="$np__jain__neal__algorithm_8h.html" title="include/np_jain_neal\l_algorithm.h" alt="" coords="1071,319,1210,360"/>
+<area shape="rect" id="node13" href="$np__neal__algorithm2_8h.html" title="include/np_neal_algorithm2.h" alt="" coords="1285,326,1476,353"/>
+<area shape="rect" id="node15" href="$np__neal__algorithm8_8h.html" title="include/np_neal_algorithm8.h" alt="" coords="709,326,900,353"/>
+<area shape="rect" id="node17" href="$np__results_8h.html" title="include/np_results.h" alt="" coords="1445,237,1583,263"/>
+<area shape="rect" id="node19" href="$np__triadic__algorithm_8h.html" title="include/np_triadic\l_algorithm.h" alt="" coords="925,319,1047,360"/>
+<area shape="rect" id="node21" href="$np__update__cluster__population_8h.html" title="include/np_update_cluster\l_population.h" alt="" coords="842,229,1015,271"/>
+<area shape="rect" id="node8" href="$np__init__clusters_8cpp.html" title="src/np_init_clusters.cpp" alt="" coords="314,326,474,353"/>
+<area shape="rect" id="node9" href="$np__mcmc_8cpp.html" title="src/np_mcmc.cpp" alt="" coords="304,408,431,435"/>
+<area shape="rect" id="node12" href="$np__jain__neal__algorithm_8cpp.html" title="src/np_jain_neal_algorithm.cpp" alt="" coords="963,408,1164,435"/>
+<area shape="rect" id="node14" href="$np__neal__algorithm2_8cpp.html" title="src/np_neal_algorithm2.cpp" alt="" coords="1331,408,1513,435"/>
+<area shape="rect" id="node16" href="$np__neal__algorithm8_8cpp.html" title="src/np_neal_algorithm8.cpp" alt="" coords="547,408,729,435"/>
+<area shape="rect" id="node18" href="$np__results_8cpp.html" title="src/np_results.cpp" alt="" coords="1552,326,1681,353"/>
+<area shape="rect" id="node20" href="$np__triadic__algorithm_8cpp.html" title="src/np_triadic_algorithm.cpp" alt="" coords="753,408,939,435"/>
+<area shape="rect" id="node23" href="$np__update__clusters_8cpp.html" title="src/np_update_clusters.cpp" alt="" coords="5,326,188,353"/>
+</map>

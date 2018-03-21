@@ -1,0 +1,13 @@
+<map id="Suffies" name="Suffies">
+<area shape="rect" id="node2" href="$classSuffies__Dirichlet.html" title="Suffies_Dirichlet" alt="" coords="146,5,265,32"/>
+<area shape="rect" id="node3" href="$classSuffies__Double.html" title="Suffies_Double" alt="" coords="150,56,261,83"/>
+<area shape="rect" id="node4" href="$classSuffies__Gamma.html" title="Suffies_Gamma" alt="" coords="147,107,263,133"/>
+<area shape="rect" id="node5" href="$classSuffies__InvWishart.html" title="Suffies_InvWishart" alt="" coords="139,157,272,184"/>
+<area shape="rect" id="node6" href="$classSuffies__MultivariateNormal.html" title="Suffies_MultivariateNormal" alt="" coords="116,208,295,235"/>
+<area shape="rect" id="node7" href="$classSuffies__Normal.html" title="Suffies_Normal" alt="" coords="149,259,261,285"/>
+<area shape="rect" id="node8" href="$classSuffies__NormalInvGamma.html" title="Suffies_NormalInvGamma" alt="" coords="117,309,293,336"/>
+<area shape="rect" id="node9" href="$classSuffies__NormalInvWishart.html" title="Suffies_NormalInvWishart" alt="" coords="118,360,293,387"/>
+<area shape="rect" id="node10" href="$classSuffies__ScalarNoise__MultivariateNormal.html" title="Suffies_ScalarNoise\l_MultivariateNormal" alt="" coords="135,411,276,453"/>
+<area shape="rect" id="node11" href="$classSuffies__Unity__MultivariateNormal.html" title="Suffies_Unity_Multivariate\lNormal" alt="" coords="118,477,293,518"/>
+<area shape="rect" id="node12" href="$classSuffies__ZeroCentered__MultivariateNormal.html" title="Suffies_ZeroCentered\l_MultivariateNormal" alt="" coords="131,542,280,583"/>
+</map>

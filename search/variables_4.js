@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['mu',['mu',['../classSufficientStatistics__MultivariateNormal.html#aaf4dd4b537629dfd2d47a3f3f10f379f',1,'SufficientStatistics_MultivariateNormal::mu()'],['../np__sufficient__statistics_8h.html#aa3f5b812f28e49bc9cf611a334ea9329',1,'mu():&#160;np_sufficient_statistics.h']]]
+  ['d',['D',['../classSuffies.html#a37a22dd445704744d9d29b38fcbe5f49',1,'Suffies']]],
+  ['delimiter',['delimiter',['../structdelimiters__values.html#a063010fc33af96067d2783e6ca67fb2f',1,'delimiters_values']]],
+  ['distribution_5ftype',['distribution_type',['../classSuffies.html#ae0f41f041f32ff0db67f875cdf224218',1,'Suffies']]]
 ];

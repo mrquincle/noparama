@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['kappa',['kappa',['../np__sufficient__statistics_8h.html#a05ac5235b52a827a368e74ed228dd485',1,'np_sufficient_statistics.h']]]
+  ['beta',['beta',['../classSuffies__Gamma.html#ab11155148f9a1faa9bb58f241036b96d',1,'Suffies_Gamma::beta()'],['../classSuffies__NormalInvGamma.html#a74d6f181366d9068e65965d31c698c5d',1,'Suffies_NormalInvGamma::beta()']]]
 ];

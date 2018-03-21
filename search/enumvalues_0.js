@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['error_5falready_5fassigned',['error_already_assigned',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca54140bfd9d25ecfa79805de3f5df728b',1,'membertrix.h']]],
-  ['error_5fassignment_5fabsent',['error_assignment_absent',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca11acbe1277b3dc6127edeeae677b10b3',1,'membertrix.h']]],
-  ['error_5fassignment_5fremaining',['error_assignment_remaining',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca614c28714e198672a55e0d89f8d654e6',1,'membertrix.h']]],
-  ['error_5fnone',['error_none',['../membertrix_8h.html#ac7659d73a8cdedc08e9f566bb406689ca021380030e124f879f67daf259d571fa',1,'membertrix.h']]]
+  ['alert',['Alert',['../pretty__print_8hpp.html#a06fc87d81c62e9abb8790b6e5713c55ba99ff217d4e56967ccbf2676f4bc1f566',1,'pretty_print.hpp']]],
+  ['algorithm2',['algorithm2',['../np__main_8cpp.html#af7e76874ebb2ea89c8372be017aa4beca080341b1383dc5945d623f2502d15ebd',1,'np_main.cpp']]],
+  ['algorithm8',['algorithm8',['../np__main_8cpp.html#af7e76874ebb2ea89c8372be017aa4beca103876bd1ed97e6fc37a45f820e38eca',1,'np_main.cpp']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['updateclusterpopulation',['UpdateClusterPopulation',['../classUpdateClusterPopulation.html',1,'']]],
-  ['updateclusters',['UpdateClusters',['../classUpdateClusters.html',1,'']]]
+  ['nealalgorithm2',['NealAlgorithm2',['../classNealAlgorithm2.html',1,'']]],
+  ['nealalgorithm8',['NealAlgorithm8',['../classNealAlgorithm8.html',1,'']]]
 ];

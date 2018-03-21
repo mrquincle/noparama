@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['cluster_5fid_5ft',['cluster_id_t',['../np__cluster_8h.html#a4c4f648aa21a02a81f91bc59b1595328',1,'np_cluster.h']]],
-  ['cluster_5ft',['cluster_t',['../classcluster__t.html',1,'cluster_t'],['../classcluster__t.html#a9fd8e7a2ff44a5c06a6329448b58aae2',1,'cluster_t::cluster_t()']]],
-  ['clusters_5fdataset_5ft',['clusters_dataset_t',['../np__cluster_8h.html#a1cc7fcde193f0175f8cad3d5e254b5a5',1,'np_cluster.h']]],
-  ['clusters_5ft',['clusters_t',['../np__cluster_8h.html#ab983ea409e16c1775556c8c19c3b1254',1,'np_cluster.h']]]
+  ['beta',['beta',['../classSuffies__Gamma.html#ab11155148f9a1faa9bb58f241036b96d',1,'Suffies_Gamma::beta()'],['../classSuffies__NormalInvGamma.html#a74d6f181366d9068e65965d31c698c5d',1,'Suffies_NormalInvGamma::beta()']]],
+  ['binary_5fmatrix_5ft',['binary_matrix_t',['../membertrix_8h.html#ab072084d67919846f60649ab72336336',1,'membertrix.h']]],
+  ['black',['Black',['../pretty__print_8hpp.html#adf764cbdea00d65edcd07bb9953ad2b7ac1e9bce8242f443c54c7405223d616cd',1,'pretty_print.hpp']]],
+  ['blue',['Blue',['../pretty__print_8hpp.html#adf764cbdea00d65edcd07bb9953ad2b7af5e09dd1da4088464f264b7a3118bff8',1,'pretty_print.hpp']]]
 ];

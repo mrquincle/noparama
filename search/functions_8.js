@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['t_5fsample_5fpdf',['t_sample_pdf',['../classt__sample__pdf.html#a02c1010896799ce8c2b6c75c20033b92',1,'t_sample_pdf']]]
+  ['nealalgorithm2',['NealAlgorithm2',['../classNealAlgorithm2.html#a5fb23097511b08bb85d7e88ce7c49a1b',1,'NealAlgorithm2']]],
+  ['nealalgorithm8',['NealAlgorithm8',['../classNealAlgorithm8.html#a64a516d7d32489a59746b0b322331a8c',1,'NealAlgorithm8']]]
 ];

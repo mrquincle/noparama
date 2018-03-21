@@ -1,5 +1,30 @@
 var searchData=
 [
-  ['_7ecluster_5ft',['~cluster_t',['../classcluster__t.html#a24d8338f330c82f7e5a37eeb83ffe2ea',1,'cluster_t']]],
-  ['_7eposteriorpredictive',['~PosteriorPredictive',['../classPosteriorPredictive.html#aee982633fb2350cce1eb265938c31acb',1,'PosteriorPredictive']]]
+  ['sams_5fprior',['sams_prior',['../np__statistics_8h.html#a8a35f5cd999ca8a105d1201fad54128eaedb1531fd603e979ce812ee1ac061762',1,'np_statistics.h']]],
+  ['sams_5frandom_5fwalk',['sams_random_walk',['../np__statistics_8h.html#a8a35f5cd999ca8a105d1201fad54128ea3b8d20a1e7c5a19d12c3d0767b49ab22',1,'np_statistics.h']]],
+  ['scalarnoise_5fmultivariatenormal',['ScalarNoise_MultivariateNormal',['../np__suffies_8h.html#a7eb5e5fdc84e0cae91b04cff2541e880a80c065b12324c6b6b5f3d702dcca3a91',1,'np_suffies.h']]],
+  ['separate_5fstructure',['SEPARATE_STRUCTURE',['../membertrix_8cpp.html#a8635937d93ff07e8326aca755cb3f251',1,'membertrix.cpp']]],
+  ['set',['set',['../classstd_1_1set.html',1,'std']]],
+  ['setsuffies',['setSuffies',['../classcluster__t.html#ac4cefd2f827bc6c0c9f10bb9cac19bca',1,'cluster_t']]],
+  ['sigma',['sigma',['../classSuffies__Normal.html#a30febbb15c792fea934c97f8b3b7ad95',1,'Suffies_Normal::sigma()'],['../classSuffies__ZeroCentered__MultivariateNormal.html#a7c1509ad5687a43fc12f57f6791dd166',1,'Suffies_ZeroCentered_MultivariateNormal::sigma()'],['../classSuffies__MultivariateNormal.html#af900e78a0a122a82a35a6c0058dba8a5',1,'Suffies_MultivariateNormal::sigma()'],['../classSuffies__ScalarNoise__MultivariateNormal.html#ab290c2d98715ddfea868a04af1f2dae2',1,'Suffies_ScalarNoise_MultivariateNormal::sigma()']]],
+  ['simple_5frandom_5fsplit',['simple_random_split',['../np__statistics_8h.html#a8a35f5cd999ca8a105d1201fad54128ea815a2c5c4ce3ab888afa00ae8e607178',1,'np_statistics.h']]],
+  ['source_5flikelihood_5fzero',['source_likelihood_zero',['../structstep.html#ae125ea04beec2f99c615bd12f5214ff0',1,'step']]],
+  ['split_5fmethod_5ft',['split_method_t',['../np__statistics_8h.html#a8a35f5cd999ca8a105d1201fad54128e',1,'np_statistics.h']]],
+  ['statistics_5ft',['statistics_t',['../structstatistics__t.html',1,'']]],
+  ['std',['std',['../namespacestd.html',1,'']]],
+  ['step',['step',['../structstep.html',1,'step'],['../structstatistics__t.html#a11548eba2a72e04f063146a0cc07be92',1,'statistics_t::step()']]],
+  ['step_5ft',['step_t',['../np__statistics_8h.html#a09cf546a37bb7b7a78c3927a9acab308',1,'np_statistics.h']]],
+  ['suffies',['Suffies',['../classSuffies.html',1,'']]],
+  ['suffies_5fdirichlet',['Suffies_Dirichlet',['../classSuffies__Dirichlet.html',1,'Suffies_Dirichlet'],['../classSuffies__Dirichlet.html#a172b2bb864b23019ee0b7591baaf921c',1,'Suffies_Dirichlet::Suffies_Dirichlet()']]],
+  ['suffies_5fdouble',['Suffies_Double',['../classSuffies__Double.html',1,'']]],
+  ['suffies_5fgamma',['Suffies_Gamma',['../classSuffies__Gamma.html',1,'Suffies_Gamma'],['../classSuffies__Gamma.html#a7b336a56221d093ba0fcaadbc78be733',1,'Suffies_Gamma::Suffies_Gamma()']]],
+  ['suffies_5finvwishart',['Suffies_InvWishart',['../classSuffies__InvWishart.html',1,'Suffies_InvWishart'],['../classSuffies__InvWishart.html#a9a1890c305a6df4819aadc69feaf1a50',1,'Suffies_InvWishart::Suffies_InvWishart()']]],
+  ['suffies_5fmultivariatenormal',['Suffies_MultivariateNormal',['../classSuffies__MultivariateNormal.html',1,'Suffies_MultivariateNormal'],['../classSuffies__MultivariateNormal.html#a9b03ef319a2c5f2483445ade77a180cc',1,'Suffies_MultivariateNormal::Suffies_MultivariateNormal()']]],
+  ['suffies_5fnormal',['Suffies_Normal',['../classSuffies__Normal.html',1,'Suffies_Normal'],['../classSuffies__Normal.html#ab4dc90b511656f9f099441cd733e2bef',1,'Suffies_Normal::Suffies_Normal()']]],
+  ['suffies_5fnormalinvgamma',['Suffies_NormalInvGamma',['../classSuffies__NormalInvGamma.html',1,'Suffies_NormalInvGamma'],['../classSuffies__NormalInvGamma.html#a2d312e8158444bdaaff288172f3a4068',1,'Suffies_NormalInvGamma::Suffies_NormalInvGamma()']]],
+  ['suffies_5fnormalinvwishart',['Suffies_NormalInvWishart',['../classSuffies__NormalInvWishart.html',1,'Suffies_NormalInvWishart'],['../classSuffies__NormalInvWishart.html#aab8a9b1e196aee04ed4f10f31e97f1d7',1,'Suffies_NormalInvWishart::Suffies_NormalInvWishart()']]],
+  ['suffies_5fscalarnoise_5fmultivariatenormal',['Suffies_ScalarNoise_MultivariateNormal',['../classSuffies__ScalarNoise__MultivariateNormal.html',1,'Suffies_ScalarNoise_MultivariateNormal'],['../classSuffies__ScalarNoise__MultivariateNormal.html#a2dcc97df84c48c50699cde328ca6c43a',1,'Suffies_ScalarNoise_MultivariateNormal::Suffies_ScalarNoise_MultivariateNormal()']]],
+  ['suffies_5funity_5fmultivariatenormal',['Suffies_Unity_MultivariateNormal',['../classSuffies__Unity__MultivariateNormal.html',1,'Suffies_Unity_MultivariateNormal'],['../classSuffies__Unity__MultivariateNormal.html#aa09e1e0903304716a9b439961e0986b1',1,'Suffies_Unity_MultivariateNormal::Suffies_Unity_MultivariateNormal()']]],
+  ['suffies_5fzerocentered_5fmultivariatenormal',['Suffies_ZeroCentered_MultivariateNormal',['../classSuffies__ZeroCentered__MultivariateNormal.html',1,'Suffies_ZeroCentered_MultivariateNormal'],['../classSuffies__ZeroCentered__MultivariateNormal.html#a6f0400a106ac5a7429579a658271cecf',1,'Suffies_ZeroCentered_MultivariateNormal::Suffies_ZeroCentered_MultivariateNormal()']]],
+  ['swap',['swap',['../classmembertrix.html#a2c976126176078c86431a963977fd030',1,'membertrix::swap()'],['../classcluster__t.html#a121ace890c9da2ea64fe4c858f0d5c5e',1,'cluster_t::swap()']]]
 ];

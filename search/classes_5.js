@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['t_5fsample_5fpdf',['t_sample_pdf',['../classt__sample__pdf.html',1,'']]]
+  ['map',['map',['../classstd_1_1map.html',1,'std']]],
+  ['mcmc',['MCMC',['../classMCMC.html',1,'']]],
+  ['membertrix',['membertrix',['../classmembertrix.html',1,'']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ordered_5fdata_5ft',['ordered_data_t',['../np__mcmc_8h.html#a65b35ecbff9cbbfbfffd8ab32eb88d23',1,'np_mcmc.h']]]
+  ['ground_5ftruth_5ft',['ground_truth_t',['../np__results_8h.html#ac9260468b309249b55a06e109707fc95',1,'np_results.h']]]
 ];
