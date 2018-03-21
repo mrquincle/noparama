@@ -17,6 +17,10 @@ dir_out <- args[3]
 
 if (method == 'triadic') {
 	method_title = "Triadic MCMC sampler"
+} else if (method == 'algorithm1') {
+	method_title = "Neal's First Gibbs MCMC sampler"
+} else if (method == 'algorithm2') {
+	method_title = "Neal's Second Gibbs MCMC sampler"
 } else if (method == 'algorithm8') {
 	method_title = "Auxiliary variable MCMC sampler"
 } else if (method == 'jain-neal') {
