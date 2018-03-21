@@ -10,6 +10,8 @@
 
 /**
  * This class NealAlgorithm8 updates the cluster population assuming a dirichlet process as nonparametric prior.
+ * It is a so-called auxiliary variables method. There is not just one new cluster proposed, but several at once.
+ * This number 
  *
  */
 class NealAlgorithm8: public UpdateClusterPopulation {
@@ -36,7 +38,9 @@ class NealAlgorithm8: public UpdateClusterPopulation {
 
 		// statistics
 		statistics_t _statistics;
-		
+
+		// number of auxiliary variables
+		int _M;
 	public:
 		/*!
 		 * Construct update method for cluster population.

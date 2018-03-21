@@ -21,7 +21,9 @@ NealAlgorithm8::NealAlgorithm8(
 	_verbosity = 5;
 
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
-		
+	
+	// the number of auxiliary variables, M=1 should be the same as algorithm 2
+	_M = 3;
 }
 
 /*
@@ -66,9 +68,8 @@ void NealAlgorithm8::update(
 
 	fout << "Calculate parameters for M new clusters" << endl;
 	// Calculate parameters for M new clusters
-	int M = 3;
-	clusters_t new_clusters(M);
-	for (int m = 0; m < M; ++m) {
+	clusters_t new_clusters(_M);
+	for (int m = 0; m < _M; ++m) {
 		Suffies *suffies = _nonparametrics.sample_base(_generator);
 		cluster_t *temp = new cluster_t(*suffies);
 		new_clusters[m] = temp;
@@ -79,7 +80,7 @@ void NealAlgorithm8::update(
 	fout << "Current observation " << data_id << " under consideration: " << observation << endl;
 
 	// Get (weighted) likelihoods for each existing and new cluster given the above observation
-	std::vector<double> weighted_likelihood(K+M);
+	std::vector<double> weighted_likelihood(K+_M);
 
 	int k = 0;
 	for (auto cluster_pair: clusters) {
@@ -91,18 +92,13 @@ void NealAlgorithm8::update(
 		fout << "Obtained suffies from cluster " << key << ": " << cluster->getSuffies() << endl;
 
 		// here _likelihood is sudden a niw distribution...
+		// TODO: is this indeed the case? or an old debug statement?
 		_likelihood.init(cluster->getSuffies());
 		fout << "calculate probability " << endl;
 		double ll = _likelihood.probability(observation);
 		fout << "which is: " << ll << endl;
 		weighted_likelihood[k] = _likelihood.probability(observation) * cluster_matrix.count(key);
-		/*
-		fout << "Cluster ";
-		cluster_matrix.print(key, std::cout);
-		cout << '\t' << _likelihood.probability(observation) << endl;
-		*/
 		k++;
-		
 	}
 
 	/*
@@ -113,35 +109,18 @@ void NealAlgorithm8::update(
 	 * that cluster for existing clusters and alpha for proposed clusters. With multiple proposals we can just directly
 	 * sample from the complete vector (existing and proposed clusters) with weighted likelihoods.
 	 */
-	for (int m = 0; m < M; ++m) {
+	for (int m = 0; m < _M; ++m) {
 		_likelihood.init(new_clusters[m]->getSuffies());
-		weighted_likelihood[K+m] = _likelihood.probability(observation) * _alpha / (double)M;
+		weighted_likelihood[K+m] = _likelihood.probability(observation) * _alpha / (double)_M;
 		fout << "New cluster " << m << 
-			"[~#" << _alpha/M << "]: " << \
+			"[~#" << _alpha/_M << "]: " << \
 			_likelihood.probability(observation) << \
 			new_clusters[m]->getSuffies() << endl;
 	}
 
 	// sample uniformly from the vector "weighted_likelihood" according to the weights in the vector
-	// hence [0.5 0.25 0.25] will be sampled in the ratio 2:1:1
+	// hence [0.5 0.25 0.25] will be sampled in the ratio 2:1:1, and return index 0 1 2 accordingly
 	size_t index = algebra::random_weighted_pick(weighted_likelihood.begin(), weighted_likelihood.end(), _generator);
-	/*
-	fout << "Pick a cluster given their weights" << endl;
-	double pick = _distribution(_generator);
-	fout << "Pick " << pick << endl;
-	std::vector<double> cumsum_likelihood(weighted_likelihood.size());
-	fout << "Weighted likelihood: " << weighted_likelihood << endl;
-	std::partial_sum(weighted_likelihood.begin(), weighted_likelihood.end(), cumsum_likelihood.begin());
-	fout << "Cumulative weights: " << cumsum_likelihood << endl;
-
-	pick = pick * cumsum_likelihood.back();
-	fout << "Pick scaled with maximum cumsum: " << pick << endl;
-
-	auto lower = std::lower_bound(cumsum_likelihood.begin(), cumsum_likelihood.end(), pick);
-	size_t index = std::distance(cumsum_likelihood.begin(), lower);
-	assert (index < cumsum_likelihood.size());
-	fout << "Pick value just below pick: " << index << endl;
-	*/
 
 	/*
 	 * Pick either a new or old cluster using calculated values. With a new cluster generate new sufficient 
@@ -150,6 +129,7 @@ void NealAlgorithm8::update(
 	if (index >= K) {
 		// pick new cluster
 		fout << "New cluster: " << index-K << endl;
+		// lazy, just allocate a new one with proper sufficient statistics and deallocate all temporary ones at the end
 		cluster_t *new_cluster = new cluster_t(new_clusters[index-K]->getSuffies());
 		fout << "Add to membership matrix" << endl;
 		cluster_id_t cluster_index = cluster_matrix.addCluster(new_cluster);
@@ -171,7 +151,7 @@ void NealAlgorithm8::update(
 	
 	// deallocate new clusters that have not been used
 	fout << "Deallocate temporary clusters" << endl;
-	for (int m = 0; m < M; ++m) {
+	for (int m = 0; m < _M; ++m) {
 		delete new_clusters[m];
 	}
 

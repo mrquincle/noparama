@@ -20,6 +20,7 @@
 #include <statistics/normalinvwishart.h>
 #include <statistics/normalinvgamma.h>
 
+#include <np_neal_algorithm2.h>
 #include <np_neal_algorithm8.h>
 #include <np_jain_neal_algorithm.h>
 #include <np_triadic_algorithm.h>
@@ -28,7 +29,7 @@
 
 namespace fs = std::experimental::filesystem;
 
-enum algorithm_t { algorithm8, jain_neal_split, triadic };
+enum algorithm_t { algorithm2, algorithm8, jain_neal_split, triadic };
 
 void disp_help(std::string appname) {
 	std::string datafilename;
@@ -108,7 +109,9 @@ int main(int argc, char *argv[]) {
 	} else {
 		datafilename = flags['d'];
 
-		if (algorithm_str == "algorithm8") {
+		if (algorithm_str == "algorithm2") {
+			algorithm = algorithm2;
+		} else if (algorithm_str == "algorithm8") {
 			algorithm = algorithm8;
 		} else if (algorithm_str == "jain_neal_split") {
 			algorithm = jain_neal_split;
@@ -260,6 +263,13 @@ int main(int argc, char *argv[]) {
 	int subset_count;
 	UpdateClusterPopulation *update_cluster_population;
 	switch(algorithm) {
+		case algorithm2: 
+			{
+				fout << "We will be using algorithm 2 by Neal" << std::endl;
+				update_cluster_population = new NealAlgorithm2(generator, *likelihood, hyper);
+				subset_count = 1;
+				break;
+			}
 		case algorithm8: 
 			{
 				fout << "We will be using algorithm 8 by Neal" << std::endl;

@@ -49,6 +49,7 @@ set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mc
     src/membertrix.cpp src/np_init_clusters.cpp \\
     src/clustering_performance.cpp \\
     src/np_update_clusters.cpp \\
+    src/np_neal_algorithm2.cpp \\
     src/np_neal_algorithm8.cpp \\
     src/np_jain_neal_algorithm.cpp \\
     src/np_triadic_algorithm.cpp 
