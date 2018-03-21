@@ -18,6 +18,8 @@ NealAlgorithm2::NealAlgorithm2(
 {
 	_alpha = _nonparametrics.getSuffies().alpha;
 	
+	_verbosity = 5;
+
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 }
 
@@ -26,12 +28,13 @@ void NealAlgorithm2::update(
 			const data_ids_t & data_ids
 		) {
 
+	static int step = 0;
+	fout << "Update step " << ++step << " in algorithm 2" << endl;
+
 	assert (data_ids.size() == 1);
 	data_id_t data_id = data_ids[0];
+	fout << "For data item " << data_id << endl;
 	
-	static int step = 0;
-	fout << "Update step " << ++step << " in algorithm 2 for data item " << data_id << endl;
-
 	// remove observation under consideration from cluster
 	for (auto index: data_ids) {
 		fout << "Retract observation " << index << " from cluster matrix" << endl;
@@ -43,6 +46,7 @@ void NealAlgorithm2::update(
 	auto clusters = cluster_matrix.getClusters();
 
 	// Create temporary data structure for K clusters
+	fout << "Create temp data structures to store per cluster likelihood and indices" << endl;
 	size_t K = clusters.size();
 	std::vector<double> weighted_likelihood(K);
 	std::vector<int> cluster_ids(K);
@@ -57,6 +61,7 @@ void NealAlgorithm2::update(
 		auto const &cluster = cluster_pair.second;
 	
 		cluster_ids[k] = key;
+		fout << "Obtained suffies from cluster " << key << ": " << cluster->getSuffies() << endl;
 		
 		_likelihood.init(cluster->getSuffies());
 		weighted_likelihood[k] = _likelihood.probability(observation) * cluster_matrix.count(key);
@@ -82,18 +87,15 @@ void NealAlgorithm2::update(
 
 	if (reject < prob_new_sample) {
 		// note, acceptance of new cluster does not depend on its likelihood
+		fout << "New cluster " << endl;
 		cluster_id_t cluster_index = cluster_matrix.addCluster(new_cluster);
+		fout << "Add to membership matrix" << endl;
 		cluster_matrix.assign(cluster_index, data_id);
 		_statistics.step[0].cluster_events_accept++;
 	} else {
 		// pick existing cluster with weights 
-		double pick = (reject - prob_new_sample);
-
-		std::vector<double> cumsum_likelihood;
-		std::partial_sum(weighted_likelihood.begin(), weighted_likelihood.end(), cumsum_likelihood.begin());
-
-		auto lower = std::lower_bound(cumsum_likelihood.begin(), cumsum_likelihood.end(), pick);
-		size_t index = std::distance(cumsum_likelihood.begin(), lower);
+		fout << "Existing cluster" << endl;
+		size_t index = algebra::random_weighted_pick(weighted_likelihood.begin(), weighted_likelihood.end(), _generator);
 		cluster_id_t cluster_id = cluster_ids[index];
 		
 		fout << "Assign data to cluster with id " << cluster_id << endl;

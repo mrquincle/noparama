@@ -45,6 +45,13 @@ class JainNealAlgorithm: public UpdateClusterPopulation {
 
 		double ratioStateProb(bool split, int nc0, int nc1, int nc);
 
+		/*!
+		 * Calculate the probability of splitting N items over C clusters or merging N items into C clusters.
+		 * 
+		 * @param[in] split                      Perform a split (true) or a merge
+		 * @param[in] N                          Number of items
+		 * @param[in] C                          Number of clusters
+		 */
 		double ratioProposal(bool split, int N, int C = 2);
 
 		void checkLikelihoods(double l1, double l2, step_t statistics_step, double &l21, bool &accept, bool &overwrite);

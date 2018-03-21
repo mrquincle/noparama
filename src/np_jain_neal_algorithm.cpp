@@ -60,8 +60,12 @@ double JainNealAlgorithm::ratioProposal(bool split, int N, int C) {
 	if (_split_method == sams_prior) {
 		return 0.0;
 	}
-	double result = (C - N - 1) * std::log(C - 1) - (C - N) * std::log(C);
-//	double result = std::log(pow(2, nc - 2));
+	double result1 = (C - N - 1) * std::log(C - 1) - (C - N) * std::log(C);
+	assert (C == 2);
+	double result = std::log(pow(2, N - 2));
+
+	assert(result1 == result);
+
 	if (split)
 		return result;
 	else
@@ -70,7 +74,10 @@ double JainNealAlgorithm::ratioProposal(bool split, int N, int C) {
 	if (_split_method == sams_prior) {
 		return 1.0;
 	}
-	double result = pow(2, nc - 2);
+	// when assuming C=2:
+	// double result = pow(2, N - 2);
+	assert (C == 2);
+	double result = pow(2, N - 2);
 	if (split) 
 		return result;
 	else
