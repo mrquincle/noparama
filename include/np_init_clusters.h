@@ -15,10 +15,13 @@
  */
 class InitClusters {
 	private:
+		// The random generator (can be used to sample from the prior)
 		std::default_random_engine _generator;
 
+		// The distribution to sample from
 		distribution_t &  _nonparametrics;
 
+		// 
 		std::uniform_real_distribution<double> _distribution;
 
 		// verbosity

@@ -55,8 +55,10 @@ void MCMC::run(dataset_t & dataset, int T) {
 		assert (i == j);
 	}
 
+	// initialize parameters of a first set of clusters 
 	_init_clusters.init(_membertrix, K);
 
+	// weights are all the same (does actually not need to be normalized: assigning 1 to each would be fine as well)
 	vector<double> weights(K);
 	for (int k = 0; k < K; ++k) {
 		weights[k] = 1/(double)K;
@@ -65,8 +67,12 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 	// randomly assign data to clusters
 	for (int i = 0; i < N; ++i) {
+		// a cluster is selected uniformly (between 0 and K-1)
 		int k = distribution(_generator);
-	//	fout << "Assign data item " << i << " to cluster " << k <<endl;
+#ifdef DEBUG
+	    fout << "Assign data item " << i << " to cluster " << k <<endl;
+#endif
+		// assign to matrix 
 		np_error_t err = _membertrix.assign(k, i);
 		if (err) fout << "Error: " << np_error_str[err] << endl;
 	}	

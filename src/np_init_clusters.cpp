@@ -17,6 +17,10 @@ InitClusters::InitClusters(
 	_verbosity = 4;
 }
 
+/**
+ * This implementation samples the sufficient statistics for each cluster (mean, variance) from a Dirichlet
+ * distribution.
+ */
 void InitClusters::init(
 			membertrix & cluster_matrix,
 			int K

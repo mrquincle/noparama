@@ -50,9 +50,9 @@ Example:
 
 .. code-block:: bash
 
-	cd build/bin
-	./noparama -d ../datasets/twogaussians.data
+	./build/bin/noparama -d ../datasets/twogaussians.data -a triadic -T 1000 -c clustering
 
+Typically, the purity should be almost 1, the rand index a bit lower and the adjusted rand index a bit lower again.
 
 Structure
 ---------
@@ -182,9 +182,14 @@ In Progress
 -----------
    
 This is a work-in-progress. This means it normally can be compiled and should be functionality complete.
-However, don't use it yet.
 
-Especially the split-merge samplers are not doing what I want them to be doing... 
+Current state:
+
+* The split-merge algorithms etc have been tested extensively.
+* The simpler algorithms were first implemented using matlab/octave and are now ported to C++. This is nontrivial because they assume conjugacy. 
+* That means that now I'm implementing update and downdate of sufficient statistics. For example the NIW distribution
+  should have an update(data_t data) or even update(dataset_t dataset) function that at once adjusts its values.
+
 
 :Authors:
     Anne van Rossum

@@ -62,4 +62,14 @@ class normal_inverse_wishart_distribution: public distribution_t {
 			
 			return _suffies_result;
 		}
+
+		void update(data_t data, bool downdate = false) {
+			if (downdate) {
+				// removing a data item that corresponds to a normal likelihood given a NIW prior
+			} else {
+				// adding a data item that corresponds to a normal likelihood given a NIW prior
+//				_suffies_iw.Lambda += data.x * data.x.transpose();
+//				... etc
+			}
+		}
 };

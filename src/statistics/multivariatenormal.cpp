@@ -48,6 +48,18 @@ Suffies_Unity_MultivariateNormal* multivariate_normal_distribution::operator()(r
 	return _suffies_result;
 }
 
+/*
+void multivariate_normal_distribution::updateSuffies(data_t & data, bool downdate) {
+	// adjust the sufficient statistics, I wouldn't know... I need the base distribution
+	if (downdate) {
+		// posterior predictive...
+		
+	} else {
+		// posterior predictive...
+	}
+}
+*/
+
 double multivariate_normal_distribution::probability(data_t & data) const
 {
 	double* ptr = &data[0];

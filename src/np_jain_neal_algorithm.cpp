@@ -206,6 +206,9 @@ void JainNealAlgorithm::checkLikelihoods(double lsrc, double ldest, step_t stati
 	}
 }
 
+/**
+ * Here we sample the parameters from the new cluster that we need for the split. The split is not yet accepted!
+ */
 bool JainNealAlgorithm::split(
 		data_ids_t data_ids,
 		cluster_id_t current_cluster_id

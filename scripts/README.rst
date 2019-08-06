@@ -37,7 +37,7 @@ And now create a directory and visualize the results:
 Visualize an individual data frame
 ----------------------------------
 
-The script is called `visualize_input.R`:
+The script is called `visualize_input.R` and it only works on lines or line segments:
 
     mkdir -p temp
     Rscript visualize_input.R ../../data/lines/dpmline4.pnts.Sat_Aug_29_19:28:33_2015.811501.data.txt temp
@@ -45,7 +45,7 @@ The script is called `visualize_input.R`:
 Visualize a particular result 
 -----------------------------
 
-The script is called `visualize_single_fit.R`:
+The script is called `visualize_single_fit.R` and it only works on lines or line segments:
 
     mkdir -p temp
     Rscript visualize_single_fit.R ../output/algorithm8/dpmline4.pnts.Sat_Aug_29_19:28:36_2015.811530.data.txt/LATEST temp

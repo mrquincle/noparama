@@ -1,6 +1,13 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
 
+# Make sure the data is properly formatted.
+# It should be separated by tabs. It should start with non-white space.
+# It should have three columns, x, y and class
+# The last column will be used for coloring
+
+separator <- '\t'
+
 library(ggplot2)
 source("read.octave.R")
 
@@ -13,7 +20,7 @@ dir_out <- args[2]
 
 bname <- basename(file_in)
 
-datapoints <- read.table(file_in, sep="\t")
+datapoints <- read.table(file_in, sep=separator)
 
 dataframe <- data.frame(
 	datapoints

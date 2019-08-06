@@ -23,6 +23,12 @@ NealAlgorithm2::NealAlgorithm2(
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 }
 
+/*
+ * This does not seem to be the actual implementation, but rather M=1 of Algorithm 8, which resembles more Algorithm 4
+ * from Neal. 
+ *    - Retracting an observation from the cluster should actually "downdate" the sufficient statistics of that cluster.
+ *    - This algorithm henceforth only works for conjugate distributions.
+ */
 void NealAlgorithm2::update(
 			membertrix & cluster_matrix,
 			const data_ids_t & data_ids
@@ -36,10 +42,16 @@ void NealAlgorithm2::update(
 	fout << "For data item " << data_id << endl;
 	
 	// remove observation under consideration from cluster
-	for (auto index: data_ids) {
-		fout << "Retract observation " << index << " from cluster matrix" << endl;
-		cluster_matrix.retract(index);
-	}
+	fout << "Retract observation " << data_id << " from cluster matrix" << endl;
+	cluster_id_t cluster_id = getClusterId(data_id);
+	cluster_matrix.retract(cluster_id, data_id);
+
+	// adjust sufficient statistics of cluster
+	auto cluster = cluster_matrix.getCluster(cluster_id);
+	fout << "Obtained suffies from cluster " << cluster_id << ": " << cluster->getSuffies() << endl;
+
+	data_t *data = cluster_matrix.getDatum(data_id);
+	cluster->updateSuffies(data);
 	
 	// existing clusters
 	// if data item removed one of the clusters, this is still in there with a particular weight
