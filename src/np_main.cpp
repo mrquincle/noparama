@@ -38,10 +38,96 @@ void disp_help(std::string appname) {
 	std::cout << "noparama [version 0.1.72]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Usage: " << std::endl;
-	std::cout << "  noparama -d datafile -a algorithm8|jain_neal_split|triadic  [-T ticks] [-c regression|clustering|angular]" << std::endl;
+	std::cout << "  noparama <-d datafile> <-a algorithm8|jain_neal_split|triadic> <-T ticks> <-c regression|clustering|angular|points3d> <-r reference file>" << std::endl;
 	std::cout << "For example:" << std::endl;
 	datafilename = "datasets/twogaussians.data";
 	std::cout << "  " << appname << " -d " << datafilename << " -a triadic -T 5000 -c regression" << std::endl;
+}
+
+void read_data(std::string & datafilename, representation_mode_t & representation_mode, ground_truth_t * ground_truth, dataset_t & dataset) {
+	char _verbosity = Debug;
+	fout << "Load file: " << datafilename << std::endl;
+	if (ground_truth) {
+		ground_truth->clear();
+	}
+	dataset.clear();
+	
+	// potentially limit number of data items (for debug purposes)
+	bool limit = false;
+	int N = 10;
+	if (limit) {
+		fout << "Using limited dataset with only " << N << " items " << std::endl;
+	} else {
+		fout << "Using full dataset" << std::endl;
+	}
+
+	// The data file should have "a b c" on lines, separated by spaces (without quotes, each value of the type double).
+	fout << "Read dataset" << std::endl;
+	std::ifstream datafilehandle(datafilename);
+	std::string line;
+	double a, b, c, d;
+	int n = 0;
+	while (std::getline(datafilehandle, line)) {
+		std::istringstream ss(line);
+		ss >> a >> b >> c;
+		switch(representation_mode) {
+		case regression_mode:
+			{
+				data_t *data = new data_t(3);
+				// prepend vector with constant for regression
+				*data = { 1, a, b };
+				dataset.push_back(data);
+				if (ground_truth) {
+					(*ground_truth)[n] = (int)c;
+				}
+				break;
+			}
+		case angular_mode: case clustering_mode: 
+			{
+				data_t *data = new data_t(2);
+				*data = { a, b };
+				dataset.push_back(data);
+				if (ground_truth) {
+					(*ground_truth)[n] = (int)c;
+				}
+				break;
+			}
+		case points3d_mode: 
+			{
+				data_t *data = new data_t(3);
+				*data = { a, b, c};
+				dataset.push_back(data);
+				if (ground_truth) {
+					if (ss >> d) {
+						(*ground_truth)[n] = (int)d;
+					} else {
+						std::cerr << "Not enough columns" << std::endl;
+					}
+				}
+			}
+		}
+		n++;
+		if (limit && (n == N)) break;
+	}
+
+	if (n == 0 || dataset.empty()) {
+		fout << "No data found... Check the file or the contents of the file." << std::endl;
+		exit(7);
+	}
+
+	int I = 5;
+	fout << "Display first " << I << " items of the dataset" << std::endl;
+	if (ground_truth) {
+		for (int i = 0; i < I; ++i) {
+			if (i == (int)ground_truth->size()) break;
+			fout << "Data: " << *dataset[i] << " with ground truth " << (*ground_truth)[i] << std::endl;
+		}
+	} else {
+		for (int i = 0; i < I; ++i) {
+			fout << "Data: " << *dataset[i] << std::endl;
+		}
+	}
+
 }
 
 /**
@@ -63,22 +149,14 @@ int main(int argc, char *argv[]) {
 
 	fout << "The Dirichlet Process is run with alpha=" << alpha << std::endl;
 
-	// limit number of data items
-	bool limit = false;
-	int N = 10;
-	if (limit) {
-		fout << "Using limited dataset with only " << N << " items " << std::endl;
-	} else {
-		fout << "Using full dataset" << std::endl;
-	}
-
 	std::default_random_engine generator(std::random_device{}()); 
 
 	// Configuration std::strings that can be filled from CLI arguments
 	std::string datafilename;
+	std::string reffilename;
 	int token;
 	std::unordered_map<int, std::string> flags;
-	while( (token = getopt(argc, argv, "d:c:a:T:h?")) != EOF)
+	while( (token = getopt(argc, argv, "d:c:a:T:h?r:")) != EOF)
 	{
 		switch (token)
 		{
@@ -97,6 +175,9 @@ int main(int argc, char *argv[]) {
 			case 'h': case '?':
 				disp_help(std::string(argv[0]));
 				exit(1);
+				break;
+			case 'r':
+				flags['r'] = std::string(optarg);
 				break;
 		}
 	}
@@ -124,6 +205,10 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 	}
+
+	if (flags.find('r') != flags.end()) {
+		reffilename = flags['r'];
+	}
 	
 	// optional T flag
 	int T = 2000;
@@ -144,7 +229,11 @@ int main(int argc, char *argv[]) {
 		} else if (configuration == "angular") {
 			fout << "Angular mode (form of regression)" << std::endl;
 			representation_mode = angular_mode;
+		} else if (configuration == "points3d") {
+			fout << "Likelihood comparison (using 3D point clouds)" << std::endl;
+			representation_mode = points3d_mode;
 		} else {
+			fout << "Unknown mode: " << configuration << std::endl;
 			fout << "Picked regression mode by default." << std::endl;
 		}
 	}
@@ -160,49 +249,14 @@ int main(int argc, char *argv[]) {
 	
 	fout << "Run MCMC sampler for " << T << " steps " << std::endl;
 
-	fout << "Load file: " << datafilename << std::endl;
-
 	dataset_t dataset;
-	// The data file should have "a b c" on lines, separated by spaces (without quotes, each value of the type double).
-	fout << "Read dataset" << std::endl;
-	std::ifstream datafilehandle(datafilename);
-	double a, b, c;
 	ground_truth_t ground_truth;
-	ground_truth.clear();
-	int n = 0;
-	while (datafilehandle >> a >> b >> c) {
-		switch(representation_mode) {
-		case regression_mode:
-			{
-				data_t *data = new data_t(3);
-				// prepend vector with constant for regression
-				*data = { 1, a, b };
-				dataset.push_back(data);
-				break;
-			}
-		case angular_mode: case clustering_mode: 
-			{
-				data_t *data = new data_t(2);
-				*data = { a, b };
-				dataset.push_back(data);
-				break;
-			}
-		}
-		ground_truth[n] = (int)c;
-		n++;
-		if (limit && (n == N)) break;
-	}
 
-	if (n == 0) {
-		fout << "No data found... Check the file or the contents of the file." << std::endl;
-		exit(7);
-	}
+	read_data(datafilename, representation_mode, &ground_truth, dataset);
 
-	int I = 5;
-	fout << "Display first " << I << " items of the dataset" << std::endl;
-	for (int i = 0; i < I; ++i) {
-		if (i == (int)ground_truth.size()) break;
-		fout << "Data: " << *dataset[i] << " with ground truth " << ground_truth[i] << std::endl;
+	dataset_t ref_dataset;
+	if (reffilename != "") {
+		read_data(reffilename, representation_mode, NULL, ref_dataset);
 	}
 
 	// The likelihood function only is required w.r.t. type, parameters are normally set later
@@ -214,12 +268,23 @@ int main(int argc, char *argv[]) {
 		suffies_mvn->mu << 0, 0;
 		suffies_mvn->sigma = 1;
 		likelihood = new scalarnoise_multivariate_normal_distribution(*suffies_mvn, representation_mode);
-	} else {
+	} else if (representation_mode == clustering_mode) {
 		fout << "Multivariate normal suffies" << std::endl;
 		Suffies_MultivariateNormal * suffies_mvn = new Suffies_MultivariateNormal(2);
 		suffies_mvn->mu << 0, 0;
 		suffies_mvn->sigma << 1, 0, 0, 1; // get rid of this
 		likelihood = new multivariate_normal_distribution(*suffies_mvn);
+	} else if (representation_mode == points3d_mode) {
+		fout << "Set comparison 'suffies'" << std::endl;
+		Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
+		suffies_mvn->mu << 0, 0;
+		suffies_mvn->sigma = 1;
+		//Suffies_Unity_MultivariateNormal * suffies_umvn = new Suffies_Unity_MultivariateNormal(2);
+		//suffies_umvn->mu << 0, 0;
+		likelihood = new set_compare(*suffies_mvn, ref_dataset);
+	} else {
+		std::cerr << "Unknown likelihood" << std::endl;
+		exit(107);
 	}
 		
 	fout << "likelihood still: " << likelihood->getSuffies() << std::endl;
@@ -238,7 +303,7 @@ int main(int argc, char *argv[]) {
 		suffies_nig->beta = 0.1;
 		suffies_nig->Lambda << 0.01, 0, 0, 0.01;
 		prior = new normal_inverse_gamma_distribution(*suffies_nig);
-	} else {
+	} else if (representation_mode == clustering_mode) {
 		fout << "Normal Inverse Wishart distribution" << std::endl;
 		Suffies_NormalInvWishart * suffies_niw = new Suffies_NormalInvWishart(2);
 		suffies_niw->mu << 6, 6;
@@ -246,6 +311,17 @@ int main(int argc, char *argv[]) {
 		suffies_niw->nu = 4;
 		suffies_niw->Lambda << 0.01, 0, 0, 0.01;
 		prior = new normal_inverse_wishart_distribution(*suffies_niw);
+	} else if (representation_mode == points3d_mode) {
+		// Check if indeed appropriate
+		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(2);
+		suffies_nig->mu << 0, 0;
+		suffies_nig->alpha = 10;
+		suffies_nig->beta = 0.1;
+		suffies_nig->Lambda << 0.01, 0, 0, 0.01;
+		prior = new normal_inverse_gamma_distribution(*suffies_nig);
+	} else {
+		std::cerr << "Unknown likelihood" << std::endl;
+		exit(107);
 	}
 	fout << "Create Dirichlet Process" << std::endl;
 	dirichlet_process hyper(suffies_dirichlet, *prior);
@@ -338,7 +414,7 @@ int main(int argc, char *argv[]) {
 	delete &mcmc;
 	delete likelihood;
 	delete prior;
-	for (int i = 0; i < N; ++i) {
+	for (int i = 0; i < (int)dataset.size(); ++i) {
 		delete dataset[i];
 	}
 	delete update_cluster_population;

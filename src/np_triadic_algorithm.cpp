@@ -26,7 +26,7 @@ TriadicAlgorithm::TriadicAlgorithm(
 	_alpha = _nonparametrics.getSuffies().alpha;
 
 	_verbosity = Debug;
-	_verbosity = Warning;
+//	_verbosity = Warning;
 	
 	_statistics.step[0].type = "merge from 2 to 1";
 	_statistics.step[1].type = "split from 1 to 2";
@@ -38,8 +38,13 @@ TriadicAlgorithm::TriadicAlgorithm(
 	_beta = 0.1;
 	//_beta = 1;
 
-	_split_method = sams_prior;
-	//_split_method = simple_random_split;
+//	_split_method = sams_prior;
+	_split_method = simple_random_split;
+	if (_split_method == sams_prior) {
+		fout << "Split method used: sams_prior" << std::endl;
+	} else if(_split_method == simple_random_split) {
+		fout << "Split method used: simple_random_split" << std::endl;
+	}
 }
 
 /*
@@ -353,7 +358,9 @@ bool TriadicAlgorithm::split(
 	// split(): get likelihood for the C clusters before split
 	for (int i = 0; i != C; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
-		_likelihood.init(cluster[i]->getSuffies());
+//		if (_split_method == sams_prior) {
+			_likelihood.init(cluster[i]->getSuffies());
+//		}
 		data[i] = _cluster_matrix->getData(cluster_ids[i]);
 		ldata[i] = _likelihood.logprobability(*data[i]);
 	}
@@ -362,7 +369,9 @@ bool TriadicAlgorithm::split(
 
 	// split(): get likelihood again for all Q clusters after the split (use pdata_ids)
 	for (int i = 0; i != Q; ++i) {
-		_likelihood.init(cluster[i]->getSuffies());
+//		if (_split_method == sams_prior) {
+			_likelihood.init(cluster[i]->getSuffies());
+//		}
 		_cluster_matrix->getData(pdata_ids[i], pdata[i]);
 		lpdata[i] = _likelihood.logprobability(pdata[i]);
 	}
@@ -507,7 +516,9 @@ bool TriadicAlgorithm::merge(
 	// merge(): retrieve all likelihoods for data at each cluster before the step
 	for (int i = 0; i != C; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
-		_likelihood.init(cluster[i]->getSuffies());
+//		if (_split_method == sams_prior) {
+			_likelihood.init(cluster[i]->getSuffies());
+//		}
 		data[i] = _cluster_matrix->getData(cluster_ids[i]);
 		ldata[i] = _likelihood.logprobability(*data[i]);
 	}
@@ -515,7 +526,9 @@ bool TriadicAlgorithm::merge(
 	// merge(): retrieve all likelihoods for data at each cluster after the step (one fewer cluster)
 	for (int i = 0; i != Q; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
-		_likelihood.init(cluster[i]->getSuffies());
+//		if (_split_method == sams_prior) {
+			_likelihood.init(cluster[i]->getSuffies());
+//		}
 		_cluster_matrix->getData(pdata_ids[i], pdata[i]);
 		lpdata[i] = _likelihood.logprobability(pdata[i]);
 	}

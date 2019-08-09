@@ -33,8 +33,9 @@ MCMC::MCMC(
 	_update_cluster_population(update_cluster_population),
 	_likelihood(likelihood)
 {
-	_verbosity = Notice;
+	_verbosity = Debug;
 
+	// the number of sets we split / merge into, e.g. 3 for the triadic sampler
 	_subset_count = subset_count;
 
 	_max_likelihood = -std::numeric_limits<double>::infinity();
@@ -87,6 +88,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 	// just only pick a few, set M=1 for debugging, but M<N can also be used to perform fewer "large" steps
 	int M = N;
+	M = 10;
 	if (M > N) M = N;
 
 	int cycle_print = 100;
@@ -101,7 +103,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 		}
 
 		/* We iterate over all observations. We are using a fixed scan where we randomize all items once and then loop
-		 * over them.
+		 * over them. For e.g. a triadic sampler we need three of such vectors.
 		 */
 		fout << "Create multiple vectors with indices and randomly order each of them" << endl;
 		std::vector< std::vector<int> > indices(_subset_count);
@@ -137,6 +139,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 			if ((int)uniq.size() != _subset_count) continue;
 	
 			// update cluster assignments, delete and create clusters
+			fout << "Update cluster assignment" << std::endl;
 			_update_cluster_population.update(_membertrix, subset);
 
 		}
@@ -163,6 +166,7 @@ const membertrix & MCMC::getMaxLikelihoodMatrix() const {
 }
 
 void MCMC::considerMaxLikelihood() {
+	fout << "Check max likelihood " << endl;
 	const clusters_t &clusters = _membertrix.getClusters();
 	double current_likelihood = .0;
 	for (auto cluster_pair: clusters) {

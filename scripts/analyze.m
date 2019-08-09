@@ -1,8 +1,7 @@
 #!/usr/bin/octave -q
 
 if length(argv()) == 0
-	disp("Usage: analyze.m folder")
-	exit(0)
+	error("Usage: analyze.m folder")
 end
 
 folder=argv(){1};

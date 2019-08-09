@@ -64,6 +64,7 @@ class normal_inverse_wishart_distribution: public distribution_t {
 		}
 
 		void update(data_t data, bool downdate = false) {
+			assert(false);	
 			if (downdate) {
 				// removing a data item that corresponds to a normal likelihood given a NIW prior
 			} else {

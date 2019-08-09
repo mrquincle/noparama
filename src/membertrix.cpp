@@ -25,6 +25,12 @@ membertrix::membertrix() {
 	_verbosity = Warning;
 }
 
+/**
+ * The copy constructor. It is perhaps not implemented so "cleanly". It is namely secretly cleaning up stuff behind
+ * the scenes. How it does this, is by only calling addData for data present in the original object. Plus it calls
+ * assign for assign the data to clusters as in the original object. If there are "orphaned" clusters they will not
+ * be copied.
+ */
 membertrix::membertrix(const membertrix &other) {
 	_verbosity = other._verbosity ;
 	fout << "Copy constructor (is used to clean up stuff)" << endl;

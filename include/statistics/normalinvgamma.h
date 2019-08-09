@@ -12,6 +12,9 @@
 /*!
  * The base class distribution_t allows using this class, there were needs to be sampled from a probability 
  * distribution. The sufficient statistics are distribution dependent and are stored within this derived class.
+ *
+ * This is a multivariate form of the NIG distribution. We expect _suffies_nig to contain a Lambda matrix (not just
+ * a gamma scalar).
  */
 class normal_inverse_gamma_distribution: public distribution_t {
 	private:

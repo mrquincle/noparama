@@ -3,16 +3,17 @@
 #include <data-driven/emd_meanshift.h>
 
 set_compare::set_compare(
-		Suffies_Unity_MultivariateNormal & suffies, 
+		Suffies_ScalarNoise_MultivariateNormal & suffies, 
 		dataset_t & dataset_reference)
 {
-	_suffies_unity_mvn = &suffies;
+	_suffies_mvn = &suffies;
 	_distribution_type = Unity_MultivariateNormal;
 	_dataset_reference = dataset_reference;
 
 	int size = 0, dim = 0;
 	get_shape(dataset_reference, size, dim);
 	_dataset_reference_raw = (float*)malloc(size * dim * sizeof(float));
+	_dataset_reference_mean = (float*)malloc(dim * sizeof(float));
 	// we assume the reference set has more points, so, then we do not need to allocate all the time
 	_dataset_compare_raw = (float*)malloc(size * dim * sizeof(float));
 	_dataset_compare_mean = (float*)malloc(dim * sizeof(float));
@@ -24,6 +25,10 @@ set_compare::set_compare(
 }
 
 void set_compare::calc_mean(float * data, int size, int dim, float * result) const {
+	if (result == NULL) {
+		std::cerr << "Error: result not allocated" << std::endl;
+		assert(false);
+	}
 	double tmp[dim];
 	for (int j = 0; j < dim; ++j) {
 		tmp[j] = 0;
@@ -64,21 +69,21 @@ void set_compare::get_raw(dataset_t & source, float* target) const {
 }
 
 void set_compare::init(Suffies & suffies) {
-	if (typeid(suffies)!=typeid(*_suffies_unity_mvn)) {
+	if (typeid(suffies)!=typeid(*_suffies_mvn)) {
 		std::cout << "init mvn" << std::endl;
-		std::cout << "current suffies: " << *_suffies_unity_mvn << std::endl;
+		std::cout << "current suffies: " << *_suffies_mvn << std::endl;
 		std::cout << "incoming suffies: " << suffies << std::endl;
-		assert (typeid(suffies)==typeid(*_suffies_unity_mvn));
+		assert (typeid(suffies)==typeid(*_suffies_mvn));
 	}
-	_suffies_unity_mvn = &dynamic_cast<Suffies_Unity_MultivariateNormal&>(suffies);
+	_suffies_mvn = &dynamic_cast<Suffies_ScalarNoise_MultivariateNormal&>(suffies);
 }
 
 Suffies & set_compare::getSuffies() {
-	return *_suffies_unity_mvn;
+	return *_suffies_mvn;
 }
 
 /*
- * Suffies_Unity_MultivariateNormal* set_compare::operator()(random_engine_t &generator) 
+ * Suffies_ScalarNoise_MultivariateNormal* set_compare::operator()(random_engine_t &generator) 
 {
 
 }

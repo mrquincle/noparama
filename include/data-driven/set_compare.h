@@ -33,7 +33,7 @@ class set_compare: public distribution_t {
 		
 		float * _dataset_match;
 
-		Suffies_Unity_MultivariateNormal * _suffies_unity_mvn;
+		Suffies_ScalarNoise_MultivariateNormal * _suffies_mvn;
 
 	protected:
 
@@ -55,7 +55,7 @@ class set_compare: public distribution_t {
 		 *
 		 * @param[in] suffies          mean 
 		 */
-		set_compare(Suffies_Unity_MultivariateNormal & suffies, dataset_t & dataset_reference);
+		set_compare(Suffies_ScalarNoise_MultivariateNormal & suffies, dataset_t & dataset_reference);
 		
 		void init(Suffies & suffies);
 

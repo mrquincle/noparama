@@ -11,7 +11,7 @@
 #include <pretty_print.hpp>
 #include <typeinfo>
 
-enum representation_mode_t { clustering_mode, regression_mode, angular_mode };
+enum representation_mode_t { clustering_mode, regression_mode, angular_mode, points3d_mode };
 
 /*!
  * To sample from a multivariate normal distribution, we need to initialize it with mean and covariance matrix
