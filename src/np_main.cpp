@@ -29,6 +29,12 @@
 
 #include <pretty_print.hpp>
 
+
+#include <dim1algebra.hpp>
+
+using namespace std;
+using namespace algebra;
+
 namespace fs = std::experimental::filesystem;
 
 enum algorithm_t { /*algorithm2, */ algorithm8, jain_neal_split, triadic };
@@ -45,7 +51,7 @@ void disp_help(std::string appname) {
 }
 
 void read_data(std::string & datafilename, representation_mode_t & representation_mode, ground_truth_t * ground_truth, dataset_t & dataset) {
-	char _verbosity = Debug;
+	char _verbosity = Information;
 	fout << "Load file: " << datafilename << std::endl;
 	if (ground_truth) {
 		ground_truth->clear();
@@ -145,6 +151,13 @@ int main(int argc, char *argv[]) {
 	// Configuration parameters 
 	// ---------------------------------------------------------------------------------------------------------------
 	double alpha = 1;
+
+	bool subsample = true;
+	int subsample_size = 256;
+
+	// If true, writes samples from (Dirichlet) prior to file fhyper.txt and quits 
+	bool test_prior = false;
+
 	// ---------------------------------------------------------------------------------------------------------------
 
 	fout << "The Dirichlet Process is run with alpha=" << alpha << std::endl;
@@ -252,11 +265,37 @@ int main(int argc, char *argv[]) {
 	dataset_t dataset;
 	ground_truth_t ground_truth;
 
-	read_data(datafilename, representation_mode, &ground_truth, dataset);
+	if (subsample) {
+		dataset_t complete_dataset;
+		read_data(datafilename, representation_mode, &ground_truth, complete_dataset);
+		std::vector<int> indices;
+		indices.resize(complete_dataset.size());
+		fill_successively(indices.begin(), indices.end());
+		random_order(indices.begin(), indices.end());
+		assert (subsample_size <= (int)indices.size());
+		for (int i = 0; i < (int)indices.size(); ++i) {
+			dataset.push_back(complete_dataset[indices[i]]);
+		}
+	} else {
+		read_data(datafilename, representation_mode, &ground_truth, dataset);
+	}
 
 	dataset_t ref_dataset;
 	if (reffilename != "") {
-		read_data(reffilename, representation_mode, NULL, ref_dataset);
+		if (subsample) {
+			dataset_t ref_dataset_complete;
+			read_data(datafilename, representation_mode, &ground_truth, ref_dataset_complete);
+			std::vector<int> indices;
+			indices.resize(ref_dataset_complete.size());
+			fill_successively(indices.begin(), indices.end());
+			random_order(indices.begin(), indices.end());
+			assert (subsample_size <= (int)indices.size());
+			for (int i = 0; i < (int)indices.size(); ++i) {
+				ref_dataset.push_back(ref_dataset_complete[indices[i]]);
+			}
+		} else {
+			read_data(reffilename, representation_mode, NULL, ref_dataset);
+		}
 	}
 
 	// The likelihood function only is required w.r.t. type, parameters are normally set later
@@ -276,8 +315,8 @@ int main(int argc, char *argv[]) {
 		likelihood = new multivariate_normal_distribution(*suffies_mvn);
 	} else if (representation_mode == points3d_mode) {
 		fout << "Set comparison 'suffies'" << std::endl;
-		Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(2);
-		suffies_mvn->mu << 0, 0;
+		Suffies_ScalarNoise_MultivariateNormal * suffies_mvn = new Suffies_ScalarNoise_MultivariateNormal(3);
+		suffies_mvn->mu << 0, 0, 0;
 		suffies_mvn->sigma = 1;
 		//Suffies_Unity_MultivariateNormal * suffies_umvn = new Suffies_Unity_MultivariateNormal(2);
 		//suffies_umvn->mu << 0, 0;
@@ -313,11 +352,11 @@ int main(int argc, char *argv[]) {
 		prior = new normal_inverse_wishart_distribution(*suffies_niw);
 	} else if (representation_mode == points3d_mode) {
 		// Check if indeed appropriate
-		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(2);
-		suffies_nig->mu << 0, 0;
+		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(3);
+		suffies_nig->mu << 0, 0, 0;
 		suffies_nig->alpha = 10;
 		suffies_nig->beta = 0.1;
-		suffies_nig->Lambda << 0.01, 0, 0, 0.01;
+		suffies_nig->Lambda << 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01;
 		prior = new normal_inverse_gamma_distribution(*suffies_nig);
 	} else {
 		std::cerr << "Unknown likelihood" << std::endl;
@@ -325,9 +364,29 @@ int main(int argc, char *argv[]) {
 	}
 	fout << "Create Dirichlet Process" << std::endl;
 	dirichlet_process hyper(suffies_dirichlet, *prior);
-	
+
 	fout << "Set up InitClusters object" << std::endl;
 	InitClusters init_clusters(generator, hyper);
+
+	// print hyper 
+	if (test_prior) {
+		fout << "Write everything to file fhyper.txt" << endl;
+		int kTest = 1000;
+		ofstream fhyper;
+		fhyper.open("fhyper.txt");
+		for (int k = 0; k < kTest; ++k) {
+			// sample sufficient statistics from nonparametrics
+			Suffies_MultivariateNormal* suffies = hyper.sample_base(generator);
+			double * array = suffies->mu.data();
+			string sep = "";
+			for (int i = 0; i < suffies->mu.size(); ++i, sep = ", ") {
+				fhyper << sep << array[i];
+			}
+			fhyper << endl;
+		}
+		fhyper.close();
+		exit(0);
+	}
 
 	// To update cluster parameters we need prior (hyper parameters) and likelihood, the membership matrix is left 
 	// invariant

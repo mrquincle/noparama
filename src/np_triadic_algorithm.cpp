@@ -25,8 +25,8 @@ TriadicAlgorithm::TriadicAlgorithm(
 {
 	_alpha = _nonparametrics.getSuffies().alpha;
 
-	_verbosity = Debug;
-//	_verbosity = Warning;
+//	_verbosity = Debug;
+	_verbosity = Notice;
 	
 	_statistics.step[0].type = "merge from 2 to 1";
 	_statistics.step[1].type = "split from 1 to 2";
@@ -674,7 +674,7 @@ void TriadicAlgorithm::update(
 		step_t & statistics_step = _statistics.step[1];
 		if (accept) {
 			size_t Kb = _cluster_matrix->getClusterCount();
-			fout << "There are now " << Kb << " clusters" << endl;
+			foutvar(Notice) << "There are now " << Kb << " clusters" << endl;
 			assert (Kb == Ka + 1);
 			statistics_step.cluster_events_accept++;
 		} else {
@@ -698,7 +698,7 @@ void TriadicAlgorithm::update(
 		step_t & statistics_step = _statistics.step[0];
 		if (accept) {
 			size_t Kb = _cluster_matrix->getClusterCount();
-			fout << "There are now " << Kb << " clusters" << endl;
+			foutvar(Notice) << "There are now " << Kb << " clusters" << endl;
 			assert (Kb == Ka - 1);
 			statistics_step.cluster_events_accept++;
 		} else {
@@ -736,7 +736,7 @@ void TriadicAlgorithm::update(
 					step_t & statistics_step = _statistics.step[3];
 					if (accept) {
 						size_t Kb = _cluster_matrix->getClusterCount();
-						fout << "There are now " << Kb << " clusters" << endl;
+						foutvar(Notice) << "There are now " << Kb << " clusters" << endl;
 						assert (Kb == Ka + 1);
 
 						statistics_step.cluster_events_accept++;
@@ -757,7 +757,7 @@ void TriadicAlgorithm::update(
 					step_t & statistics_step = _statistics.step[2];
 					if (accept) {
 						size_t Kb = _cluster_matrix->getClusterCount();
-						fout << "There are now " << Kb << " clusters" << endl;
+						foutvar(Notice) << "There are now " << Kb << " clusters" << endl;
 						assert (Kb == Ka - 1);
 
 						statistics_step.cluster_events_accept++;

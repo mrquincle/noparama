@@ -2,6 +2,8 @@
 
 #include <data-driven/emd_meanshift.h>
 
+#define SET_COMPARE_USE_PRIOR
+
 set_compare::set_compare(
 		Suffies_ScalarNoise_MultivariateNormal & suffies, 
 		dataset_t & dataset_reference)
@@ -117,7 +119,19 @@ double set_compare::probability(dataset_t & dataset) const
 	int m = 0;
 	get_shape(dataset, m, dim);
 	get_raw(dataset, _dataset_compare_raw);
+#ifdef SET_COMPARE_USE_PRIOR
+	double *mu = _suffies_mvn->mu.data();
+	int mu_size = _suffies_mvn->mu.size();
+	if (mu_size != dim) {
+		std::cerr << "Error: dimensions do not match: " << mu_size << " vs " << dim << std::endl;
+		assert (mu_size == dim);
+	}
+	for (int i = 0; i < mu_size; ++i) {
+		_dataset_compare_mean[i] = (float)mu[i];
+	}
+#else
 	calc_mean(_dataset_compare_raw, m, dim, _dataset_compare_mean);
+#endif
 
 	emd_global_offset(b, n, m, _dataset_reference_raw, _dataset_compare_raw, _dataset_match,
 			_dataset_reference_mean, _dataset_compare_mean);

@@ -33,7 +33,7 @@ MCMC::MCMC(
 	_update_cluster_population(update_cluster_population),
 	_likelihood(likelihood)
 {
-	_verbosity = Debug;
+	_verbosity = Information;
 
 	// the number of sets we split / merge into, e.g. 3 for the triadic sampler
 	_subset_count = subset_count;
@@ -47,6 +47,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 	int N = dataset.size();
 
 	int number_mh_steps = 40; // was 20
+	number_mh_steps = 20;
 
 	fout << "Add data to membership matrix" << endl;
 	for (int i = 0; i < N; ++i) {
@@ -88,11 +89,16 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 	// just only pick a few, set M=1 for debugging, but M<N can also be used to perform fewer "large" steps
 	int M = N;
-	M = 10;
+	M = 100;
+	M = 20;
 	if (M > N) M = N;
 
 	int cycle_print = 100;
-	int cycle_max_likelihood = 10;
+	int cycle_max_likelihood = 1;
+
+	foutvar(Notice) << "There will be " << T << " MH updates" << endl;
+	foutvar(Notice) << "Within each update there will be " << M << " cluster updates" << endl;
+	foutvar(Notice) << "Total number of steps is " << T*M << endl;
 
 	// update clusters
 	for (int t = 0; t < T; ++t) {
@@ -126,26 +132,34 @@ void MCMC::run(dataset_t & dataset, int T) {
 		}
 #endif
 
-		fout << "Create subset of size " << _subset_count << endl;
+		// We assume M to be very large. Hence sampling 3 items randomly and check on uniqueness by creating a set is
+		// a fast way that makes sure there is a unique set sampled. On average we update the cluster assignments
+		// much more often than that we update the cluster parameters. 
+		// Note that the indices are randomly ordered. This means that M can be made smaller than N without the risk
+		// that particular data points are never seen.
+		foutvar(Debug) << "Create subset of size " << _subset_count << endl;
 		for (int i = 0; i < M; ++i) {
 			// create subset vector of size _subset_count
 			std::vector<int> subset(_subset_count);
 			std::set<int> uniq;
 			for (int j = 0; j < _subset_count; ++j) {
-				fout << "Set next item to " << indices[j][i] << endl;
+				foutvar(Debug) << "Add " << indices[j][i] << " to subset" << endl;
 				subset[j] = indices[j][i];
 				uniq.insert(subset[j]);
 			}
-			if ((int)uniq.size() != _subset_count) continue;
+			if ((int)uniq.size() != _subset_count) {
+				foutvar(Debug) << "Oops... Not all " << _subset_count << "indices are unique. Try Again." << endl;
+				continue;
+			}
 	
 			// update cluster assignments, delete and create clusters
-			fout << "Update cluster assignment" << std::endl;
+			foutvar(Debug) << "Update cluster assignment i=" << i << std::endl;
 			_update_cluster_population.update(_membertrix, subset);
 
 		}
 		//_update_cluster_population.printStatistics();
 
-		fout << "Update cluster " << endl;
+		fout << "Update cluster t=" << t << endl;
 
 		// update cluster parameters
 		_update_clusters.update(_membertrix, number_mh_steps);
