@@ -154,9 +154,12 @@ int main(int argc, char *argv[]) {
 
 	bool subsample = true;
 	int subsample_size = 256;
+//	subsample_size = 128;
 
 	// If true, writes samples from (Dirichlet) prior to file fhyper.txt and quits 
 	bool test_prior = false;
+
+	bool test_likelihood = true;
 
 	// ---------------------------------------------------------------------------------------------------------------
 
@@ -262,36 +265,39 @@ int main(int argc, char *argv[]) {
 	
 	fout << "Run MCMC sampler for " << T << " steps " << std::endl;
 
+	// get dataset and ground truth
 	dataset_t dataset;
 	ground_truth_t ground_truth;
-
 	if (subsample) {
 		dataset_t complete_dataset;
-		read_data(datafilename, representation_mode, &ground_truth, complete_dataset);
+		ground_truth_t complete_ground_truth;
+		read_data(datafilename, representation_mode, &complete_ground_truth, complete_dataset);
 		std::vector<int> indices;
 		indices.resize(complete_dataset.size());
 		fill_successively(indices.begin(), indices.end());
 		random_order(indices.begin(), indices.end());
 		assert (subsample_size <= (int)indices.size());
-		for (int i = 0; i < (int)indices.size(); ++i) {
+		for (int i = 0; i < subsample_size; ++i) {
 			dataset.push_back(complete_dataset[indices[i]]);
+			ground_truth[i] = complete_ground_truth[indices[i]];
 		}
 	} else {
 		read_data(datafilename, representation_mode, &ground_truth, dataset);
 	}
 
+	// get reference dataset
 	dataset_t ref_dataset;
 	if (reffilename != "") {
 		if (subsample) {
-			dataset_t ref_dataset_complete;
-			read_data(datafilename, representation_mode, &ground_truth, ref_dataset_complete);
+			dataset_t ref_complete_dataset;
+			read_data(reffilename, representation_mode, NULL, ref_complete_dataset);
 			std::vector<int> indices;
-			indices.resize(ref_dataset_complete.size());
+			indices.resize(ref_complete_dataset.size());
 			fill_successively(indices.begin(), indices.end());
 			random_order(indices.begin(), indices.end());
 			assert (subsample_size <= (int)indices.size());
-			for (int i = 0; i < (int)indices.size(); ++i) {
-				ref_dataset.push_back(ref_dataset_complete[indices[i]]);
+			for (int i = 0; i < subsample_size; ++i) {
+				ref_dataset.push_back(ref_complete_dataset[indices[i]]);
 			}
 		} else {
 			read_data(reffilename, representation_mode, NULL, ref_dataset);
@@ -354,8 +360,10 @@ int main(int argc, char *argv[]) {
 		// Check if indeed appropriate
 		Suffies_NormalInvGamma * suffies_nig = new Suffies_NormalInvGamma(3);
 		suffies_nig->mu << 0, 0, 0;
+		// if alpha very small, dispersion gets really big
 		suffies_nig->alpha = 10;
-		suffies_nig->beta = 0.1;
+		// with beta at 0.1 most values are at around +/-5 till +/-15, with beta at 1, there's +/-0 up to +/- 5
+		suffies_nig->beta = 1;
 		suffies_nig->Lambda << 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01;
 		prior = new normal_inverse_gamma_distribution(*suffies_nig);
 	} else {
@@ -434,6 +442,41 @@ int main(int argc, char *argv[]) {
 #endif
 				break;
 			}
+	}
+
+	if (test_likelihood) {
+		fout << "Test likelihood" << endl;
+		int kTest = 4;
+		int single_out_class = 1;
+		dataset_t dataset0;
+		dataset0.clear();
+		assert (ground_truth.size() == dataset.size());
+		for (int i = 0; i < (int)dataset.size(); ++i) {
+			if (ground_truth[i] == single_out_class) {
+				dataset0.push_back(dataset[i]); 
+			}
+		}
+		fout << "Dataset: " << endl;
+		for (int i = 0; i < (int)dataset0.size(); ++i) {
+			fout << *dataset0[i] << endl;
+		}
+		for (int k = 0; k < kTest; ++k) {
+			// sample sufficient statistics from nonparametrics
+			Suffies_MultivariateNormal* suffies = hyper.sample_base(generator);
+			double * array = suffies->mu.data();
+			string sep = "";
+			fout << "Suffies: ";
+			for (int i = 0; i < suffies->mu.size(); ++i, sep = ", ") {
+				cout << sep << array[i];
+			}
+			cout << endl;
+			likelihood->init(*suffies);
+
+			double logprob = likelihood->logprobability(dataset0);
+			fout << "Log probability: " << logprob << endl;
+			//delete suffies;
+		}
+		exit(0);
 	}
 
 	// create MCMC object

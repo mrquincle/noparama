@@ -24,7 +24,7 @@ void emd_meanshift(int b, int n, int m, const float * cloud1, const float * clou
 */
 
 void emd_global_offset(int b, int n, int m, const float * cloud1, const float * cloud2, float * match, 
-    float * offset1, float * offset2) {
+    const float * offset1, const float * offset2) {
 
   for (int i=0;i<b;i++){
 
@@ -46,21 +46,25 @@ void emd_global_offset(int b, int n, int m, const float * cloud1, const float * 
       if (j==-2)
 	level=0;
       for (int k=0;k<n;k++){
-	double x1=cloud1[k*dim+0];
-	double y1=cloud1[k*dim+1];
-	double z1=cloud1[k*dim+2];
+	double x1=cloud1[k*dim+0] - offset1[k*dim+0];
+	double y1=cloud1[k*dim+1] - offset1[k*dim+1];
+	double z1=cloud1[k*dim+2] - offset1[k+dim+2];
 	// this iterates over all points, they all have the same offset
 	for (int l=0;l<m;l++){
-	  double dx=(x1-cloud2[l*dim+0]) - (offset1[dim+0] - offset2[dim+0]);
-	  double dy=(y1-cloud2[l*dim+1]) - (offset1[dim+1] - offset2[dim+1]);
-	  double dz=(z1-cloud2[l*dim+2]) - (offset1[dim+2] - offset2[dim+2]);
+	  double dx=(x1- (cloud2[l*dim+0] - offset2[l*dim+0]));
+	  double dy=(y1- (cloud2[l*dim+1] - offset2[l*dim+1]));
+	  double dz=(z1- (cloud2[l*dim+2] - offset2[l*dim+2]));
 
 	  // this is not sparse, that's why almost any point wants to contribute to other points
 	  // even if there distance is not small
 	  double dist = dx*dx+dy*dy+dz*dz;
-	  //					double dist = abs(dx+dy);
-	  //					dist = sqrtf(dist);
 	  weight[k*m+l]=expf(level*dist)*saturatedr[l];
+/*	  if (j > 5 && k == 0 && l == 0) {
+	    std::cout << dist << std::endl;
+	    std::cout << saturatedr[l] << std::endl;
+	    std::cout << weight[k*m+l] << std::endl;
+	  }
+	  */
 	}
       }
       // vector ss is sum for each l
@@ -123,17 +127,17 @@ void emd_global_offset(int b, int n, int m, const float * cloud1, const float * 
 void emd_mean_costs_global_offset(int b, int n, int m, float * cloud1, float * cloud2, float * match, 
     float * offset1, float * offset2, float * cost) {
 
-  *cost = 0;
+  *cost = 0.0;
   for (int i=0;i<b;i++){
     double s=0;
     for (int j=0;j<n;j++)
       for (int k=0;k<m;k++){
-	float x1=cloud1[j*dim+0];
-	float y1=cloud1[j*dim+1];
-	float z1=cloud1[j*dim+2];
-	float dx=(x1 - cloud2[k*dim+0]) - (offset1[dim+0] - offset2[dim+0]);
-	float dy=(y1 - cloud2[k*dim+1]) - (offset1[dim+1] - offset2[dim+1]);
-	float dz=(z1 - cloud2[k*dim+2]) - (offset1[dim+2] - offset2[dim+2]);
+	float x1=cloud1[j*dim+0] - offset1[j*dim+0];
+	float y1=cloud1[j*dim+1] - offset1[j*dim+1];
+	float z1=cloud1[j*dim+2] - offset1[j*dim+2];
+	float dx=(x1 - (cloud2[k*dim+0] - offset2[k*dim+0]));
+	float dy=(y1 - (cloud2[k*dim+1] - offset2[k*dim+1]));
+	float dz=(z1 - (cloud2[k*dim+2] - offset2[k*dim+2]));
 	float d=sqrtf(dx*dx+dy*dy+dz*dz)*match[j*m+k];
 	s+=d;
       }

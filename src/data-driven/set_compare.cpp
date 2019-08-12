@@ -127,8 +127,14 @@ double set_compare::probability(dataset_t & dataset) const
 		assert (mu_size == dim);
 	}
 	for (int i = 0; i < mu_size; ++i) {
-		_dataset_compare_mean[i] = (float)mu[i];
+		_dataset_compare_mean[i] = ((float)mu[i]);
 	}
+	std::cout << "Mean: ";
+	std::string sep = "";
+	for (int i = 0; i < mu_size; ++i, sep = ", ") {
+		std::cout << sep << _dataset_compare_mean[i];
+	}
+	std::cout << std::endl;
 #else
 	calc_mean(_dataset_compare_raw, m, dim, _dataset_compare_mean);
 #endif
@@ -140,6 +146,7 @@ double set_compare::probability(dataset_t & dataset) const
 	emd_mean_costs_global_offset(b, n, m, _dataset_reference_raw, _dataset_compare_raw, _dataset_match, 
 			_dataset_reference_mean, _dataset_compare_mean, &costs);
 
+	std::cout << "Costs: " << costs << std::endl;
 	return (double)costs;
 }
 

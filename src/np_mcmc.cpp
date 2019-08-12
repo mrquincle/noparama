@@ -48,6 +48,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 	int number_mh_steps = 40; // was 20
 	number_mh_steps = 20;
+	number_mh_steps = 2;
 
 	fout << "Add data to membership matrix" << endl;
 	for (int i = 0; i < N; ++i) {
@@ -93,7 +94,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 	M = 20;
 	if (M > N) M = N;
 
-	int cycle_print = 100;
+	int cycle_print = 10;
 	int cycle_max_likelihood = 1;
 
 	foutvar(Notice) << "There will be " << T << " MH updates" << endl;
