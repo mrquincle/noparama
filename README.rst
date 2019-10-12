@@ -194,4 +194,4 @@ Current state:
 :Authors:
     Anne van Rossum
 
-:Version: 0.1.78
+:Version: 0.1.87

@@ -23,15 +23,30 @@ void emd_meanshift(int b, int n, int m, const float * cloud1, const float * clou
 }
 */
 
+double calc_dist(double dx, double dy, double dz) {
+// return sqrt(dx*dx + dy*dy + dz*dz);
+  double result = dx*dx + dy*dy + dz*dz;
+  return sqrt(result);
+}
+
 void emd_global_offset(int b, int n, int m, const float * cloud1, const float * cloud2, float * match, 
     const float * offset1, const float * offset2) {
+
+//  std::cout << "n = " << n << ", m = " << m << std::endl;
+
+  /*
+  if (m > n) {
+    assert(m % n == 0);
+  } else {
+    assert(n % m == 0);
+  }*/
 
   for (int i=0;i<b;i++){
 
     // decompose in such way that one factor is 1 and the other factor defines how often the cloud point fits
     int factorl=std::max(n,m)/n;
     int factorr=std::max(n,m)/m;
-
+  
     // saturation says something about convergence, initialize at factor l and factor r.
     std::vector<double> saturatedl(n,double(factorl)), saturatedr(m,double(factorr));
     // weights for each pair of points
@@ -46,25 +61,39 @@ void emd_global_offset(int b, int n, int m, const float * cloud1, const float * 
       if (j==-2)
 	level=0;
       for (int k=0;k<n;k++){
-	double x1=cloud1[k*dim+0] - offset1[k*dim+0];
-	double y1=cloud1[k*dim+1] - offset1[k*dim+1];
-	double z1=cloud1[k*dim+2] - offset1[k+dim+2];
+	// note how we write offset1[0] rather than offset1[k*dim+0], offset is always the same
+	double x1=cloud1[k*dim+0] - offset1[0];
+	double y1=cloud1[k*dim+1] - offset1[1];
+	double z1=cloud1[k*dim+2] - offset1[2];
 	// this iterates over all points, they all have the same offset
 	for (int l=0;l<m;l++){
-	  double dx=(x1- (cloud2[l*dim+0] - offset2[l*dim+0]));
-	  double dy=(y1- (cloud2[l*dim+1] - offset2[l*dim+1]));
-	  double dz=(z1- (cloud2[l*dim+2] - offset2[l*dim+2]));
+	  double x2=cloud2[l*dim+0] - offset2[0];
+	  double y2=cloud2[l*dim+1] - offset2[1];
+	  double z2=cloud2[l*dim+2] - offset2[2];
 
 	  // this is not sparse, that's why almost any point wants to contribute to other points
 	  // even if there distance is not small
-	  double dist = dx*dx+dy*dy+dz*dz;
+	  //double dist = (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)+(z1-z2)*(z1-z2);
+	  double dist = calc_dist(x1-x2,y1-y2,z1-z2);
 	  weight[k*m+l]=expf(level*dist)*saturatedr[l];
-/*	  if (j > 5 && k == 0 && l == 0) {
-	    std::cout << dist << std::endl;
-	    std::cout << saturatedr[l] << std::endl;
-	    std::cout << weight[k*m+l] << std::endl;
-	  }
-	  */
+	  /*
+	  if (j == 8) {
+	    std::cout << "[" << k << "," << l << "]" << dist << ", ";
+	    if (dist > 25) {
+	      std::cout << std::endl;
+//	      std::cout << "x1: " << x1 << ", ";
+//	      std::cout << "y1: " << y1 << ", ";
+//	      std::cout << "z1: " << z1 << std::endl;
+	      std::cout << "x2: " << x2 << ", ";
+	      std::cout << "y2: " << y2 << ", ";
+	      std::cout << "z2: " << z2 << std::endl;
+	      std::cout << "offset2 " << offset2[0] << ", ";
+	      std::cout << offset2[1] << ", ";
+	      std::cout << offset2[2] << std::endl;
+	    }
+//	    std::cout << saturatedr[l] << std::endl;
+//	    std::cout << weight[k*m+l] << ',';
+	  }*/
 	}
       }
       // vector ss is sum for each l
@@ -130,17 +159,19 @@ void emd_mean_costs_global_offset(int b, int n, int m, float * cloud1, float * c
   *cost = 0.0;
   for (int i=0;i<b;i++){
     double s=0;
-    for (int j=0;j<n;j++)
+    for (int j=0;j<n;j++) {
+      double x1=cloud1[j*dim+0] - offset1[0];
+      double y1=cloud1[j*dim+1] - offset1[1];
+      double z1=cloud1[j*dim+2] - offset1[2];
       for (int k=0;k<m;k++){
-	float x1=cloud1[j*dim+0] - offset1[j*dim+0];
-	float y1=cloud1[j*dim+1] - offset1[j*dim+1];
-	float z1=cloud1[j*dim+2] - offset1[j*dim+2];
-	float dx=(x1 - (cloud2[k*dim+0] - offset2[k*dim+0]));
-	float dy=(y1 - (cloud2[k*dim+1] - offset2[k*dim+1]));
-	float dz=(z1 - (cloud2[k*dim+2] - offset2[k*dim+2]));
-	float d=sqrtf(dx*dx+dy*dy+dz*dz)*match[j*m+k];
+	double dx=(x1 - (cloud2[k*dim+0] - offset2[0]));
+	double dy=(y1 - (cloud2[k*dim+1] - offset2[1]));
+	double dz=(z1 - (cloud2[k*dim+2] - offset2[2]));
+//	float d=sqrtf(dx*dx+dy*dy+dz*dz)*match[j*m+k];
+	double d = calc_dist(dx,dy,dz) * match[j*m+k];
 	s+=d;
       }
+    }
     *cost+=(s/(n*m));
     cloud1+=n*dim;
     cloud2+=m*dim;

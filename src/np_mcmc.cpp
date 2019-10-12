@@ -42,19 +42,19 @@ MCMC::MCMC(
 }
 
 void MCMC::run(dataset_t & dataset, int T) {
-	int K = 30;
+	int K = 20;
 
 	int N = dataset.size();
 
 	int number_mh_steps = 40; // was 20
 	number_mh_steps = 20;
-	number_mh_steps = 2;
+//	number_mh_steps = 2;
 
-	fout << "Add data to membership matrix" << endl;
+	foutvar(Debug) << "Add data to membership matrix" << endl;
 	for (int i = 0; i < N; ++i) {
 		data_t & datum = *dataset[i];
 		data_id_t j = _membertrix.addData(datum);
-		fout << "Data " << datum << " got index " << j <<endl;
+		foutvar(Debug) << "Data " << datum << " got index " << j <<endl;
 		assert (i == j);
 	}
 
@@ -90,12 +90,12 @@ void MCMC::run(dataset_t & dataset, int T) {
 
 	// just only pick a few, set M=1 for debugging, but M<N can also be used to perform fewer "large" steps
 	int M = N;
-	M = 100;
-	M = 20;
+//	M = 100;
+//	M = 20;
 	if (M > N) M = N;
 
 	int cycle_print = 10;
-	int cycle_max_likelihood = 1;
+	int cycle_max_likelihood = 5;
 
 	foutvar(Notice) << "There will be " << T << " MH updates" << endl;
 	foutvar(Notice) << "Within each update there will be " << M << " cluster updates" << endl;
@@ -112,7 +112,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 		/* We iterate over all observations. We are using a fixed scan where we randomize all items once and then loop
 		 * over them. For e.g. a triadic sampler we need three of such vectors.
 		 */
-		fout << "Create multiple vectors with indices and randomly order each of them" << endl;
+		foutvar(Debug) << "Create multiple vectors with indices and randomly order each of them" << endl;
 		std::vector< std::vector<int> > indices(_subset_count);
 		for (int i = 0; i < _subset_count; ++i) {
 			indices[i].resize(N);
@@ -181,7 +181,7 @@ const membertrix & MCMC::getMaxLikelihoodMatrix() const {
 }
 
 void MCMC::considerMaxLikelihood() {
-	fout << "Check max likelihood " << endl;
+//	fout << "Check max likelihood " << endl;
 	const clusters_t &clusters = _membertrix.getClusters();
 	double current_likelihood = .0;
 	for (auto cluster_pair: clusters) {

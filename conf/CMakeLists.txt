@@ -47,6 +47,7 @@ set(SOURCE_FILES src/np_suffies.cpp src/np_main.cpp src/np_results.cpp src/np_mc
     src/statistics/multivariatenormal.cpp \\
     src/statistics/scalarnoise_multivariatenormal.cpp \\
     src/data-driven/set_compare.cpp src/data-driven/emd_meanshift.cpp \\
+    src/data-driven/nearest_compare.cpp \\
     src/membertrix.cpp src/np_init_clusters.cpp \\
     src/clustering_performance.cpp \\
     src/np_update_clusters.cpp \\

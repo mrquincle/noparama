@@ -33,10 +33,24 @@ TriadicAlgorithm::TriadicAlgorithm(
 	_statistics.step[2].type = "merge from 3 to 2";
 	_statistics.step[3].type = "split from 2 to 3";
 
+	for (int i = 0; i < 4; ++i) {
+		_statistics.step[i].attempts = 0;
+		_statistics.step[i].cluster_events_accept = 0;
+		_statistics.step[i].cluster_events_reject = 0;
+		_statistics.step[i].target_likelihood_zero = 0;
+		_statistics.step[i].source_likelihood_zero = 0;
+		_statistics.step[i].likelihood_both_zero = 0;
+		_statistics.step[i].likelihood_both_nonzero = 0;
+		_statistics.step[i].likelihood_both_nonzero_accept = 0;
+		_statistics.step[i].likelihood_both_nonzero_reject = 0;
+	}
+
 	fout << "likelihood: " << _likelihood.getSuffies() << endl;
 
-	_beta = 0.1;
-	//_beta = 1;
+	// a high beta corresponds to more 2 -> 1 attemps than 2 -> 3 attempts
+//  _beta = 0.1;
+//	_beta = 0.999;
+	_beta = 0.00001;
 
 //	_split_method = sams_prior;
 	_split_method = simple_random_split;
@@ -340,7 +354,7 @@ bool TriadicAlgorithm::split(
 	assert(Ncheck == N);
 #endif
 
-	fout << "Cluster sizes: from " << cluster_ids << ": " << ndata << " to " << npdata << endl;
+	fout << "Cluster ids " << cluster_ids << " with respective sizes " << ndata << " to " << npdata << endl;
 
 	// split(): npdata contains more clusters than ndata
 	rP = ratioStateProb(true, npdata, ndata);
@@ -358,9 +372,7 @@ bool TriadicAlgorithm::split(
 	// split(): get likelihood for the C clusters before split
 	for (int i = 0; i != C; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
-//		if (_split_method == sams_prior) {
-			_likelihood.init(cluster[i]->getSuffies());
-//		}
+		_likelihood.init(cluster[i]->getSuffies());
 		data[i] = _cluster_matrix->getData(cluster_ids[i]);
 		ldata[i] = _likelihood.logprobability(*data[i]);
 	}
@@ -369,9 +381,7 @@ bool TriadicAlgorithm::split(
 
 	// split(): get likelihood again for all Q clusters after the split (use pdata_ids)
 	for (int i = 0; i != Q; ++i) {
-//		if (_split_method == sams_prior) {
-			_likelihood.init(cluster[i]->getSuffies());
-//		}
+		_likelihood.init(cluster[i]->getSuffies());
 		_cluster_matrix->getData(pdata_ids[i], pdata[i]);
 		lpdata[i] = _likelihood.logprobability(pdata[i]);
 	}
@@ -516,9 +526,7 @@ bool TriadicAlgorithm::merge(
 	// merge(): retrieve all likelihoods for data at each cluster before the step
 	for (int i = 0; i != C; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
-//		if (_split_method == sams_prior) {
-			_likelihood.init(cluster[i]->getSuffies());
-//		}
+		_likelihood.init(cluster[i]->getSuffies());
 		data[i] = _cluster_matrix->getData(cluster_ids[i]);
 		ldata[i] = _likelihood.logprobability(*data[i]);
 	}
@@ -526,9 +534,7 @@ bool TriadicAlgorithm::merge(
 	// merge(): retrieve all likelihoods for data at each cluster after the step (one fewer cluster)
 	for (int i = 0; i != Q; ++i) {
 		cluster[i] = _cluster_matrix->getCluster(cluster_ids[i]);
-//		if (_split_method == sams_prior) {
-			_likelihood.init(cluster[i]->getSuffies());
-//		}
+		_likelihood.init(cluster[i]->getSuffies());
 		_cluster_matrix->getData(pdata_ids[i], pdata[i]);
 		lpdata[i] = _likelihood.logprobability(pdata[i]);
 	}
@@ -670,7 +676,8 @@ void TriadicAlgorithm::update(
 		fout << "There are " << Ka << " clusters" << endl;
 
 		bool accept = split(data_picks, cluster_ids);
-	
+
+		// count statistics by step[x] array
 		step_t & statistics_step = _statistics.step[1];
 		if (accept) {
 			size_t Kb = _cluster_matrix->getClusterCount();
@@ -705,6 +712,7 @@ void TriadicAlgorithm::update(
 			statistics_step.cluster_events_reject++;
 		}
 
+		// skip next split/merge if statement (only between 2 and 3 clusters)
 		jain_neal_split = true;
 	}
 

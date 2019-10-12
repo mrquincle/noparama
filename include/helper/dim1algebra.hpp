@@ -10,7 +10,7 @@
  * against this software being used for military purposes, factory farming, animal experimentation, and "Universal
  * Declaration of Human Rights" violations.
  *
- * Copyright (c) 2013 Anne C. van Rossum <anne@almende.org>
+ * Copyright (c) 2013 Anne C. van Rossum <anne@crownstone.rocks>
  *
  * @author    Anne C. van Rossum
  */
@@ -838,6 +838,45 @@ T distance(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, I
 		std::cerr << "Unknown distance metric" << std::endl;
 		return T(-1);
 	}
+}
+
+/**
+ * Requires two sorted ranges. Within each range there should not be duplicate values. Returns the Jaccard index. 
+ * @param first1             start of the first container
+ * @param last1              end of the first container
+ * @param first2             start of the second container
+ * @param last2              end of the second container
+ * @return                   the Jaccard index between the two containers
+ */
+template<typename T, typename InputIterator1, typename InputIterator2>
+T set_jaccard_index(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2) {
+	T result = std::distance(first2,last2) + std::distance(first1,last1);
+
+	return result - set_intersection_size(first1,last1,first2,last2);
+}
+
+/**
+ * Requires two sorted ranges. Returns the size of the intersection.
+ * @param first1             start of the first container
+ * @param last1              end of the first container
+ * @param first2             start of the second container
+ * @param last2              end of the second container
+ * @return                   the Jaccard index between the two containers
+ */
+template <typename T, typename InputIterator1, typename InputIterator2>
+  T set_intersection_size (InputIterator1 first1, InputIterator1 last1,
+                                   InputIterator2 first2, InputIterator2 last2)
+{
+	T result = T(0);
+	while (first1!=last1 && first2!=last2)
+	{
+		if (*first1<*first2) ++first1;
+		else if (*first2<*first1) ++first2;
+		else {
+			result++;
+		}
+	}
+	return result;
 }
 
 /**
