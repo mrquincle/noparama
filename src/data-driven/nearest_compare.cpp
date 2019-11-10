@@ -4,8 +4,6 @@
 #include <helper/dim1algebra.hpp>
 #include <math.h>
 
-#define SET_COMPARE_USE_PRIOR
-
 //#define EXCESSIVE_DEBUG
 
 nearest_compare::nearest_compare(
@@ -81,7 +79,7 @@ void nearest_compare::get_raw(dataset_t & source, float* target) const {
 
 void nearest_compare::init(Suffies & suffies) {
 	if (typeid(suffies)!=typeid(*_suffies_mvn)) {
-		std::cout << "init mvn" << std::endl;
+		std::cout << "init nearest compare" << std::endl;
 		std::cout << "current suffies: " << *_suffies_mvn << std::endl;
 		std::cout << "incoming suffies: " << suffies << std::endl;
 		assert (typeid(suffies)==typeid(*_suffies_mvn));
@@ -130,8 +128,15 @@ double nearest_compare::probability(data_t & data) const
 	}
 	double dist = get_nearest_neighbour(*_data_compare);
 
-	double prob = 1.0/sqrt(2.0*M_PI)*exp(-1/2*dist*dist);
+	double prob = 1.0/sqrt(2.0*M_PI)*exp(-1/2.0*dist*dist);
 
+#ifdef EXCESSIVE_DEBUG
+	algebra::print(data.begin(), data.end());
+	std::cout << "dist: " << dist << ", prob: " << prob << std::endl;
+#endif
+	if (prob < 0) {
+		prob = 0.0;
+	}
 	return prob;
 }
 
@@ -140,7 +145,7 @@ double nearest_compare::probability(dataset_t & dataset) const
 	assert (dataset.size() > 0);
 
 	double result = 1.0;
-	for(auto data: dataset) {
+	for (auto data: dataset) {
 		result *= probability(*data);
 	}
 	return result;
@@ -148,14 +153,34 @@ double nearest_compare::probability(dataset_t & dataset) const
 
 double nearest_compare::logprobability(data_t & data) const
 {
-	double prob = probability(data);
-	assert(prob > 0);
-	return std::log(prob);
+	int D = data.size();
+	double *mu_data = _suffies_mvn->mu.data();
+	for (int i = 0; i < D; ++i) {
+		(*_data_compare)[i] = data[i] - mu_data[i];
+	}
+	double dist = get_nearest_neighbour(*_data_compare);
+
+	double prob = -1/2.0 * log(2.0*M_PI) + -1/2.0*dist*dist;
+#ifdef EXCESSIVE_DEBUG
+	algebra::print(data.begin(), data.end());
+	std::cout << "dist: " << dist << ", prob: " << prob << std::endl;
+#endif
+
+	return prob;
 }
 
 double nearest_compare::logprobability(dataset_t & dataset) const
 {
-	double prob = probability(dataset);
-	assert(prob > 0);
-	return std::log(prob);
+	assert (dataset.size() > 0);
+
+	double result = 0.0;
+	for (auto data: dataset) {
+		result += logprobability(*data);
+	}
+#ifdef EXCESSIVE_DEBUG
+	std::cout << "------------------------------------" << std::endl;
+	std::cout << "total result: " << result << std::endl;
+	std::cout << "------------------------------------" << std::endl;
+#endif
+	return result;
 }

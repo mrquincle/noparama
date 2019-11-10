@@ -14,6 +14,13 @@ using namespace std;
 
 //#define TEST_WITH_TWO
 
+/*
+ * The triadic algorithm is a split-merge sampler. It can split/merge both two clusters as well as split/merge
+ * three clusters. The parameters of a new cluster are obtained from the base distribution. Only a single new
+ * cluster is proposed at a time. The split method itself can be 1.) a simple random split where points are assigned
+ * 50-50 to the old and the new cluster or 2.) SAMS (sequentially-allocated merge-split) where new points are 
+ * assigned based on how previous points are assigned to the old and new cluster.
+ */
 TriadicAlgorithm::TriadicAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
@@ -50,10 +57,13 @@ TriadicAlgorithm::TriadicAlgorithm(
 	// a high beta corresponds to more 2 -> 1 attemps than 2 -> 3 attempts
 //  _beta = 0.1;
 //	_beta = 0.999;
-	_beta = 0.00001;
 
-//	_split_method = sams_prior;
-	_split_method = simple_random_split;
+//	_beta = 0.00001;
+	// let's do fifty-fifty
+	_beta = 0.5;
+
+	_split_method = sams_prior;
+//	_split_method = simple_random_split;
 	if (_split_method == sams_prior) {
 		fout << "Split method used: sams_prior" << std::endl;
 	} else if(_split_method == simple_random_split) {

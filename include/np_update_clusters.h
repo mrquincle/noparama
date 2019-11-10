@@ -26,7 +26,7 @@ class UpdateClusters {
 		char _verbosity;
 	protected:
 
-		Suffies *propose();
+		Suffies *propose(Suffies & current);
 
 	public:
 		/*!

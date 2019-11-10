@@ -7,6 +7,13 @@
 
 using namespace std;
 
+/*
+ * This algorithm is slightly more advanced than standard Gibbs sampling for nonconjugate models. Rather than 
+ * considering just a single proposal distribution it considers multiple by the use of "auxiliary parameters". It
+ * draws multiple times from the base distribution and rather than using the weight "alpha". It uses for those
+ * draws the weight "alpha/k".
+ *
+ */
 NealAlgorithm8::NealAlgorithm8(
 			random_engine_t & generator,
 			distribution_t & likelihood,

@@ -45,6 +45,7 @@ Suffies_Unity_MultivariateNormal* multivariate_normal_distribution::operator()(r
 
 	_suffies_result->mu = _mean + _transform * 
 		Eigen::VectorXd{ _mean.size() }.unaryExpr([&](auto x) { return dist(generator); });
+	//std::cout << "Generate mvn from " << _mean.transpose() << " which is " << _suffies_result->mu.transpose() << std::endl;
 	return _suffies_result;
 }
 

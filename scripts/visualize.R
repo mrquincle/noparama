@@ -15,6 +15,7 @@ dir_out <- args[3]
 #method <- 'algorithm8'
 #method <- 'jain-neal'
 
+
 if (method == 'triadic') {
 	method_title = "Triadic MCMC sampler"
 } else if (method == 'algorithm1') {
@@ -29,6 +30,9 @@ if (method == 'triadic') {
 	method_title = "Unknown"
 	print("Unknown method");
 }
+
+#title <- paste('Line estimation with the', method_title, sep=" ");
+title <- paste('3D cube estimation with the', method_title, sep=" ");
 
 wpath <- file.path(dir_in)
 
@@ -51,7 +55,7 @@ pdf(NULL)
 
 ggplot(dataframe.m, aes(x = variable, y = value)) + 
 	geom_violin() + 
-	ggtitle(paste("Line estimation with the", method_title, sep=" ")) +
+	ggtitle(title) +
 	scale_x_discrete(name = "Clustering metric") + 
 	scale_y_continuous(name = "Clustering performance [0..1]", limits = c(0,1) ) +
 	theme(title = bold.text, axis.title = bold.text) + 

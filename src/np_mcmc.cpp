@@ -41,6 +41,10 @@ MCMC::MCMC(
 	_max_likelihood = -std::numeric_limits<double>::infinity();
 }
 
+/**
+ * We create K new clusters. We assign the data to each cluster, where we select them uniformly. The data clusters
+ * that are left unassigned are removed.
+ */
 void MCMC::run(dataset_t & dataset, int T) {
 	int K = 20;
 
@@ -160,7 +164,7 @@ void MCMC::run(dataset_t & dataset, int T) {
 		}
 		//_update_cluster_population.printStatistics();
 
-		fout << "Update cluster t=" << t << endl;
+		foutvar(Debug) << "Update cluster t=" << t << endl;
 
 		// update cluster parameters
 		_update_clusters.update(_membertrix, number_mh_steps);

@@ -25,7 +25,7 @@ class normal_inverse_gamma_distribution: public distribution_t {
 		Suffies_Gamma _suffies_g;
 		int _D;
 
-		bool _test_one_dim;
+//		bool _test_one_dim;
 
 		// result
 		Suffies_ScalarNoise_MultivariateNormal * _suffies_result; 
@@ -44,6 +44,7 @@ class normal_inverse_gamma_distribution: public distribution_t {
 		
 			_suffies_mvn.mu = suffies_nig.mu;
 
+			/*
 			_test_one_dim = true;
 
 			if (_test_one_dim) {
@@ -51,6 +52,7 @@ class normal_inverse_gamma_distribution: public distribution_t {
 				std::cout << "Warning: Test set up in NIG: generates zeros for second and third scalar in mu" << std::endl;
 				std::cout << std::endl;
 			}
+			*/
 		}
 
 		Suffies_ScalarNoise_MultivariateNormal* operator()(random_engine_t & generator) 
@@ -71,10 +73,12 @@ class normal_inverse_gamma_distribution: public distribution_t {
 
 			_suffies_result->mu = suffies_mvn1->mu;
 
+			/*
 			if (_test_one_dim) {
 				_suffies_result->mu(0) = 0;
 				_suffies_result->mu(2) = 0;
 			}
+			*/
 
 			return _suffies_result;
 		}

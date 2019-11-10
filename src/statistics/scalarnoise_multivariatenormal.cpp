@@ -48,14 +48,23 @@ void scalarnoise_multivariate_normal_distribution::prepare() {
 	}
 }
 
+/**
+ * We return the results of a sampling action by a Suffies struct again. It would also be possible to just return
+ * data_t here. The returned struct only has the mu field set to nonzero values. The covariance matrix is the
+ * identity matrix times a variance constant. This means we can sample each dimension independently. 
+ */
 Suffies_Unity_MultivariateNormal* scalarnoise_multivariate_normal_distribution::operator()(random_engine_t &generator) 
 {
 	_suffies_result = new Suffies_Unity_MultivariateNormal(_D);
 
 	static std::normal_distribution<> dist;
 
-	double scale = _var * dist(generator);
-	_suffies_result->mu = _mean.array() * scale;
+	std::cout << "Before: " << _mean.transpose() << std::endl;
+	_suffies_result->mu = _mean;
+	for (int i = 0; i < _D; ++i) {
+		double shift = _var * dist(generator);
+		_suffies_result->mu[i] += shift;
+	}
 	return _suffies_result;
 }
 

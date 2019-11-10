@@ -67,8 +67,6 @@ void read_data(std::string & datafilename, representation_mode_t & representatio
 	int N = 16;
 	if (limit) {
 		fout << "Using limited dataset with only " << N << " items " << std::endl;
-	} else {
-		fout << "Using full dataset" << std::endl;
 	}
 
 	// The data file should have "a b c" on lines, separated by spaces (without quotes, each value of the type double).
@@ -165,8 +163,8 @@ int main(int argc, char *argv[]) {
 	// ---------------------------------------------------------------------------------------------------------------
 	double alpha = 1;
 
-	bool subsample = false;
-	int subsample_size = 256;
+	bool subsample = true;
+	int subsample_size = 200;
 //	subsample_size = 128;
 //	subsample_size = 16;
 

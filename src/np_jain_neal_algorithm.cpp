@@ -12,6 +12,9 @@ using namespace std;
 
 #define USE_LOGARITHM
 
+/*
+ * This algorithm is a split-merge sampler. 
+ */
 JainNealAlgorithm::JainNealAlgorithm(
 			random_engine_t & generator,
 			distribution_t & likelihood,
